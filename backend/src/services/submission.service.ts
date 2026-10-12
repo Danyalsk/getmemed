@@ -7,11 +7,13 @@ import type {
   UpdateViewsResponse,
 } from "../contracts/submission";
 import { postSubmissionSchema } from "../contracts/submission";
+import { env } from "../config/env";
 import { AppError } from "../lib/errors";
 import { CampaignModel } from "../models/campaign.model";
 import { SubmissionModel, type SubmissionWithRefs } from "../models/submission.model";
 import { getOwnedCampaign } from "./campaign.service";
 import { entitledPayout, payoutDue } from "./payout";
+import { detectSpike } from "./spike";
 
 type SubmissionRefs = Pick<SubmissionWithRefs, "campaign" | "creator">;
 
@@ -140,11 +142,26 @@ export async function updateViews(
         }
       }
 
+      const now = new Date();
+      // A flag stays until reviewed, so later organic updates don't clear it.
+      const spike = submission.flagged
+        ? null
+        : detectSpike(
+            {
+              previousViews: submission.views,
+              views,
+              since: submission.viewsUpdatedAt ?? submission.createdAt,
+              now,
+            },
+            { minDelta: env.SPIKE_MIN_DELTA, viewsPerHour: env.SPIKE_VIEWS_PER_HOUR },
+          );
+
       submission.set({
         views,
         entitledAmount: entitled,
         paidAmount: submission.paidAmount + pay,
-        viewsUpdatedAt: new Date(),
+        viewsUpdatedAt: now,
+        ...(spike && { flagged: true, flagReason: spike }),
       });
       await submission.save({ session });
       return pay;
