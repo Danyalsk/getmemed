@@ -2,6 +2,7 @@ import { Router, type Response } from "express";
 
 import { createCampaignSchema, type Campaign } from "../contracts/campaign";
 import { idParamsSchema } from "../contracts/common";
+import type { Submission } from "../contracts/submission";
 import { authenticate, requireRole, requireUser } from "../middleware/auth";
 import {
   closeCampaign,
@@ -9,6 +10,7 @@ import {
   listBrandCampaigns,
   listLiveCampaigns,
 } from "../services/campaign.service";
+import { createSubmission, listCampaignSubmissions } from "../services/submission.service";
 
 export const campaignRouter = Router();
 
@@ -31,3 +33,21 @@ campaignRouter.patch("/:id/close", requireRole("brand"), async (req, res: Respon
   const { id } = idParamsSchema.parse(req.params);
   res.json(await closeCampaign(requireUser(req).id, id));
 });
+
+campaignRouter.get(
+  "/:id/submissions",
+  requireRole("brand"),
+  async (req, res: Response<Submission[]>) => {
+    const { id } = idParamsSchema.parse(req.params);
+    res.json(await listCampaignSubmissions(requireUser(req).id, id));
+  },
+);
+
+campaignRouter.post(
+  "/:id/submissions",
+  requireRole("creator"),
+  async (req, res: Response<Submission>) => {
+    const { id } = idParamsSchema.parse(req.params);
+    res.status(201).json(await createSubmission(requireUser(req).id, id, req.body));
+  },
+);

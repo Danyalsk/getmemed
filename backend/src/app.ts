@@ -6,6 +6,7 @@ import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler";
 import { authRouter } from "./routes/auth.routes";
 import { campaignRouter } from "./routes/campaign.routes";
+import { submissionRouter } from "./routes/submission.routes";
 
 export function createApp() {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp() {
   });
   app.use("/api/auth", authRouter);
   app.use("/api/campaigns", campaignRouter);
+  app.use("/api/submissions", submissionRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
