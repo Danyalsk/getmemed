@@ -15,6 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { TRANSITION } from "@/components/page-transition";
+
 import { CloseCampaignDialog } from "./close-campaign-dialog";
 import { useCampaignStatus } from "./use-campaign-status";
 
@@ -72,7 +74,7 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/brand/campaigns/${campaign._id}`}>
+            <Link href={`/brand/campaigns/${campaign._id}`} transitionTypes={TRANSITION.forward}>
               <EyeIcon /> View details
             </Link>
           </DropdownMenuItem>

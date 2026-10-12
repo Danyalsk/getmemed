@@ -5,6 +5,7 @@ import { ArrowLeftIcon, InboxIcon } from "lucide-react";
 import Link from "next/link";
 
 import { CampaignCover } from "@/components/campaign-cover";
+import { SharedCover, TRANSITION } from "@/components/page-transition";
 import { CampaignStatusBadge } from "@/components/campaign-status-badge";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
@@ -73,6 +74,7 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
     <>
       <Link
         href="/brand"
+        transitionTypes={TRANSITION.back}
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeftIcon className="size-4" /> All campaigns
@@ -83,7 +85,11 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
       {campaign ? (
         <section className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
           <div className="relative aspect-[3/1] min-h-40">
-            <CampaignCover campaign={campaign} sizes="(min-width: 1152px) 1152px, 100vw" priority />
+            <SharedCover id={campaign._id}>
+              <div className="absolute inset-0">
+                <CampaignCover campaign={campaign} sizes="(min-width: 1152px) 1152px, 100vw" priority />
+              </div>
+            </SharedCover>
             <div aria-hidden className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
           </div>
           <div className="-mt-12 flex flex-col gap-6 p-6 pt-0">

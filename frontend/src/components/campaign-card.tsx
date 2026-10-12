@@ -5,6 +5,7 @@ import type { Campaign } from "@contracts/campaign";
 import { PLATFORM_LABELS } from "@contracts/common";
 
 import { CampaignCover } from "@/components/campaign-cover";
+import { SharedCover } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelative, formatRupees, formatRupeesCompact, formatViews, initials } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
@@ -37,7 +38,11 @@ export function CampaignCard({ campaign, title, topLeft, topRight }: CampaignCar
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-colors hover:border-white/20">
       <div className="relative aspect-video overflow-hidden bg-muted">
-        <CampaignCover campaign={campaign} sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw" />
+        <SharedCover id={campaign._id}>
+          <div className="absolute inset-0">
+            <CampaignCover campaign={campaign} sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw" />
+          </div>
+        </SharedCover>
         {topLeft && <div className="absolute top-3 left-3">{topLeft}</div>}
         {topRight && <div className="absolute top-2 right-2 z-10">{topRight}</div>}
       </div>
@@ -67,7 +72,10 @@ export function CampaignCard({ campaign, title, topLeft, topRight }: CampaignCar
             <span className="text-muted-foreground">/{formatRupeesCompact(campaign.budget)}</span>
           </span>
           <div className="flex items-center gap-1.5">
-            <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums" title="Posts submitted">
+            <span
+              className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs tabular-nums"
+              title="Posts submitted"
+            >
               <UsersRoundIcon className="size-3" /> {campaign.submissionCount}
             </span>
             {firstRung && (

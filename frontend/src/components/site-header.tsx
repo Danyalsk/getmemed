@@ -32,7 +32,10 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
+    <header
+      className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur"
+      style={{ viewTransitionName: "site-header" }}
+    >
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
         <Link href={session ? HOME_BY_ROLE[session.user.role] : "/"} aria-label="Meme'd home">
           <Wordmark className="text-xl" />
@@ -41,7 +44,8 @@ export function SiteHeader() {
           <>
             <nav aria-label="Main" className="flex items-center gap-1">
               {NAV[session.user.role].map(({ href, label }) => {
-                const active = href === pathname || (href !== HOME_BY_ROLE[session.user.role] && pathname.startsWith(href));
+                const active =
+                  href === pathname || (href !== HOME_BY_ROLE[session.user.role] && pathname.startsWith(href));
                 return (
                   <Link
                     key={href}
@@ -67,7 +71,9 @@ export function SiteHeader() {
                 <DropdownMenuLabel className="flex flex-col gap-0.5">
                   <span>{session.user.name}</span>
                   <span className="text-xs font-normal text-muted-foreground">{session.user.email}</span>
-                  <span className="text-xs font-normal text-muted-foreground capitalize">{session.user.role} account</span>
+                  <span className="text-xs font-normal text-muted-foreground capitalize">
+                    {session.user.role} account
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={clearSession}>

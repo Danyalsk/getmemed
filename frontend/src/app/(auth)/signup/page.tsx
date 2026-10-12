@@ -13,6 +13,7 @@ import type { Role } from "@contracts/common";
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
 import { PasswordField } from "@/components/forms/password-field";
+import { PageTransition } from "@/components/page-transition";
 import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
@@ -55,66 +56,68 @@ export default function SignupPage() {
   const onSubmit = handleSubmit((values) => signup.mutate(signupSchema.parse(values)));
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
-        <p className="text-sm text-muted-foreground">Get set up in under a minute.</p>
+    <PageTransition>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
+          <p className="text-sm text-muted-foreground">Get set up in under a minute.</p>
+        </div>
+        <form onSubmit={onSubmit} noValidate>
+          <FieldGroup>
+            <Controller
+              control={control}
+              name="role"
+              render={({ field }) => (
+                <ChoiceTiles
+                  legend="I'm joining as"
+                  name={field.name}
+                  choices={ROLE_CHOICES}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            <TextField
+              label={role === "brand" ? "Brand name" : "Full name"}
+              autoComplete={role === "brand" ? "organization" : "name"}
+              placeholder={role === "brand" ? "Company or brand name" : "Your name"}
+              error={errors.name}
+              {...register("name")}
+            />
+            <TextField
+              label="Email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@company.com"
+              error={errors.email}
+              {...register("email")}
+            />
+            <PasswordField
+              label="Password"
+              autoComplete="new-password"
+              description="At least 8 characters."
+              error={errors.password}
+              {...register("password")}
+            />
+            <PasswordField
+              label="Confirm password"
+              autoComplete="new-password"
+              error={errors.confirmPassword}
+              {...register("confirmPassword")}
+            />
+            <Button type="submit" disabled={signup.isPending}>
+              {signup.isPending && <LoaderCircleIcon className="animate-spin" />}
+              Create account
+            </Button>
+          </FieldGroup>
+        </form>
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+            Log in
+          </Link>
+        </p>
       </div>
-      <form onSubmit={onSubmit} noValidate>
-        <FieldGroup>
-          <Controller
-            control={control}
-            name="role"
-            render={({ field }) => (
-              <ChoiceTiles
-                legend="I'm joining as"
-                name={field.name}
-                choices={ROLE_CHOICES}
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-          <TextField
-            label={role === "brand" ? "Brand name" : "Full name"}
-            autoComplete={role === "brand" ? "organization" : "name"}
-            placeholder={role === "brand" ? "Company or brand name" : "Your name"}
-            error={errors.name}
-            {...register("name")}
-          />
-          <TextField
-            label="Email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@company.com"
-            error={errors.email}
-            {...register("email")}
-          />
-          <PasswordField
-            label="Password"
-            autoComplete="new-password"
-            description="At least 8 characters."
-            error={errors.password}
-            {...register("password")}
-          />
-          <PasswordField
-            label="Confirm password"
-            autoComplete="new-password"
-            error={errors.confirmPassword}
-            {...register("confirmPassword")}
-          />
-          <Button type="submit" disabled={signup.isPending}>
-            {signup.isPending && <LoaderCircleIcon className="animate-spin" />}
-            Create account
-          </Button>
-        </FieldGroup>
-      </form>
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
-          Log in
-        </Link>
-      </p>
-    </div>
+    </PageTransition>
   );
 }
