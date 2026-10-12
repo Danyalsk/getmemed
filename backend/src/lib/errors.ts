@@ -6,6 +6,7 @@ const STATUS_BY_CODE: Record<ErrorCode, number> = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
 };
 
