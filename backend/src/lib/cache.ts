@@ -23,16 +23,21 @@ redis?.on("ready", () => {
 });
 
 /**
- * Read-through cache for a JSON response body. Falls back to `load` when Redis
- * is not configured or unreachable.
+ * Read-through cache for JSON response bodies, grouped by namespace. Each
+ * namespace has a version number baked into its keys, so `invalidate` drops
+ * every cached variant (page, search, filter) with a single INCR.
+ * Falls back to `load` when Redis is not configured or unreachable.
  */
 export async function cachedJson(
-  key: string,
+  namespace: string,
+  variant: string,
   ttlSeconds: number,
   load: () => Promise<string>,
 ): Promise<string> {
   if (!redis) return load();
 
+  const version = await redis.get(`${namespace}:version`).catch(() => null);
+  const key = `${namespace}:v${version ?? "0"}:${variant}`;
   const hit = await redis.get(key).catch(() => null);
   if (hit !== null) return hit;
 
@@ -41,8 +46,8 @@ export async function cachedJson(
   return body;
 }
 
-export async function invalidate(key: string): Promise<void> {
-  await redis?.del(key).catch(() => undefined);
+export async function invalidate(namespace: string): Promise<void> {
+  await redis?.incr(`${namespace}:version`).catch(() => undefined);
 }
 
 export async function disconnectCache(): Promise<void> {

@@ -5,7 +5,11 @@ import request from "supertest";
 import { createApp } from "../src/app";
 import { authResponseSchema } from "../src/contracts/auth";
 import { campaignSchema, type CreateCampaignInput } from "../src/contracts/campaign";
-import { submissionSchema, updateViewsResponseSchema } from "../src/contracts/submission";
+import {
+  submissionPageSchema,
+  submissionSchema,
+  updateViewsResponseSchema,
+} from "../src/contracts/submission";
 import { CampaignModel } from "../src/models/campaign.model";
 import { SubmissionModel } from "../src/models/submission.model";
 
@@ -26,8 +30,11 @@ async function signup(role: "brand" | "creator"): Promise<string> {
   return authResponseSchema.parse(res.body).token;
 }
 
+let brandToken = "";
+
 async function createCampaign(budget: number): Promise<string> {
   const token = await signup("brand");
+  brandToken = token;
   const input: CreateCampaignInput = { name: "Launch", platform: "instagram", budget, milestones: ladder };
   const res = await request(app).post("/api/campaigns").auth(token, { type: "bearer" }).send(input);
   return campaignSchema.parse(res.body)._id;
@@ -131,6 +138,44 @@ describe("PATCH /api/submissions/:id/views", () => {
 
     expect(res.paidNow).toBe(0);
     expect(res.submission.views).toBe(60_000);
+  });
+
+  it("holds payouts while paused and catches up on resume", async () => {
+    const campaignId = await createCampaign(10_000);
+    const [submissionId = ""] = await submitPosts(campaignId, 1);
+    const setStatus = (status: string) =>
+      request(app)
+        .patch(`/api/campaigns/${campaignId}/status`)
+        .auth(brandToken, { type: "bearer" })
+        .send({ status });
+
+    expect((await setStatus("paused")).status).toBe(200);
+    const whilePaused = updateViewsResponseSchema.parse((await patchViews(submissionId, 60_000)).body);
+    expect(whilePaused.paidNow).toBe(0);
+
+    expect((await setStatus("active")).status).toBe(200);
+    const afterResume = updateViewsResponseSchema.parse((await patchViews(submissionId, 60_000)).body);
+    expect(afterResume.paidNow).toBe(2_000);
+
+    expect((await setStatus("closed")).status).toBe(200);
+    expect((await setStatus("active")).status).toBe(409);
+  });
+
+  it("paginates and searches a campaign's submissions", async () => {
+    const campaignId = await createCampaign(10_000);
+    await submitPosts(campaignId, 12);
+    const list = (query: string) =>
+      request(app).get(`/api/campaigns/${campaignId}/submissions?${query}`).auth(brandToken, { type: "bearer" });
+
+    const second = submissionPageSchema.parse((await list("page=2&pageSize=5")).body);
+    expect(second).toMatchObject({ total: 12, page: 2, pageSize: 5, totalPages: 3 });
+    expect(second.items).toHaveLength(5);
+
+    const found = submissionPageSchema.parse((await list("search=post11")).body);
+    expect(found.total).toBe(1);
+
+    const byCreator = submissionPageSchema.parse((await list("search=CREATOR")).body);
+    expect(byCreator.total).toBe(12);
   });
 
   it("rejects invalid input", async () => {

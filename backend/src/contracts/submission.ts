@@ -2,7 +2,9 @@ import { z } from "zod";
 
 import {
   isoDateSchema,
+  listQuerySchema,
   objectIdSchema,
+  pageSchema,
   PLATFORM_LABELS,
   platformSchema,
   rupeesSchema,
@@ -110,10 +112,11 @@ export const submissionSchema = z.object({
 });
 export type Submission = z.infer<typeof submissionSchema>;
 
-export const submissionListSchema = z.array(submissionSchema);
+export const submissionsQuerySchema = listQuerySchema;
 
-export const creatorSubmissionsSchema = z.object({
-  submissions: submissionListSchema,
+export const submissionPageSchema = pageSchema(submissionSchema);
+
+export const creatorSubmissionsSchema = submissionPageSchema.extend({
   totalEarnings: rupeesSchema,
 });
 export type CreatorSubmissions = z.infer<typeof creatorSubmissionsSchema>;

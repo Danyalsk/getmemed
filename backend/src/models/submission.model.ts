@@ -2,8 +2,8 @@ import { model, Schema } from "mongoose";
 
 const submissionSchema = new Schema(
   {
-    campaign: { type: Schema.Types.ObjectId, ref: "Campaign", required: true, index: true },
-    creator: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    campaign: { type: Schema.Types.ObjectId, ref: "Campaign", required: true },
+    creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
     // Canonical post URL; unique so one post can't be paid twice.
     postUrl: { type: String, required: true, unique: true },
     views: { type: Number, required: true, default: 0, min: 0 },
@@ -15,5 +15,8 @@ const submissionSchema = new Schema(
   },
   { timestamps: true, versionKey: false },
 );
+
+submissionSchema.index({ campaign: 1, createdAt: -1 });
+submissionSchema.index({ creator: 1, createdAt: -1 });
 
 export const SubmissionModel = model("Submission", submissionSchema);

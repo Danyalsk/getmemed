@@ -1,13 +1,20 @@
 import { Router } from "express";
 
-import { createCampaignSchema } from "../contracts/campaign";
+import {
+  brandCampaignsQuerySchema,
+  createCampaignSchema,
+  liveCampaignsQuerySchema,
+  updateCampaignStatusSchema,
+} from "../contracts/campaign";
 import { idParamsSchema } from "../contracts/common";
+import { submissionsQuerySchema } from "../contracts/submission";
 import { authenticate, requireRole, requireUser } from "../middleware/auth";
 import {
-  closeCampaign,
   createCampaign,
+  findOwnedCampaign,
   listBrandCampaigns,
   listLiveCampaignsJson,
+  updateCampaignStatus,
 } from "../services/campaign.service";
 import { createSubmission, listCampaignSubmissions } from "../services/submission.service";
 
@@ -22,25 +29,35 @@ campaignRouter.post("/", requireRole("brand"), async (req, res) => {
 });
 
 campaignRouter.get("/mine", requireRole("brand"), async (req, res) => {
-  const campaigns = await listBrandCampaigns(requireUser(req)._id);
-  res.json(campaigns);
+  const query = brandCampaignsQuerySchema.parse(req.query);
+  const result = await listBrandCampaigns(requireUser(req)._id, query);
+  res.json(result);
 });
 
-campaignRouter.get("/live", requireRole("creator"), async (_req, res) => {
-  const body = await listLiveCampaignsJson();
+campaignRouter.get("/live", requireRole("creator"), async (req, res) => {
+  const query = liveCampaignsQuerySchema.parse(req.query);
+  const body = await listLiveCampaignsJson(query);
   res.type("json").send(body);
 });
 
-campaignRouter.patch("/:id/close", requireRole("brand"), async (req, res) => {
+campaignRouter.get("/:id", requireRole("brand"), async (req, res) => {
   const { id } = idParamsSchema.parse(req.params);
-  const campaign = await closeCampaign(requireUser(req)._id, id);
+  const campaign = await findOwnedCampaign(requireUser(req)._id, id);
+  res.json(campaign);
+});
+
+campaignRouter.patch("/:id/status", requireRole("brand"), async (req, res) => {
+  const { id } = idParamsSchema.parse(req.params);
+  const { status } = updateCampaignStatusSchema.parse(req.body);
+  const campaign = await updateCampaignStatus(requireUser(req)._id, id, status);
   res.json(campaign);
 });
 
 campaignRouter.get("/:id/submissions", requireRole("brand"), async (req, res) => {
   const { id } = idParamsSchema.parse(req.params);
-  const submissions = await listCampaignSubmissions(requireUser(req)._id, id);
-  res.json(submissions);
+  const query = submissionsQuerySchema.parse(req.query);
+  const result = await listCampaignSubmissions(requireUser(req)._id, id, query);
+  res.json(result);
 });
 
 campaignRouter.post("/:id/submissions", requireRole("creator"), async (req, res) => {

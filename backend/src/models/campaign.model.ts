@@ -12,7 +12,7 @@ const milestoneSchema = new Schema(
 
 const campaignSchema = new Schema(
   {
-    brand: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    brand: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true, trim: true },
     platform: { type: String, enum: platformSchema.options, required: true },
     budget: { type: Number, required: true, min: 1 },
@@ -41,5 +41,6 @@ const campaignSchema = new Schema(
 );
 
 campaignSchema.index({ status: 1, createdAt: -1 });
+campaignSchema.index({ brand: 1, createdAt: -1 });
 
 export const CampaignModel = model("Campaign", campaignSchema);

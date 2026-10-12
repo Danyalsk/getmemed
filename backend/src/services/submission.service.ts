@@ -1,11 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
+import type { z } from "zod";
 
-import { postSubmissionSchema, type UpdateViewsInput } from "../contracts/submission";
+import {
+  postSubmissionSchema,
+  type submissionsQuerySchema,
+  type UpdateViewsInput,
+} from "../contracts/submission";
 import { env } from "../config/env";
 import { AppError } from "../lib/errors";
+import { pageWindow, searchPattern, toPage } from "../lib/list";
 import { CampaignModel } from "../models/campaign.model";
 import { SubmissionModel } from "../models/submission.model";
-import { assertOwnsCampaign, invalidateLiveCampaigns } from "./campaign.service";
+import { UserModel } from "../models/user.model";
+import { findOwnedCampaign, invalidateLiveCampaigns } from "./campaign.service";
 import { entitledPayout, payoutDue } from "./payout";
 import { detectSpike } from "./spike";
 
@@ -33,17 +40,50 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
   return submission.populate(SUBMISSION_REFS);
 }
 
-export async function listCreatorSubmissions(creatorId: string) {
-  const submissions = await SubmissionModel.find({ creator: creatorId })
-    .sort({ createdAt: -1 })
-    .populate(SUBMISSION_REFS);
-  const totalEarnings = submissions.reduce((sum, submission) => sum + submission.paidAmount, 0);
-  return { submissions, totalEarnings };
+type SubmissionsQuery = z.output<typeof submissionsQuerySchema>;
+
+/** Matches the post link, the creator's name or the campaign's name. */
+async function searchFilter(search: string | undefined) {
+  if (!search) return {};
+  const pattern = searchPattern(search);
+  const [creatorIds, campaignIds] = await Promise.all([
+    UserModel.find({ name: pattern }).distinct("_id"),
+    CampaignModel.find({ name: pattern }).distinct("_id"),
+  ]);
+  return {
+    $or: [{ postUrl: pattern }, { creator: { $in: creatorIds } }, { campaign: { $in: campaignIds } }],
+  };
 }
 
-export async function listCampaignSubmissions(brandId: string, campaignId: string) {
-  await assertOwnsCampaign(brandId, campaignId);
-  return SubmissionModel.find({ campaign: campaignId }).sort({ createdAt: -1 }).populate(SUBMISSION_REFS);
+async function listSubmissions(scope: { creator: string } | { campaign: string }, query: SubmissionsQuery) {
+  const filter = { ...scope, ...(await searchFilter(query.search)) };
+  const { skip, limit } = pageWindow(query);
+  const [submissions, total] = await Promise.all([
+    SubmissionModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate(SUBMISSION_REFS),
+    SubmissionModel.countDocuments(filter),
+  ]);
+  return toPage(submissions, total, query);
+}
+
+async function totalEarnings(creatorId: string): Promise<number> {
+  const [result] = await SubmissionModel.aggregate<{ total: number }>([
+    { $match: { creator: new Types.ObjectId(creatorId) } },
+    { $group: { _id: null, total: { $sum: "$paidAmount" } } },
+  ]);
+  return result?.total ?? 0;
+}
+
+export async function listCreatorSubmissions(creatorId: string, query: SubmissionsQuery) {
+  const [page, earnings] = await Promise.all([
+    listSubmissions({ creator: creatorId }, query),
+    totalEarnings(creatorId),
+  ]);
+  return { ...page, totalEarnings: earnings };
+}
+
+export async function listCampaignSubmissions(brandId: string, campaignId: string, query: SubmissionsQuery) {
+  await findOwnedCampaign(brandId, campaignId);
+  return listSubmissions({ campaign: campaignId }, query);
 }
 
 /**
@@ -72,6 +112,8 @@ export async function updateViews(submissionId: string, input: UpdateViewsInput)
       const pay = payoutDue({
         entitled,
         alreadyPaid: submission.paidAmount,
+        // Paused or closed campaigns pay nothing. Views are still recorded, and
+        // since payouts are entitlement minus paid, a resumed campaign catches up.
         remainingBudget: campaign.status === "active" ? campaign.budget - campaign.spent : 0,
       });
 

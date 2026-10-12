@@ -1,14 +1,15 @@
 import { Router } from "express";
 
 import { idParamsSchema } from "../contracts/common";
-import { updateViewsSchema } from "../contracts/submission";
+import { submissionsQuerySchema, updateViewsSchema } from "../contracts/submission";
 import { authenticate, requireRole, requireUser } from "../middleware/auth";
 import { listCreatorSubmissions, updateViews } from "../services/submission.service";
 
 export const submissionRouter = Router();
 
 submissionRouter.get("/mine", authenticate, requireRole("creator"), async (req, res) => {
-  const result = await listCreatorSubmissions(requireUser(req)._id);
+  const query = submissionsQuerySchema.parse(req.query);
+  const result = await listCreatorSubmissions(requireUser(req)._id, query);
   res.json(result);
 });
 

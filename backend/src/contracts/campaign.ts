@@ -3,7 +3,9 @@ import { z } from "zod";
 import {
   campaignStatusSchema,
   isoDateSchema,
+  listQuerySchema,
   objectIdSchema,
+  pageSchema,
   platformSchema,
   rupeesSchema,
 } from "./common";
@@ -76,4 +78,28 @@ export const campaignSchema = campaignFieldsSchema.extend({
 });
 export type Campaign = z.infer<typeof campaignSchema>;
 
-export const campaignListSchema = z.array(campaignSchema);
+export const brandCampaignsQuerySchema = listQuerySchema.extend({
+  status: campaignStatusSchema.optional(),
+});
+export type BrandCampaignsQuery = z.input<typeof brandCampaignsQuerySchema>;
+
+export const liveCampaignsQuerySchema = listQuerySchema.extend({
+  platform: platformSchema.optional(),
+});
+export type LiveCampaignsQuery = z.input<typeof liveCampaignsQuerySchema>;
+
+export const campaignPageSchema = pageSchema(campaignSchema);
+
+/** Totals across all of a brand's campaigns, independent of filters and paging. */
+export const budgetSummarySchema = z.object({
+  campaigns: z.number().int().nonnegative(),
+  budget: rupeesSchema,
+  spent: rupeesSchema,
+  remaining: rupeesSchema,
+});
+
+export const brandCampaignsSchema = campaignPageSchema.extend({ summary: budgetSummarySchema });
+export type BrandCampaigns = z.infer<typeof brandCampaignsSchema>;
+
+export const updateCampaignStatusSchema = z.object({ status: campaignStatusSchema });
+export type UpdateCampaignStatusInput = z.infer<typeof updateCampaignStatusSchema>;
