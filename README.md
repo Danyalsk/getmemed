@@ -49,6 +49,14 @@ npm install
 npm run dev
 ```
 
+### Demo data
+
+```bash
+cd backend && npm run seed
+```
+
+Creates 12 campaigns from fictional brands (with cover art from `backend/scripts/seed/covers`), 8 creators and posts whose payouts are calculated by the real payout service. Every seeded account uses the `@seed.memed.app` domain and the password `password123`, for example `daily.meme.dose@seed.memed.app` (creator) or `zing.beverages@seed.memed.app` (brand). Re-running the seed replaces only that data.
+
 Or run everything (Mongo replica set, Redis, API, web) with Docker:
 
 ```bash
@@ -65,6 +73,7 @@ JWT_SECRET=$(openssl rand -hex 32) docker compose up --build
 | Type check | `npm run typecheck` | `npm run typecheck` |
 | Lint | `npm run lint` | `npm run lint` |
 | Tests | `npm test` | — |
+| Demo data | `npm run seed` | — |
 | Production | `npm run build && npm start` | `npm run build && npm start` |
 
 `npm test` runs Jest with `--experimental-vm-modules`: the MongoDB driver loads runtime adapters with a dynamic `import()`, which Jest's VM rejects without that flag.
