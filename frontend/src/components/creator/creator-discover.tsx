@@ -6,10 +6,10 @@ import { useState } from "react";
 
 import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/common";
 
-import { CampaignCard, CampaignCardSkeleton, CARD_TARGET_CLASS } from "@/components/campaign-card";
+import { CampaignCard, CampaignCardSkeleton, CARD_LINK_CLASS } from "@/components/campaign-card";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
-import { QueryError } from "@/components/list/query-error";
+import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SearchInput } from "@/components/list/search-input";
 import { PageHeader } from "@/components/page-header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,7 +57,7 @@ export function CreatorDiscover() {
         </Select>
       </div>
 
-      {error && <QueryError error={error} onRetry={() => void refetch()} />}
+      {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       {data?.total === 0 ? (
         <EmptyState
@@ -79,7 +79,7 @@ export function CreatorDiscover() {
                   title={
                     <SubmitPostDialog
                       campaign={campaign}
-                      trigger={<button type="button" className={CARD_TARGET_CLASS}>{campaign.name}</button>}
+                      trigger={<button type="button" className={CARD_LINK_CLASS}>{campaign.name}</button>}
                     />
                   }
                 />

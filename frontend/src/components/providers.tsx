@@ -5,8 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { useSession } from "@/lib/session";
 
-/** Drops cached data whenever the signed-in user changes, so nobody sees another account's data. */
-function ClearCacheOnSessionChange({ client }: { client: QueryClient }) {
+function ResetCacheOnSessionChange({ client }: { client: QueryClient }) {
   const token = useSession()?.token;
   useEffect(() => {
     client.clear();
@@ -21,7 +20,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={client}>
-      <ClearCacheOnSessionChange client={client} />
+      <ResetCacheOnSessionChange client={client} />
       {children}
     </QueryClientProvider>
   );

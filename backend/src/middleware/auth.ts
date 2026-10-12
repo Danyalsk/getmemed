@@ -2,7 +2,7 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 
 import type { Role } from "../contracts/common";
 import { AppError } from "../lib/errors";
-import { verifyToken, type AuthUser } from "../lib/jwt";
+import { verifyAuthToken, type AuthUser } from "../lib/jwt";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -16,7 +16,7 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
     throw AppError.unauthorized();
   }
   try {
-    req.user = verifyToken(token);
+    req.user = verifyAuthToken(token);
   } catch {
     throw AppError.unauthorized("Session expired or invalid, please log in again");
   }
@@ -25,15 +25,14 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
 
 export function requireRole(role: Role): RequestHandler {
   return (req, _res, next) => {
-    if (requireUser(req).role !== role) {
+    if (getAuthUser(req).role !== role) {
       throw AppError.forbidden(`Only ${role}s can do this`);
     }
     next();
   };
 }
 
-/** Narrows `req.user` for handlers mounted behind `authenticate`. */
-export function requireUser(req: Request): AuthUser {
+export function getAuthUser(req: Request): AuthUser {
   if (!req.user) {
     throw AppError.unauthorized();
   }

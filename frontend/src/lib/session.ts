@@ -13,7 +13,6 @@ export const HOME_BY_ROLE: Record<Role, "/brand" | "/creator"> = {
 };
 
 const listeners = new Set<() => void>();
-// useSyncExternalStore needs a stable snapshot, so parse once per stored value.
 let snapshot: { raw: string | null; session: AuthResponse | null } = { raw: null, session: null };
 
 function parseSession(raw: string): AuthResponse | null {
@@ -33,13 +32,12 @@ function readSession(): AuthResponse | null {
   return snapshot.session;
 }
 
-function notify(): void {
+function notifySubscribers(): void {
   listeners.forEach((listener) => listener());
 }
 
-function subscribe(listener: () => void): () => void {
+function subscribeToSession(listener: () => void): () => void {
   listeners.add(listener);
-  // Keeps tabs in sync when the user logs in or out elsewhere.
   window.addEventListener("storage", listener);
   return () => {
     listeners.delete(listener);
@@ -49,19 +47,18 @@ function subscribe(listener: () => void): () => void {
 
 export function saveSession(session: AuthResponse): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-  notify();
+  notifySubscribers();
 }
 
 export function clearSession(): void {
   localStorage.removeItem(STORAGE_KEY);
-  notify();
+  notifySubscribers();
 }
 
-export function getToken(): string | null {
+export function getAuthToken(): string | null {
   return readSession()?.token ?? null;
 }
 
-/** `undefined` until hydrated on the client, then the session or `null`. */
 export function useSession(): AuthResponse | null | undefined {
-  return useSyncExternalStore(subscribe, readSession, () => undefined);
+  return useSyncExternalStore(subscribeToSession, readSession, () => undefined);
 }

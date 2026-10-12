@@ -4,7 +4,6 @@ const submissionSchema = new Schema(
   {
     campaign: { type: Schema.Types.ObjectId, ref: "Campaign", required: true },
     creator: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    // Canonical post URL; unique so one post can't be paid twice.
     postUrl: { type: String, required: true, unique: true },
     views: { type: Number, required: true, default: 0, min: 0 },
     entitledAmount: { type: Number, required: true, default: 0, min: 0 },

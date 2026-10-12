@@ -5,27 +5,24 @@ import type { Campaign } from "@contracts/campaign";
 import { PLATFORM_LABELS } from "@contracts/common";
 
 import { CampaignCover } from "@/components/campaign-cover";
-import { SharedCover } from "@/components/page-transition";
+import { SharedCampaignCover } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatRelative, formatRupees, formatRupeesCompact, formatViews, initials } from "@/lib/format";
+import { formatRelativeTime, formatRupees, formatRupeesCompact, formatViews, getInitials } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 
-/** Makes the title the card's click target: its ::after covers the whole card. */
-export const CARD_TARGET_CLASS =
+export const CARD_LINK_CLASS =
   "text-left outline-none after:absolute after:inset-0 after:rounded-2xl after:content-[''] focus-visible:after:ring-2 focus-visible:after:ring-ring";
 
 const AVATAR_COLORS = ["bg-wl-lavender", "bg-wl-yellow", "bg-wl-red", "bg-wl-blue", "bg-wl-lime"];
 
-function avatarColor(name: string): string {
+function getAvatarColor(name: string): string {
   const hash = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0);
   return AVATAR_COLORS[hash % AVATAR_COLORS.length] ?? "bg-wl-lavender";
 }
 
 interface CampaignCardProps {
   campaign: Campaign;
-  /** Clickable title (link or dialog trigger); stretched over the card with CARD_TARGET_CLASS. */
   title: ReactNode;
-  /** Overlays on the cover photo, e.g. status badge and actions menu. */
   topLeft?: ReactNode;
   topRight?: ReactNode;
 }
@@ -38,11 +35,11 @@ export function CampaignCard({ campaign, title, topLeft, topRight }: CampaignCar
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-colors hover:border-white/20">
       <div className="relative aspect-video overflow-hidden bg-muted">
-        <SharedCover id={campaign._id}>
+        <SharedCampaignCover id={campaign._id}>
           <div className="absolute inset-0">
             <CampaignCover campaign={campaign} sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw" />
           </div>
-        </SharedCover>
+        </SharedCampaignCover>
         {topLeft && <div className="absolute top-3 left-3">{topLeft}</div>}
         {topRight && <div className="absolute top-2 right-2 z-10">{topRight}</div>}
       </div>
@@ -50,12 +47,12 @@ export function CampaignCard({ campaign, title, topLeft, topRight }: CampaignCar
         <div className="flex items-center justify-between gap-3 text-sm">
           <div className="flex min-w-0 items-center gap-2">
             <span
-              className={`flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold text-wl-ink ${avatarColor(campaign.brand.name)}`}
+              className={`flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold text-wl-ink ${getAvatarColor(campaign.brand.name)}`}
             >
-              {initials(campaign.brand.name)}
+              {getInitials(campaign.brand.name)}
             </span>
             <span className="truncate font-medium">{campaign.brand.name}</span>
-            <span className="shrink-0 text-muted-foreground">· {formatRelative(campaign.createdAt)}</span>
+            <span className="shrink-0 text-muted-foreground">· {formatRelativeTime(campaign.createdAt)}</span>
           </div>
           <span
             className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted"

@@ -7,7 +7,7 @@ import type { Submission } from "@contracts/submission";
 import { SimulateViewsForm } from "@/components/creator/simulate-views-form";
 import { TableSkeleton } from "@/components/list/table-skeleton";
 import { PlatformLabel } from "@/components/platform-label";
-import { Earnings, SpikeFlag } from "@/components/submission-status";
+import { SubmissionEarnings, ViewSpikeFlag } from "@/components/submission-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate, formatViews } from "@/lib/format";
@@ -16,11 +16,10 @@ type Viewer = "brand" | "creator";
 
 interface SubmissionsTableProps {
   submissions: Submission[] | undefined;
-  /** Brands see who posted; creators see which campaign and can simulate views. */
   viewer: Viewer;
 }
 
-function Subject({ submission, viewer }: { submission: Submission; viewer: Viewer }) {
+function SubmissionSubject({ submission, viewer }: { submission: Submission; viewer: Viewer }) {
   return viewer === "brand" ? (
     <span className="font-medium">{submission.creator.name}</span>
   ) : (
@@ -31,7 +30,7 @@ function Subject({ submission, viewer }: { submission: Submission; viewer: Viewe
   );
 }
 
-function PostLink({ submission }: { submission: Submission }) {
+function SubmissionPostLink({ submission }: { submission: Submission }) {
   return (
     <a
       href={submission.postUrl}
@@ -44,17 +43,16 @@ function PostLink({ submission }: { submission: Submission }) {
   );
 }
 
-/** Stacked layout for small screens, where a seven-column table doesn't fit. */
-function SubmissionCards({ submissions, viewer }: SubmissionsTableProps) {
+function SubmissionCardList({ submissions, viewer }: SubmissionsTableProps) {
   if (submissions === undefined) {
     return Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-36 rounded-xl" />);
   }
   return submissions.map((submission) => (
     <article key={submission._id} className="flex flex-col gap-3 rounded-xl border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
-        <Subject submission={submission} viewer={viewer} />
+        <SubmissionSubject submission={submission} viewer={viewer} />
         <div className="text-right">
-          <Earnings submission={submission} />
+          <SubmissionEarnings submission={submission} />
         </div>
       </div>
       <dl className="grid grid-cols-2 gap-2 text-sm">
@@ -67,9 +65,9 @@ function SubmissionCards({ submissions, viewer }: SubmissionsTableProps) {
           <dd>{formatDate(submission.createdAt)}</dd>
         </div>
       </dl>
-      {submission.flagged && <SpikeFlag submission={submission} />}
+      {submission.flagged && <ViewSpikeFlag submission={submission} />}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-        <PostLink submission={submission} />
+        <SubmissionPostLink submission={submission} />
         {viewer === "creator" && <SimulateViewsForm key={submission.views} submission={submission} />}
       </div>
     </article>
@@ -81,7 +79,7 @@ export function SubmissionsTable({ submissions, viewer }: SubmissionsTableProps)
   return (
     <>
       <div className="flex flex-col gap-3 md:hidden">
-        <SubmissionCards submissions={submissions} viewer={viewer} />
+        <SubmissionCardList submissions={submissions} viewer={viewer} />
       </div>
       <div className="hidden rounded-xl border bg-card md:block">
         <Table>
@@ -103,17 +101,17 @@ export function SubmissionsTable({ submissions, viewer }: SubmissionsTableProps)
               submissions.map((submission) => (
                 <TableRow key={submission._id}>
                   <TableCell className="pl-4">
-                    <Subject submission={submission} viewer={viewer} />
+                    <SubmissionSubject submission={submission} viewer={viewer} />
                   </TableCell>
                   <TableCell>
-                    <PostLink submission={submission} />
+                    <SubmissionPostLink submission={submission} />
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{formatViews(submission.views)}</TableCell>
                   <TableCell>
-                    <Earnings submission={submission} />
+                    <SubmissionEarnings submission={submission} />
                   </TableCell>
                   <TableCell className="whitespace-normal">
-                    <SpikeFlag submission={submission} />
+                    <ViewSpikeFlag submission={submission} />
                   </TableCell>
                   <TableCell className="text-muted-foreground">{formatDate(submission.createdAt)}</TableCell>
                   {viewer === "creator" && (

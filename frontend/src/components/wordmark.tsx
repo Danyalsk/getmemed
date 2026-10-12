@@ -1,6 +1,5 @@
 import { cn } from "cn";
 
-/** Meme'd wordmark as used on wldd.in: lime pixel type with a hard black drop shadow. */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span

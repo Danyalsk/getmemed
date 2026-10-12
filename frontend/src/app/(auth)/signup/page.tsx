@@ -25,7 +25,6 @@ const ROLE_CHOICES: readonly Choice<Role>[] = [
   { value: "brand", label: "Brand", hint: "Run paid campaigns", icon: Building2Icon },
 ];
 
-// Confirmation only exists in the form; the API contract stays unchanged.
 const signupFormSchema = signupSchema
   .extend({ confirmPassword: z.string().min(1, "Confirm your password") })
   .refine((values) => values.password === values.confirmPassword, {
@@ -52,7 +51,6 @@ export default function SignupPage() {
     onError: (error) => toast.error(error.message),
   });
 
-  // Parsing with the API schema drops confirmPassword before it leaves the browser.
   const onSubmit = handleSubmit((values) => signup.mutate(signupSchema.parse(values)));
 
   return (

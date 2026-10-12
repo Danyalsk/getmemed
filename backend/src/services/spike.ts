@@ -1,5 +1,4 @@
 const MS_PER_HOUR = 3_600_000;
-// Floor the window so near-simultaneous updates don't produce absurd rates.
 const MIN_WINDOW_MS = 60_000;
 
 interface SpikeThresholds {
@@ -10,16 +9,11 @@ interface SpikeThresholds {
 interface SpikeInput {
   previousViews: number;
   views: number;
-  /** When the previous count was recorded (submission time for the first update). */
   since: Date;
   now: Date;
 }
 
-/**
- * Flags growth that is both large in absolute terms and unusually fast, e.g.
- * bought views. Returns a human-readable reason, or null when growth looks organic.
- */
-export function detectSpike(
+export function detectViewSpike(
   { previousViews, views, since, now }: SpikeInput,
   { minDelta, viewsPerHour }: SpikeThresholds,
 ): string | null {

@@ -5,7 +5,6 @@ import type { ListQuery } from "@contracts/common";
 
 import { api } from "./api";
 
-/** Root keys; mutations invalidate by prefix. */
 export const queryKeys = {
   campaigns: ["campaigns"] as const,
   submissions: ["submissions"] as const,

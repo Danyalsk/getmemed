@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import type { Campaign } from "@contracts/campaign";
 
-import { imageUrl } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 interface CampaignCoverProps {
   campaign: Pick<Campaign, "name" | "coverImage">;
@@ -10,17 +10,15 @@ interface CampaignCoverProps {
   priority?: boolean;
 }
 
-/** Fills its (relatively positioned) parent. Older campaigns without a photo get a branded tile. */
 export function CampaignCover({ campaign, sizes, priority }: CampaignCoverProps) {
   if (campaign.coverImage) {
     return (
       <Image
-        src={imageUrl(campaign.coverImage)}
+        src={getImageUrl(campaign.coverImage)}
         alt=""
         fill
         sizes={sizes}
         priority={priority}
-        // Covers are already compressed to WebP on upload.
         unoptimized
         className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
       />

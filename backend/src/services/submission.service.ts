@@ -1,16 +1,16 @@
 import mongoose, { Types } from "mongoose";
 
 import type { ListQuery } from "../contracts/common";
-import { postSubmissionSchema, type UpdateViewsInput } from "../contracts/submission";
+import { postSubmissionSchemaFor, type UpdateViewsInput } from "../contracts/submission";
 import { env } from "../config/env";
 import { AppError } from "../lib/errors";
-import { pageWindow, searchPattern, toPage } from "../lib/list";
+import { toSkipLimit, toSearchRegex, toPageResult } from "../lib/list";
 import { CampaignModel } from "../models/campaign.model";
 import { SubmissionModel } from "../models/submission.model";
 import { UserModel } from "../models/user.model";
-import { findOwnedCampaign, invalidateLiveCampaigns } from "./campaign.service";
-import { entitledPayout, payoutDue } from "./payout";
-import { detectSpike } from "./spike";
+import { findBrandCampaign, invalidateLiveCampaigns } from "./campaign.service";
+import { calculateEntitledPayout, calculatePayoutDue } from "./payout";
+import { detectViewSpike } from "./spike";
 
 const SUBMISSION_REFS = [
   { path: "campaign", select: "name platform" },
@@ -26,13 +26,12 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
     throw AppError.conflict("This campaign is no longer accepting submissions");
   }
 
-  const { postUrl } = postSubmissionSchema(campaign.platform).parse(body);
+  const { postUrl } = postSubmissionSchemaFor(campaign.platform).parse(body);
   const alreadySubmitted = await SubmissionModel.exists({ postUrl });
   if (alreadySubmitted) {
     throw AppError.conflict("This post has already been submitted");
   }
 
-  // submissionCount is denormalised for campaign cards; both writes commit together.
   const submission = await mongoose.connection.transaction(async (session) => {
     const [created] = await SubmissionModel.create([{ campaign: campaign._id, creator: creatorId, postUrl }], {
       session,
@@ -47,10 +46,9 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
   return submission.populate(SUBMISSION_REFS);
 }
 
-/** Matches the post link, the creator's name or the campaign's name. */
-async function searchFilter(search: string | undefined) {
+async function buildSubmissionSearchFilter(search: string | undefined) {
   if (!search) return {};
-  const pattern = searchPattern(search);
+  const pattern = toSearchRegex(search);
   const [creatorIds, campaignIds] = await Promise.all([
     UserModel.find({ name: pattern }).distinct("_id"),
     CampaignModel.find({ name: pattern }).distinct("_id"),
@@ -60,17 +58,17 @@ async function searchFilter(search: string | undefined) {
   };
 }
 
-async function listSubmissions(scope: { creator: string } | { campaign: string }, query: ListQuery) {
-  const filter = { ...scope, ...(await searchFilter(query.search)) };
-  const { skip, limit } = pageWindow(query);
+async function findSubmissionPage(scope: { creator: string } | { campaign: string }, query: ListQuery) {
+  const filter = { ...scope, ...(await buildSubmissionSearchFilter(query.search)) };
+  const { skip, limit } = toSkipLimit(query);
   const [submissions, total] = await Promise.all([
     SubmissionModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate(SUBMISSION_REFS),
     SubmissionModel.countDocuments(filter),
   ]);
-  return toPage(submissions, total, query);
+  return toPageResult(submissions, total, query);
 }
 
-async function totalEarnings(creatorId: string): Promise<number> {
+async function sumCreatorEarnings(creatorId: string): Promise<number> {
   const [result] = await SubmissionModel.aggregate<{ total: number }>([
     { $match: { creator: new Types.ObjectId(creatorId) } },
     { $group: { _id: null, total: { $sum: "$paidAmount" } } },
@@ -80,26 +78,18 @@ async function totalEarnings(creatorId: string): Promise<number> {
 
 export async function listCreatorSubmissions(creatorId: string, query: ListQuery) {
   const [page, earnings] = await Promise.all([
-    listSubmissions({ creator: creatorId }, query),
-    totalEarnings(creatorId),
+    findSubmissionPage({ creator: creatorId }, query),
+    sumCreatorEarnings(creatorId),
   ]);
   return { ...page, totalEarnings: earnings };
 }
 
 export async function listCampaignSubmissions(brandId: string, campaignId: string, query: ListQuery) {
-  await findOwnedCampaign(brandId, campaignId);
-  return listSubmissions({ campaign: campaignId }, query);
+  await findBrandCampaign(brandId, campaignId);
+  return findSubmissionPage({ campaign: campaignId }, query);
 }
 
-/**
- * Applies a new view count and pays out whatever the post is now owed.
- *
- * Runs in a snapshot transaction: two updates touching the same campaign or
- * submission hit a write conflict, and Mongoose retries the loser from a fresh
- * read. Combined with paying only `entitled - alreadyPaid`, concurrent or
- * repeated updates can neither overspend the budget nor pay twice.
- */
-export async function updateViews(submissionId: string, input: UpdateViewsInput) {
+export async function recordViewsAndPayout(submissionId: string, input: UpdateViewsInput) {
   const { submission, paidNow } = await mongoose.connection.transaction(
     async (session) => {
       const submission = await SubmissionModel.findById(submissionId).session(session);
@@ -111,14 +101,11 @@ export async function updateViews(submissionId: string, input: UpdateViewsInput)
         throw AppError.notFound("Campaign");
       }
 
-      // Platform counts only grow; a lower number is a stale or out-of-order update.
       const views = Math.max(submission.views, input.views);
-      const entitled = entitledPayout(campaign.milestones, views);
-      const pay = payoutDue({
+      const entitled = calculateEntitledPayout(campaign.milestones, views);
+      const pay = calculatePayoutDue({
         entitled,
         alreadyPaid: submission.paidAmount,
-        // Paused or closed campaigns pay nothing. Views are still recorded, and
-        // since payouts are entitlement minus paid, a resumed campaign catches up.
         remainingBudget: campaign.status === "active" ? campaign.budget - campaign.spent : 0,
       });
 
@@ -134,10 +121,9 @@ export async function updateViews(submissionId: string, input: UpdateViewsInput)
       }
 
       const now = new Date();
-      // A flag stays until reviewed, so later organic updates don't clear it.
       const spike = submission.flagged
         ? null
-        : detectSpike(
+        : detectViewSpike(
             {
               previousViews: submission.views,
               views,

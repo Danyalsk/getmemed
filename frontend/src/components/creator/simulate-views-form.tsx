@@ -14,10 +14,6 @@ import { api } from "@/lib/api";
 import { formatRupees } from "@/lib/format";
 import { queryKeys } from "@/lib/queries";
 
-/**
- * Stand-in for the platform pushing view counts (PATCH /api/submissions/:id/views),
- * so the payout flow can be tried end to end.
- */
 export function SimulateViewsForm({ submission }: { submission: Submission }) {
   const queryClient = useQueryClient();
   const {
@@ -37,7 +33,6 @@ export function SimulateViewsForm({ submission }: { submission: Submission }) {
       } else {
         toast.info("Views updated, no new payout");
       }
-      // A payout changes both the creator's earnings and the campaign's remaining budget.
       return Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.submissions }),
         queryClient.invalidateQueries({ queryKey: queryKeys.campaigns }),

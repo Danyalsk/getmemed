@@ -28,22 +28,19 @@ const UNITS: readonly [Intl.RelativeTimeFormatUnit, number][] = [
 
 export const formatRupees = (amount: number): string => rupees.format(amount);
 
-/** ₹1,50,000 → "₹1.5L", for tight spots like cards. */
 export const formatRupeesCompact = (amount: number): string => compactRupees.format(amount);
 
-/** 10000 → "10K", matching how creators talk about views. */
 export const formatViews = (views: number): string => compact.format(views);
 
 export const formatDate = (iso: string): string => date.format(new Date(iso));
 
-/** "3d ago", "2w ago". */
-export function formatRelative(iso: string): string {
+export function formatRelativeTime(iso: string): string {
   const seconds = (new Date(iso).getTime() - Date.now()) / 1000;
   const match = UNITS.find(([, size]) => Math.abs(seconds) >= size);
   return match ? relative.format(Math.round(seconds / match[1]), match[0]) : "just now";
 }
 
-export function initials(name: string): string {
+export function getInitials(name: string): string {
   return name
     .split(/\s+/)
     .slice(0, 2)

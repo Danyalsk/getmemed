@@ -6,11 +6,9 @@ interface StatCardProps {
   label: string;
   value: string | undefined;
   icon: LucideIcon;
-  /** Tailwind text color for the icon, from the WLDD accent set. */
   accent: string;
 }
 
-/** `value` undefined renders a skeleton while data loads. */
 export function StatCard({ label, value, icon: Icon, accent }: StatCardProps) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card p-5">

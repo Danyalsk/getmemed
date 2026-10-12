@@ -5,18 +5,15 @@ import Link from "next/link";
 
 import type { Campaign } from "@contracts/campaign";
 
-import { CampaignCard, CARD_TARGET_CLASS } from "@/components/campaign-card";
+import { CampaignCard, CARD_LINK_CLASS } from "@/components/campaign-card";
 import { CampaignStatusBadge } from "@/components/campaign-status-badge";
-import { TRANSITION } from "@/components/page-transition";
+import { TRANSITION_TYPES } from "@/components/page-transition";
 import { queries } from "@/lib/queries";
 
 import { CampaignActions } from "./campaign-actions";
 
-/** Brand's campaign card: opens the campaign page, with status and actions on the photo. */
-export function CampaignGridItem({ campaign }: { campaign: Campaign }) {
+export function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
   const queryClient = useQueryClient();
-  // The campaign page renders straight from this data, so its hero exists in the
-  // same view transition and the cover photo can morph into it.
   const primeCampaignPage = () => queryClient.setQueryData(queries.campaign(campaign._id).queryKey, campaign);
 
   return (
@@ -25,9 +22,9 @@ export function CampaignGridItem({ campaign }: { campaign: Campaign }) {
       title={
         <Link
           href={`/brand/campaigns/${campaign._id}`}
-          transitionTypes={TRANSITION.forward}
+          transitionTypes={TRANSITION_TYPES.forward}
           onClick={primeCampaignPage}
-          className={CARD_TARGET_CLASS}
+          className={CARD_LINK_CLASS}
         >
           {campaign.name}
         </Link>

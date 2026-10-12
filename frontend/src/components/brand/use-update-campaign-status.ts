@@ -15,7 +15,7 @@ const SUCCESS_MESSAGES: Record<CampaignStatus, (name: string) => string> = {
   closed: (name) => `${name} closed`,
 };
 
-export function useCampaignStatus(campaign: Pick<Campaign, "_id" | "name">) {
+export function useUpdateCampaignStatus(campaign: Pick<Campaign, "_id" | "name">) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (status: CampaignStatus) => api.setCampaignStatus(campaign._id, status),

@@ -15,7 +15,6 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
   return debounced;
 }
 
-/** Page, page size and debounced search for a paginated list. Changing search or size returns to page 1. */
 export function useListState() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE_OPTIONS[0]);

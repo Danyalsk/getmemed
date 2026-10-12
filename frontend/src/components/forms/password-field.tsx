@@ -13,7 +13,6 @@ type PasswordFieldProps = Omit<ComponentProps<"input">, "type"> & {
   error?: FormFieldError | undefined;
 };
 
-/** Password input with a show/hide toggle. Spread `register(name)` into it. */
 export function PasswordField({ label, description, error, ...props }: PasswordFieldProps) {
   const inputId = useId();
   const [visible, setVisible] = useState(false);

@@ -4,7 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* WLDD / Meme'd brand, taken from wldd.in: near-black canvas, Meme'd lime, and the WLDD accent set. */
 :root {
   --wl-lime: #96ff43;
   --wl-yellow: #ffd644;
@@ -84,7 +83,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* WLDD background pattern, rotated 180° so its W shapes read as M. */
     background-image: url("/pattern-m.svg");
     background-size: 1441px 1416px;
   }
@@ -92,7 +90,6 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
-  /* Number inputs: hide spinners, they fight with typed amounts. */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     appearance: none;
@@ -100,14 +97,10 @@
   }
 }
 
-/* ---------- Page transitions (React <ViewTransition>) ---------- */
-
-/* Clicks pass through to the live page while an animation runs. */
 ::view-transition {
   pointer-events: none;
 }
 
-/* The header stays put while pages animate underneath it. */
 ::view-transition-group(site-header) {
   animation: none;
   z-index: 10;
@@ -151,7 +144,6 @@
     420ms cubic-bezier(0.65, 0, 0.35, 1) both vt-slide-in;
 }
 
-/* Cover photo morphing from card to hero; a brief blur hides scaling artefacts. */
 ::view-transition-group(.morph) {
   animation-duration: 480ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);

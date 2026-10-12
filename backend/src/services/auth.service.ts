@@ -3,15 +3,14 @@ import bcrypt from "bcryptjs";
 import type { LoginInput, SignupInput } from "../contracts/auth";
 import type { Role } from "../contracts/common";
 import { AppError } from "../lib/errors";
-import { signToken } from "../lib/jwt";
+import { signAuthToken } from "../lib/jwt";
 import { UserModel } from "../models/user.model";
 
 const BCRYPT_ROUNDS = 12;
-// Compared against when the email is unknown so both paths take the same time.
 const DUMMY_HASH = bcrypt.hashSync("timing-safe-placeholder", BCRYPT_ROUNDS);
 
-function issueSession<T extends { id: string; role: Role }>(user: T) {
-  const token = signToken({ _id: user.id, role: user.role });
+function buildAuthResponse<T extends { id: string; role: Role }>(user: T) {
+  const token = signAuthToken({ _id: user.id, role: user.role });
   return { token, user };
 }
 
@@ -23,7 +22,7 @@ export async function signup(input: SignupInput) {
 
   const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
   const user = await UserModel.create({ ...input, passwordHash });
-  return issueSession(user);
+  return buildAuthResponse(user);
 }
 
 export async function login(input: LoginInput) {
@@ -32,10 +31,10 @@ export async function login(input: LoginInput) {
   if (!user || !valid) {
     throw AppError.unauthorized("Invalid email or password");
   }
-  return issueSession(user);
+  return buildAuthResponse(user);
 }
 
-export async function getUser(userId: string) {
+export async function findUserById(userId: string) {
   const user = await UserModel.findById(userId);
   if (!user) {
     throw AppError.unauthorized("Account no longer exists");

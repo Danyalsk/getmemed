@@ -40,7 +40,6 @@ const PLATFORM_CHOICES: readonly Choice<Platform>[] = platformSchema.options.map
   icon: PLATFORM_ICONS[platform],
 }));
 
-// The cover id is filled in by the upload field; validation requires it before submit.
 const DEFAULT_VALUES: Partial<CreateCampaignInput> = {
   name: "",
   platform: "instagram",

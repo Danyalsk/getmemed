@@ -12,7 +12,6 @@ const userSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-// The hash is selected for login checks; it must never reach a response.
 userSchema.set("toJSON", { transform: (_doc, { passwordHash, ...user }) => user });
 
 export const UserModel = model("User", userSchema);

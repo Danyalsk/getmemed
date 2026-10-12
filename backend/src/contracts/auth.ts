@@ -7,7 +7,6 @@ const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Enter a valid 
 export const signupSchema = z.object({
   name: z.string().trim().min(2, "Name is too short").max(80),
   email: emailSchema,
-  // bcrypt only uses the first 72 bytes
   password: z.string().min(8, "Use at least 8 characters").max(72),
   role: roleSchema,
 });

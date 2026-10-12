@@ -9,7 +9,7 @@ import { CAMPAIGN_STATUS_LABELS, campaignStatusSchema, type CampaignStatus } fro
 import { CampaignCardSkeleton } from "@/components/campaign-card";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
-import { QueryError } from "@/components/list/query-error";
+import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SearchInput } from "@/components/list/search-input";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
@@ -18,7 +18,7 @@ import { useListState } from "@/hooks/use-list-state";
 import { formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
-import { CampaignGridItem } from "./campaign-grid-item";
+import { BrandCampaignCard } from "./brand-campaign-card";
 import { CreateCampaignDialog } from "./create-campaign-dialog";
 
 const ALL_STATUSES = "all";
@@ -70,7 +70,7 @@ export function BrandDashboard() {
           </Select>
         </div>
 
-        {error && <QueryError error={error} onRetry={() => void refetch()} />}
+        {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
         {data?.total === 0 ? (
           <EmptyState
@@ -88,7 +88,7 @@ export function BrandDashboard() {
             className={`grid gap-5 md:grid-cols-2 lg:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
           >
             {data
-              ? data.items.map((campaign) => <CampaignGridItem key={campaign._id} campaign={campaign} />)
+              ? data.items.map((campaign) => <BrandCampaignCard key={campaign._id} campaign={campaign} />)
               : Array.from({ length: 6 }, (_, index) => <CampaignCardSkeleton key={index} />)}
           </div>
         )}

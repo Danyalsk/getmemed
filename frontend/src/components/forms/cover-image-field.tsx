@@ -10,7 +10,7 @@ import { IMAGE_CONTENT_TYPES, IMAGE_MAX_BYTES } from "@contracts/image";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { api, imageUrl } from "@/lib/api";
+import { api, getImageUrl } from "@/lib/api";
 import { compressImage } from "@/lib/compress-image";
 
 interface CoverImageFieldProps {
@@ -19,7 +19,6 @@ interface CoverImageFieldProps {
   error?: FormFieldError | undefined;
 }
 
-/** Picks or drops a photo, compresses it in the browser and uploads it; the form keeps only the image id. */
 export function CoverImageField({ value, onChange, error }: CoverImageFieldProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -77,7 +76,7 @@ export function CoverImageField({ value, onChange, error }: CoverImageFieldProps
           dragging ? "border-wl-lime bg-wl-lime/10" : "hover:bg-muted/50"
         } ${message ? "border-destructive" : ""}`}
       >
-        {value && <Image src={imageUrl(value)} alt="Cover preview" fill unoptimized className="object-cover" />}
+        {value && <Image src={getImageUrl(value)} alt="Cover preview" fill unoptimized className="object-cover" />}
         {upload.isPending ? (
           <span className="relative flex items-center gap-2 rounded-md bg-background/80 px-3 py-1.5 text-sm">
             <LoaderCircleIcon className="size-4 animate-spin" /> Uploading…

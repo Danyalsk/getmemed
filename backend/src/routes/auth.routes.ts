@@ -3,8 +3,8 @@ import { rateLimit } from "express-rate-limit";
 
 import { loginSchema, signupSchema } from "../contracts/auth";
 import type { ApiError } from "../contracts/common";
-import { authenticate, requireUser } from "../middleware/auth";
-import { getUser, login, signup } from "../services/auth.service";
+import { authenticate, getAuthUser } from "../middleware/auth";
+import { findUserById, login, signup } from "../services/auth.service";
 
 export const authRouter = Router();
 
@@ -40,7 +40,7 @@ authRouter.post("/login", credentialsLimiter, async (req, res, next) => {
 
 authRouter.get("/me", authenticate, async (req, res, next) => {
   try {
-    const user = await getUser(requireUser(req)._id);
+    const user = await findUserById(getAuthUser(req)._id);
     res.json(user);
   } catch (error) {
     next(error);

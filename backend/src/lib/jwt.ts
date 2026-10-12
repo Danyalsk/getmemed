@@ -9,7 +9,7 @@ export type AuthUser = Pick<PublicUser, "_id" | "role">;
 
 const claimsSchema = z.object({ sub: objectIdSchema, role: roleSchema });
 
-export function signToken(user: AuthUser): string {
+export function signAuthToken(user: AuthUser): string {
   return jwt.sign({ role: user.role }, env.JWT_SECRET, {
     subject: user._id,
     expiresIn: env.JWT_TTL_SECONDS,
@@ -17,8 +17,7 @@ export function signToken(user: AuthUser): string {
   });
 }
 
-/** Throws when the token is malformed, expired or signed with another key. */
-export function verifyToken(token: string): AuthUser {
+export function verifyAuthToken(token: string): AuthUser {
   const claims = claimsSchema.parse(jwt.verify(token, env.JWT_SECRET, { algorithms: ["HS256"] }));
   return { _id: claims.sub, role: claims.role };
 }

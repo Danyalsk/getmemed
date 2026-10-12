@@ -33,7 +33,6 @@ async function signup(role: "brand" | "creator"): Promise<string> {
 
 let brandToken = "";
 
-// Smallest valid PNG (1×1 pixel).
 const PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
   "base64",
@@ -95,7 +94,6 @@ describe("PATCH /api/submissions/:id/views", () => {
     const campaignId = await createCampaign(budget);
     const submissionIds = await submitPosts(campaignId, 20);
 
-    // 20 posts each owed ₹2,000 against a ₹5,000 budget.
     const responses = await Promise.all(submissionIds.map((id) => patchViews(id, 60_000)));
 
     expect(responses.every((res) => res.status === 200)).toBe(true);

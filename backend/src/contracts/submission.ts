@@ -17,7 +17,7 @@ const YOUTUBE_HOSTS = new Set(["youtube.com", "www.youtube.com", "m.youtube.com"
 const YOUTUBE_ID = /^[\w-]{11}$/;
 const INSTAGRAM_CODE = /^[\w-]+$/;
 
-function parseUrl(raw: string): URL | null {
+function parseHttpUrl(raw: string): URL | null {
   try {
     const url = new URL(raw);
     return url.protocol === "https:" || url.protocol === "http:" ? url : null;
@@ -26,7 +26,7 @@ function parseUrl(raw: string): URL | null {
   }
 }
 
-function youtubeVideoId(url: URL): string | null {
+function extractYoutubeVideoId(url: URL): string | null {
   const host = url.hostname.toLowerCase();
   const [first, second] = url.pathname.split("/").filter(Boolean);
   if (host === "youtu.be") return first ?? null;
@@ -36,13 +36,8 @@ function youtubeVideoId(url: URL): string | null {
   return null;
 }
 
-/**
- * Reduces every accepted form of a post link to one canonical URL, so the same
- * post can't be submitted twice via `?igsh=`, `youtu.be`, `/shorts/` variants.
- * Returns null when the link isn't a post on the given platform.
- */
-export function canonicalPostUrl(raw: string, platform: Platform): string | null {
-  const url = parseUrl(raw.trim());
+export function normalizePostUrl(raw: string, platform: Platform): string | null {
+  const url = parseHttpUrl(raw.trim());
   if (!url) return null;
 
   switch (platform) {
@@ -54,25 +49,23 @@ export function canonicalPostUrl(raw: string, platform: Platform): string | null
         INSTAGRAM_POST_KINDS.has(kind) &&
         code !== undefined &&
         INSTAGRAM_CODE.test(code);
-      // /p/, /reel/ and /tv/ share one shortcode space, so they all collapse to /p/
       return isPost ? `https://www.instagram.com/p/${code}/` : null;
     }
     case "youtube": {
-      const id = youtubeVideoId(url);
+      const id = extractYoutubeVideoId(url);
       return id && YOUTUBE_ID.test(id) ? `https://www.youtube.com/watch?v=${id}` : null;
     }
   }
 }
 
-/** Validates a post link against the campaign's platform and outputs its canonical form. */
-export function postSubmissionSchema(platform: Platform) {
+export function postSubmissionSchemaFor(platform: Platform) {
   return z.object({
     postUrl: z
       .string()
       .trim()
       .max(500)
       .transform((raw, ctx) => {
-        const canonical = canonicalPostUrl(raw, platform);
+        const canonical = normalizePostUrl(raw, platform);
         if (!canonical) {
           ctx.addIssue({
             code: "custom",
@@ -84,7 +77,7 @@ export function postSubmissionSchema(platform: Platform) {
       }),
   });
 }
-export type PostSubmissionInput = z.input<ReturnType<typeof postSubmissionSchema>>;
+export type PostSubmissionInput = z.input<ReturnType<typeof postSubmissionSchemaFor>>;
 
 export const updateViewsSchema = z.object({
   views: z
@@ -101,9 +94,7 @@ export const submissionSchema = z.object({
   creator: z.object({ _id: objectIdSchema, name: z.string() }),
   postUrl: z.string(),
   views: z.number().int().nonnegative(),
-  /** What the highest crossed milestone is worth. */
   entitledAmount: rupeesSchema,
-  /** What was actually paid; lower than entitled when the budget ran out. */
   paidAmount: rupeesSchema,
   flagged: z.boolean(),
   flagReason: z.string().nullable(),

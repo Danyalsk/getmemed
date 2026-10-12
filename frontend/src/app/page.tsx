@@ -6,7 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 
-const LADDER = [
+const SAMPLE_MILESTONES = [
   { views: "10K views", payout: "₹500" },
   { views: "50K views", payout: "₹2,000" },
   { views: "100K views", payout: "₹5,000" },
@@ -90,7 +90,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <ol className="grid gap-3 sm:grid-cols-3">
-                {LADDER.map(({ views, payout }, index) => (
+                {SAMPLE_MILESTONES.map(({ views, payout }, index) => (
                   <li key={views} className="flex flex-col gap-2 rounded-xl border bg-card p-5">
                     <span className="text-xs text-muted-foreground">Milestone {index + 1}</span>
                     <span className="text-sm">{views}</span>

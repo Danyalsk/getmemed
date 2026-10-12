@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
-import { QueryError } from "@/components/list/query-error";
+import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SearchInput } from "@/components/list/search-input";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
@@ -42,7 +42,7 @@ export function CreatorPosts() {
       <section aria-label="Post list" className="flex flex-col gap-4">
         <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search by campaign or link" />
 
-        {error && <QueryError error={error} onRetry={() => void refetch()} />}
+        {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
         {data?.total === 0 ? (
           <EmptyState

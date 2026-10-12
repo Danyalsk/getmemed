@@ -5,11 +5,11 @@ import { ArrowLeftIcon, InboxIcon } from "lucide-react";
 import Link from "next/link";
 
 import { CampaignCover } from "@/components/campaign-cover";
-import { SharedCover, TRANSITION } from "@/components/page-transition";
+import { SharedCampaignCover, TRANSITION_TYPES } from "@/components/page-transition";
 import { CampaignStatusBadge } from "@/components/campaign-status-badge";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
-import { QueryError } from "@/components/list/query-error";
+import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SearchInput } from "@/components/list/search-input";
 import { MilestoneLadder } from "@/components/milestone-ladder";
 import { PlatformLabel } from "@/components/platform-label";
@@ -22,7 +22,7 @@ import { queries } from "@/lib/queries";
 import { BudgetUsage } from "./budget-usage";
 import { CampaignActions } from "./campaign-actions";
 
-function CampaignSubmissions({ campaignId }: { campaignId: string }) {
+function CampaignSubmissionsSection({ campaignId }: { campaignId: string }) {
   const list = useListState();
   const { data, error, refetch, isPlaceholderData } = useQuery(queries.campaignSubmissions(campaignId, list.query));
 
@@ -35,7 +35,7 @@ function CampaignSubmissions({ campaignId }: { campaignId: string }) {
         <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search by creator or link" />
       </div>
 
-      {error && <QueryError error={error} onRetry={() => void refetch()} />}
+      {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       {data?.total === 0 ? (
         <EmptyState
@@ -74,22 +74,22 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
     <>
       <Link
         href="/brand"
-        transitionTypes={TRANSITION.back}
+        transitionTypes={TRANSITION_TYPES.back}
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeftIcon className="size-4" /> All campaigns
       </Link>
 
-      {error && <QueryError error={error} onRetry={() => void refetch()} />}
+      {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       {campaign ? (
         <section className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
           <div className="relative aspect-video md:aspect-[3/1]">
-            <SharedCover id={campaign._id}>
+            <SharedCampaignCover id={campaign._id}>
               <div className="absolute inset-0">
                 <CampaignCover campaign={campaign} sizes="(min-width: 1152px) 1152px, 100vw" priority />
               </div>
-            </SharedCover>
+            </SharedCampaignCover>
             <div aria-hidden className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
           </div>
           <div className="-mt-12 flex flex-col gap-6 p-6 pt-0">
@@ -126,7 +126,7 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
         !error && <Skeleton className="h-96 w-full rounded-2xl" />
       )}
 
-      <CampaignSubmissions campaignId={campaignId} />
+      <CampaignSubmissionsSection campaignId={campaignId} />
     </>
   );
 }

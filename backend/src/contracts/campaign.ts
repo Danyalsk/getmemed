@@ -12,15 +12,15 @@ import {
 
 export const MAX_MILESTONES = 10;
 
-const wholeNumber = (field: string) =>
+const positiveIntegerField = (field: string) =>
   z
     .number({ error: `${field} must be a number` })
     .int(`${field} must be a whole number`)
     .positive(`${field} must be above 0`);
 
 export const milestoneSchema = z.object({
-  views: wholeNumber("Views"),
-  payout: wholeNumber("Payout"),
+  views: positiveIntegerField("Views"),
+  payout: positiveIntegerField("Payout"),
 });
 export type Milestone = z.infer<typeof milestoneSchema>;
 
@@ -52,9 +52,8 @@ export const milestoneLadderSchema = z
 const campaignFieldsSchema = z.object({
   name: z.string().trim().min(3, "Name is too short").max(100),
   platform: platformSchema,
-  budget: wholeNumber("Budget"),
+  budget: positiveIntegerField("Budget"),
   milestones: milestoneLadderSchema,
-  // Id returned by POST /api/images.
   coverImage: z.string({ error: "Add a cover photo" }).pipe(objectIdSchema),
 });
 
@@ -72,7 +71,6 @@ export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
 
 export const campaignSchema = campaignFieldsSchema.extend({
   _id: objectIdSchema,
-  // Campaigns created before cover photos were required have none.
   coverImage: objectIdSchema.nullable().default(null),
   submissionCount: z.number().int().nonnegative().default(0),
   brand: z.object({ _id: objectIdSchema, name: z.string() }),
@@ -95,7 +93,6 @@ export type LiveCampaignsQuery = z.output<typeof liveCampaignsQuerySchema>;
 
 export const campaignPageSchema = pageSchema(campaignSchema);
 
-/** Totals across all of a brand's campaigns, independent of filters and paging. */
 export const budgetSummarySchema = z.object({
   campaigns: z.number().int().nonnegative(),
   budget: rupeesSchema,

@@ -12,7 +12,6 @@ import { submissionRouter } from "./routes/submission.routes";
 export function createApp() {
   const app = express();
 
-  // Render/Vercel sit behind one proxy hop; needed for correct client IPs in rate limiting.
   app.set("trust proxy", 1);
   app.use(helmet());
   app.use(cors({ origin: env.CORS_ORIGINS }));

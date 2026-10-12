@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 import type { Campaign } from "@contracts/campaign";
 import { PLATFORM_LABELS } from "@contracts/common";
-import { postSubmissionSchema, type PostSubmissionInput } from "@contracts/submission";
+import { postSubmissionSchemaFor, type PostSubmissionInput } from "@contracts/submission";
 
 import { CampaignCover } from "@/components/campaign-cover";
 import { TextField } from "@/components/forms/text-field";
@@ -28,7 +28,7 @@ import { ApiRequestError, api } from "@/lib/api";
 import { formatRupees } from "@/lib/format";
 import { queryKeys } from "@/lib/queries";
 
-const PLACEHOLDERS = {
+const POST_URL_PLACEHOLDERS = {
   instagram: "https://www.instagram.com/reel/…",
   youtube: "https://youtube.com/shorts/…",
 } satisfies Record<Campaign["platform"], string>;
@@ -41,7 +41,7 @@ interface SubmitPostDialogProps {
 export function SubmitPostDialog({ campaign, trigger }: SubmitPostDialogProps) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const schema = useMemo(() => postSubmissionSchema(campaign.platform), [campaign.platform]);
+  const schema = useMemo(() => postSubmissionSchemaFor(campaign.platform), [campaign.platform]);
   const {
     register,
     handleSubmit,
@@ -98,7 +98,7 @@ export function SubmitPostDialog({ campaign, trigger }: SubmitPostDialogProps) {
             label="Post link"
             type="url"
             inputMode="url"
-            placeholder={PLACEHOLDERS[campaign.platform]}
+            placeholder={POST_URL_PLACEHOLDERS[campaign.platform]}
             error={errors.postUrl}
             {...register("postUrl")}
           />

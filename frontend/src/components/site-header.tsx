@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Wordmark } from "@/components/wordmark";
-import { initials } from "@/lib/format";
+import { getInitials } from "@/lib/format";
 import { clearSession, HOME_BY_ROLE, useSession } from "@/lib/session";
 
 const NAV: Record<Role, readonly { href: string; label: string }[]> = {
@@ -62,7 +62,7 @@ export function SiteHeader() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="ml-auto gap-2 px-2" aria-label="Account menu">
                   <span className="flex size-7 items-center justify-center rounded-full bg-wl-lavender text-xs font-semibold text-wl-ink">
-                    {initials(session.user.name)}
+                    {getInitials(session.user.name)}
                   </span>
                   <span className="hidden text-sm sm:inline">{session.user.name}</span>
                 </Button>

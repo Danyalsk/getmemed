@@ -10,7 +10,6 @@ type TextFieldProps = ComponentProps<"input"> & {
   error?: FormFieldError | undefined;
 };
 
-/** Labelled input wired for react-hook-form: spread `register(name)` into it. */
 export function TextField({ label, description, error, ...props }: TextFieldProps) {
   const inputId = useId();
   return (

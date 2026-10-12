@@ -15,20 +15,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { TRANSITION } from "@/components/page-transition";
+import { TRANSITION_TYPES } from "@/components/page-transition";
 
 import { CloseCampaignDialog } from "./close-campaign-dialog";
-import { useCampaignStatus } from "./use-campaign-status";
+import { useUpdateCampaignStatus } from "./use-update-campaign-status";
 
 interface CampaignActionsProps {
   campaign: Campaign;
-  /** `menu` for table rows, `buttons` for the campaign page header. */
   layout: "menu" | "buttons";
 }
 
 export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
   const [confirmClose, setConfirmClose] = useState(false);
-  const status = useCampaignStatus(campaign);
+  const status = useUpdateCampaignStatus(campaign);
   const canClose = campaign.status !== "closed";
   const toggle =
     campaign.status === "active"
@@ -74,7 +73,7 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/brand/campaigns/${campaign._id}`} transitionTypes={TRANSITION.forward}>
+            <Link href={`/brand/campaigns/${campaign._id}`} transitionTypes={TRANSITION_TYPES.forward}>
               <EyeIcon /> View details
             </Link>
           </DropdownMenuItem>

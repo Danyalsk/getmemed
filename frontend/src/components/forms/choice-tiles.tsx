@@ -19,7 +19,6 @@ interface ChoiceTilesProps<T extends string> {
   onChange: (value: T) => void;
 }
 
-/** Radio group rendered as tiles. Native radios keep keyboard and screen reader support. */
 export function ChoiceTiles<T extends string>({ legend, name, choices, value, onChange }: ChoiceTilesProps<T>) {
   return (
     <FieldSet>
