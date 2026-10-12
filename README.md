@@ -29,7 +29,7 @@ frontend/
 
 The API returns Mongoose documents as-is — the response shape is owned by the schemas (`remaining` is a virtual, `passwordHash` is stripped in `toJSON`), so there are no hand-written DTO mappers. The integration tests parse every response with the contract schemas, which keeps the two in sync.
 
-Route handlers have no `try/catch`: Express 5 forwards rejected promises to the central error handler (`middleware/error-handler.ts`), which maps Zod, domain, duplicate-key and body-parser errors to the shared error shape.
+Every route handler wraps its work in `try/catch` and passes failures to `next(error)`. The central error handler (`middleware/error-handler.ts`) maps Zod, domain, duplicate-key and body-parser errors to the shared error shape, and anything unexpected to a 500 without leaking internals.
 
 ## Running locally
 

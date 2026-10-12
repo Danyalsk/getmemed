@@ -18,19 +18,31 @@ const credentialsLimiter = rateLimit({
   message: rateLimitedBody,
 });
 
-authRouter.post("/signup", credentialsLimiter, async (req, res) => {
-  const input = signupSchema.parse(req.body);
-  const session = await signup(input);
-  res.status(201).json(session);
+authRouter.post("/signup", credentialsLimiter, async (req, res, next) => {
+  try {
+    const input = signupSchema.parse(req.body);
+    const session = await signup(input);
+    res.status(201).json(session);
+  } catch (error) {
+    next(error);
+  }
 });
 
-authRouter.post("/login", credentialsLimiter, async (req, res) => {
-  const input = loginSchema.parse(req.body);
-  const session = await login(input);
-  res.json(session);
+authRouter.post("/login", credentialsLimiter, async (req, res, next) => {
+  try {
+    const input = loginSchema.parse(req.body);
+    const session = await login(input);
+    res.json(session);
+  } catch (error) {
+    next(error);
+  }
 });
 
-authRouter.get("/me", authenticate, async (req, res) => {
-  const user = await getUser(requireUser(req)._id);
-  res.json(user);
+authRouter.get("/me", authenticate, async (req, res, next) => {
+  try {
+    const user = await getUser(requireUser(req)._id);
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
 });

@@ -60,7 +60,7 @@ async function submitPosts(campaignId: string, count: number): Promise<string[]>
     const res = await request(app)
       .post(`/api/campaigns/${campaignId}/submissions`)
       .auth(token, { type: "bearer" })
-      .send({ postUrl: `https://www.instagram.com/p/post${i}${crypto.randomUUID().slice(0, 6)}/` });
+      .send({ postUrl: `https://www.instagram.com/p/post-${i}-${crypto.randomUUID().slice(0, 6)}/` });
     ids.push(submissionSchema.parse(res.body)._id);
   }
   return ids;
@@ -184,7 +184,7 @@ describe("PATCH /api/submissions/:id/views", () => {
     expect(second).toMatchObject({ total: 12, page: 2, pageSize: 5, totalPages: 3 });
     expect(second.items).toHaveLength(5);
 
-    const found = submissionPageSchema.parse((await list("search=post11")).body);
+    const found = submissionPageSchema.parse((await list("search=post-11-")).body);
     expect(found.total).toBe(1);
 
     const byCreator = submissionPageSchema.parse((await list("search=CREATOR")).body);
