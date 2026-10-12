@@ -102,13 +102,16 @@ All responses are JSON. Errors always look like `{ "error": { "code", "message",
 | POST | `/api/auth/login` | — | `{ email, password }` → `{ token, user }` |
 | GET | `/api/auth/me` | any | Current user |
 | POST | `/api/campaigns` | brand | Create campaign |
-| GET | `/api/campaigns/mine` | brand | Own campaigns with `spent` / `remaining` |
-| PATCH | `/api/campaigns/:id/close` | brand (owner) | Stop submissions and payouts |
+| GET | `/api/campaigns/mine` | brand | Own campaigns (`spent` / `remaining` each) plus a budget `summary`. Filters: `status` |
+| GET | `/api/campaigns/:id` | brand (owner) | One campaign |
+| PATCH | `/api/campaigns/:id/status` | brand (owner) | `{ status: "active" \| "paused" \| "closed" }` |
 | GET | `/api/campaigns/:id/submissions` | brand (owner) | Posts submitted to a campaign |
-| GET | `/api/campaigns/live` | creator | Live campaigns (Redis-cached) |
+| GET | `/api/campaigns/live` | creator | Live campaigns (Redis-cached). Filters: `platform` |
 | POST | `/api/campaigns/:id/submissions` | creator | `{ postUrl }` |
-| GET | `/api/submissions/mine` | creator | `{ submissions, totalEarnings }` |
+| GET | `/api/submissions/mine` | creator | Own posts plus `totalEarnings` |
 | PATCH | `/api/submissions/:id/views` | **none** | `{ views }` → `{ submission, paidNow }` |
+
+Every list endpoint is paginated and searchable: `?page=1&pageSize=10&search=…` (page size up to 50). Responses look like `{ items, total, page, pageSize, totalPages }`. Campaign lists search by name; submission lists search by post link, creator name or campaign name.
 
 Auth is a JWT sent as `Authorization: Bearer <token>`. Signup and login are rate limited (20 requests / 15 min per IP).
 
@@ -123,7 +126,7 @@ Where the brief was open, these are the calls I made:
 3. **Budget runs out mid-payout → partial payout.** If ₹3,000 is owed but ₹1,200 is left, ₹1,200 is paid and the campaign is exhausted. The submission records both `entitledAmount` and `paidAmount`, and the UI shows "capped by budget".
 4. **Views never go down.** A lower count than the stored one is treated as stale/out-of-order and ignored. Payouts are never clawed back.
 5. **Live campaign** = status `active` and `spent < budget`. Exhausted or closed campaigns disappear from the creator list and reject new submissions.
-6. **Closing a campaign** (brand action) stops new submissions and further payouts; views are still recorded. Remaining budget is left unspent.
+6. **Pause, resume, close.** Brands can pause an active campaign and resume it later, or close it for good. A paused campaign is hidden from creators, takes no new submissions and pays nothing, but views are still recorded. Because each update pays `entitled − alreadyPaid`, the first update after resuming pays whatever was earned while paused. Closing is final: no submissions or payouts, and the remaining budget stays unspent.
 7. **Money is whole rupees** (integers).
 8. **Milestone ladder:** 1–10 rungs, views and payouts strictly increasing, and the top payout must fit inside the budget.
 9. **One post, one submission.** Links are normalised before the uniqueness check — `?igsh=`, `/reel/` vs `/p/`, `youtu.be`, `/shorts/` all collapse to one canonical URL — so the same post can't be submitted twice. The link's host must match the campaign platform.
@@ -147,7 +150,7 @@ If two updates touch the same campaign or submission at once, MongoDB raises a w
 
 ## Caching
 
-`GET /api/campaigns/live` is a read-through Redis cache (`campaigns:live`, 30s TTL). It stores the serialised response body, so a hit skips MongoDB and serialisation entirely. It is invalidated whenever a campaign is created, closed, or any payout changes its spend, so remaining budgets shown to creators stay current. Any Redis error falls back to MongoDB.
+`GET /api/campaigns/live` is a read-through Redis cache (`campaigns:live`, 30s TTL). It stores the serialised response body, so a hit skips MongoDB and serialisation entirely. Each page/search/filter combination is cached under a versioned key; invalidation bumps the version, dropping every variant at once. That happens whenever a campaign is created, changes status, or any payout changes its spend, so remaining budgets shown to creators stay current. Any Redis error falls back to MongoDB.
 
 ## Tests
 
@@ -157,7 +160,8 @@ cd backend && npm test
 
 - `payout.test.ts` — milestone lookup, multi-milestone jumps, paying the difference, budget cap (full, partial, exhausted).
 - `spike.test.ts` — spike thresholds and time windows.
-- `views.integration.test.ts` — concurrency, idempotency, partial payout, closed campaigns, input validation.
+- `views.integration.test.ts` — concurrency, idempotency, partial payout, pause/resume/close, pagination and search, input validation.
+- `auth.integration.test.ts` — password hash never appears in responses.
 
 ## Deployment
 
