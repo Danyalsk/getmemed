@@ -85,7 +85,11 @@ export function postSubmissionSchema(platform: Platform) {
 export type PostSubmissionInput = z.input<ReturnType<typeof postSubmissionSchema>>;
 
 export const updateViewsSchema = z.object({
-  views: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  views: z
+    .number({ error: "Views must be a number" })
+    .int("Views must be a whole number")
+    .nonnegative("Views can't be negative")
+    .max(Number.MAX_SAFE_INTEGER),
 });
 export type UpdateViewsInput = z.infer<typeof updateViewsSchema>;
 

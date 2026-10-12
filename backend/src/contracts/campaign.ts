@@ -10,9 +10,15 @@ import {
 
 export const MAX_MILESTONES = 10;
 
+const wholeNumber = (field: string) =>
+  z
+    .number({ error: `${field} must be a number` })
+    .int(`${field} must be a whole number`)
+    .positive(`${field} must be above 0`);
+
 export const milestoneSchema = z.object({
-  views: z.number().int().positive("Views must be above 0"),
-  payout: z.number().int().positive("Payout must be above 0"),
+  views: wholeNumber("Views"),
+  payout: wholeNumber("Payout"),
 });
 export type Milestone = z.infer<typeof milestoneSchema>;
 
@@ -44,7 +50,7 @@ export const milestoneLadderSchema = z
 const campaignFieldsSchema = z.object({
   name: z.string().trim().min(3, "Name is too short").max(100),
   platform: platformSchema,
-  budget: z.number().int().positive("Budget must be above 0"),
+  budget: wholeNumber("Budget"),
   milestones: milestoneLadderSchema,
 });
 
