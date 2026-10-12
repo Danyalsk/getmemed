@@ -1,49 +1,103 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { ChartPieIcon, MegaphoneIcon, PiggyBankIcon, WalletIcon } from "lucide-react";
+import { useState } from "react";
 
+import { CAMPAIGN_STATUS_LABELS, campaignStatusSchema, type CampaignStatus } from "@contracts/common";
+
+import { EmptyState } from "@/components/list/empty-state";
+import { PaginationBar } from "@/components/list/pagination-bar";
+import { QueryError } from "@/components/list/query-error";
+import { SearchInput } from "@/components/list/search-input";
+import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useListState } from "@/hooks/use-list-state";
 import { formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
-import { CampaignCard } from "./campaign-card";
+import { CampaignsTable } from "./campaigns-table";
 import { CreateCampaignDialog } from "./create-campaign-dialog";
 
-export function BrandDashboard() {
-  const { data: campaigns, error, isPending } = useQuery(queries.myCampaigns);
+const ALL_STATUSES = "all";
 
-  const totals = (campaigns ?? []).reduce(
-    (sum, campaign) => ({
-      budget: sum.budget + campaign.budget,
-      spent: sum.spent + campaign.spent,
-      remaining: sum.remaining + campaign.remaining,
-    }),
-    { budget: 0, spent: 0, remaining: 0 },
-  );
+export function BrandDashboard() {
+  const list = useListState();
+  const [status, setStatus] = useState<CampaignStatus>();
+  const { data, error, refetch, isPlaceholderData } = useQuery(queries.myCampaigns({ ...list.query, status }));
+  const summary = data?.summary;
+  const filtered = Boolean(list.query.search ?? status);
 
   return (
     <>
-      <section className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-4xl">Your campaigns</h1>
-          <p className="text-muted-foreground">Track what each campaign has paid out and what is left.</p>
+      <PageHeader
+        title="Campaigns"
+        description="Launch campaigns, track spend against budget and review creator posts."
+        actions={<CreateCampaignDialog />}
+      />
+
+      <section aria-label="Budget overview" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Campaigns" value={summary && String(summary.campaigns)} icon={MegaphoneIcon} accent="text-wl-lavender" />
+        <StatCard label="Total budget" value={summary && formatRupees(summary.budget)} icon={WalletIcon} accent="text-wl-yellow" />
+        <StatCard label="Paid out" value={summary && formatRupees(summary.spent)} icon={ChartPieIcon} accent="text-wl-red" />
+        <StatCard label="Remaining" value={summary && formatRupees(summary.remaining)} icon={PiggyBankIcon} accent="text-wl-lime" />
+      </section>
+
+      <section aria-label="Campaign list" className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search campaigns" />
+          <Select
+            value={status ?? ALL_STATUSES}
+            onValueChange={(value) => {
+              const parsed = campaignStatusSchema.safeParse(value);
+              setStatus(parsed.success ? parsed.data : undefined);
+              list.resetPage();
+            }}
+          >
+            <SelectTrigger aria-label="Filter by status" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_STATUSES}>All statuses</SelectItem>
+              {campaignStatusSchema.options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {CAMPAIGN_STATUS_LABELS[option]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <CreateCampaignDialog />
-      </section>
 
-      <section aria-label="Budget overview" className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total budget" value={formatRupees(totals.budget)} className="bg-wl-yellow" />
-        <StatCard label="Spent" value={formatRupees(totals.spent)} className="bg-wl-pink" />
-        <StatCard label="Remaining" value={formatRupees(totals.remaining)} className="bg-wl-green" />
-      </section>
+        {error && <QueryError error={error} onRetry={() => void refetch()} />}
 
-      <section aria-label="Campaigns" className="grid gap-6 lg:grid-cols-2">
-        {error && <p className="font-semibold text-red-700">{error.message}</p>}
-        {isPending && <p>Loading campaigns…</p>}
-        {campaigns?.length === 0 && (
-          <p className="text-muted-foreground">No campaigns yet. Launch your first one to start paying creators.</p>
+        {data?.total === 0 ? (
+          <EmptyState
+            icon={MegaphoneIcon}
+            title={filtered ? "No matching campaigns" : "No campaigns yet"}
+            description={
+              filtered
+                ? "Try a different search term or status filter."
+                : "Create your first campaign to start paying creators for the reach they drive."
+            }
+            action={filtered ? undefined : <CreateCampaignDialog />}
+          />
+        ) : (
+          <div className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}>
+            <CampaignsTable campaigns={data?.items} />
+          </div>
         )}
-        {campaigns?.map((campaign) => <CampaignCard key={campaign._id} campaign={campaign} />)}
+
+        {data && (
+          <PaginationBar
+            page={data.page}
+            pageSize={data.pageSize}
+            total={data.total}
+            totalPages={data.totalPages}
+            onPageChange={list.setPage}
+            onPageSizeChange={list.setPageSize}
+          />
+        )}
       </section>
     </>
   );

@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoaderCircleIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -56,12 +57,13 @@ export function SimulateViewsForm({ submission }: { submission: Submission }) {
           min={0}
           aria-label={`New view count for ${submission.campaign.name}`}
           aria-invalid={errors.views !== undefined}
-          className="h-8 w-32"
+          className="h-8 w-28"
           {...register("views", { valueAsNumber: true })}
         />
         {errors.views && <span className="text-xs font-semibold text-red-700">{errors.views.message}</span>}
       </div>
       <Button type="submit" size="sm" variant="secondary" disabled={update.isPending}>
+        {update.isPending && <LoaderCircleIcon className="animate-spin" />}
         Update
       </Button>
     </form>

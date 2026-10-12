@@ -1,29 +1,44 @@
-import { queryOptions } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions } from "@tanstack/react-query";
+
+import type { BrandCampaignsQuery, LiveCampaignsQuery } from "@contracts/campaign";
+import type { ListQuery } from "@contracts/common";
 
 import { api } from "./api";
 
-/** Every query key lives here so mutations can invalidate by prefix. */
+/** Root keys; mutations invalidate by prefix. */
 export const queryKeys = {
   campaigns: ["campaigns"] as const,
   submissions: ["submissions"] as const,
 };
 
 export const queries = {
-  myCampaigns: queryOptions({
-    queryKey: [...queryKeys.campaigns, "mine"],
-    queryFn: api.myCampaigns,
-  }),
-  liveCampaigns: queryOptions({
-    queryKey: [...queryKeys.campaigns, "live"],
-    queryFn: api.liveCampaigns,
-  }),
-  campaignSubmissions: (campaignId: string) =>
+  myCampaigns: (query: BrandCampaignsQuery) =>
     queryOptions({
-      queryKey: [...queryKeys.campaigns, campaignId, "submissions"],
-      queryFn: () => api.campaignSubmissions(campaignId),
+      queryKey: [...queryKeys.campaigns, "mine", query],
+      queryFn: () => api.myCampaigns(query),
+      placeholderData: keepPreviousData,
     }),
-  mySubmissions: queryOptions({
-    queryKey: [...queryKeys.submissions, "mine"],
-    queryFn: api.mySubmissions,
-  }),
+  campaign: (id: string) =>
+    queryOptions({
+      queryKey: [...queryKeys.campaigns, id],
+      queryFn: () => api.campaign(id),
+    }),
+  liveCampaigns: (query: LiveCampaignsQuery) =>
+    queryOptions({
+      queryKey: [...queryKeys.campaigns, "live", query],
+      queryFn: () => api.liveCampaigns(query),
+      placeholderData: keepPreviousData,
+    }),
+  campaignSubmissions: (campaignId: string, query: ListQuery) =>
+    queryOptions({
+      queryKey: [...queryKeys.submissions, "campaign", campaignId, query],
+      queryFn: () => api.campaignSubmissions(campaignId, query),
+      placeholderData: keepPreviousData,
+    }),
+  mySubmissions: (query: ListQuery) =>
+    queryOptions({
+      queryKey: [...queryKeys.submissions, "mine", query],
+      queryFn: () => api.mySubmissions(query),
+      placeholderData: keepPreviousData,
+    }),
 };

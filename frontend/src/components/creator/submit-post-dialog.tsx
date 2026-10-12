@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoaderCircleIcon, SendIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -66,13 +67,16 @@ export function SubmitPostDialog({ campaign }: { campaign: Campaign }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Submit a post</Button>
+        <Button size="sm">
+          <SendIcon /> Submit post
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Submit to {campaign.name}</DialogTitle>
+          <DialogTitle>Submit a post to {campaign.name}</DialogTitle>
           <DialogDescription>
-            Paste the link to your {PLATFORM_LABELS[campaign.platform]} post. Each post can be submitted once.
+            Paste the public link to your {PLATFORM_LABELS[campaign.platform]} post. Each post can only be
+            submitted once, and earnings start when its views cross the first milestone.
           </DialogDescription>
         </DialogHeader>
         <form id={`submit-${campaign._id}`} onSubmit={onSubmit} noValidate>
@@ -86,8 +90,12 @@ export function SubmitPostDialog({ campaign }: { campaign: Campaign }) {
           />
         </form>
         <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button type="submit" form={`submit-${campaign._id}`} disabled={submit.isPending}>
-            {submit.isPending ? "Submitting…" : "Submit post"}
+            {submit.isPending && <LoaderCircleIcon className="animate-spin" />}
+            Submit post
           </Button>
         </DialogFooter>
       </DialogContent>

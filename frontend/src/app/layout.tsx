@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { Archivo_Black, DM_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Silkscreen } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-const display = Archivo_Black({ variable: "--font-display", weight: "400", subsets: ["latin"] });
-const body = DM_Sans({ variable: "--font-body", subsets: ["latin"] });
+const body = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
+const pixel = Silkscreen({ variable: "--font-silkscreen", weight: ["400", "700"], subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Meme'd — Campaign Payout Tracker",
-  description: "Brands launch campaigns, creators post memes and climb the payout ladder.",
+  title: { default: "Meme'd", template: "%s · Meme'd" },
+  description: "Run creator campaigns with milestone payouts that never exceed your budget.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased`}>
+    <html lang="en" className={`dark ${body.variable} ${pixel.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
-        <Toaster position="top-center" />
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

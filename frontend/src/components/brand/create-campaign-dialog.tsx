@@ -2,13 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { LoaderCircleIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { createCampaignSchema, MAX_MILESTONES, type CreateCampaignInput } from "@contracts/campaign";
-import { PLATFORM_LABELS, type Platform } from "@contracts/common";
+import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/common";
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
 import { TextField } from "@/components/forms/text-field";
@@ -22,19 +22,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FieldError, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { FieldDescription, FieldError, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { api } from "@/lib/api";
+import { PLATFORM_ICONS } from "@/lib/platforms";
 import { queryKeys } from "@/lib/queries";
 
-const PLATFORM_CHOICES: readonly Choice<Platform>[] = [
-  { value: "instagram", label: PLATFORM_LABELS.instagram, hint: "Reels & posts", colorClass: "bg-wl-pink" },
-  { value: "youtube", label: PLATFORM_LABELS.youtube, hint: "Videos & Shorts", colorClass: "bg-wl-yellow" },
-];
+const PLATFORM_HINTS: Record<Platform, string> = {
+  instagram: "Reels and feed posts",
+  youtube: "Videos and Shorts",
+};
+
+const PLATFORM_CHOICES: readonly Choice<Platform>[] = platformSchema.options.map((platform) => ({
+  value: platform,
+  label: PLATFORM_LABELS[platform],
+  hint: PLATFORM_HINTS[platform],
+  icon: PLATFORM_ICONS[platform],
+}));
 
 const DEFAULT_VALUES: CreateCampaignInput = {
   name: "",
   platform: "instagram",
-  budget: 10_000,
+  budget: 50_000,
   milestones: [
     { views: 10_000, payout: 500 },
     { views: 50_000, payout: 2_000 },
@@ -62,7 +70,7 @@ export function CreateCampaignDialog() {
   const create = useMutation({
     mutationFn: api.createCampaign,
     onSuccess: (campaign) => {
-      toast.success(`"${campaign.name}" is live`);
+      toast.success(`${campaign.name} is live`);
       reset(DEFAULT_VALUES);
       setOpen(false);
       return queryClient.invalidateQueries({ queryKey: queryKeys.campaigns });
@@ -75,21 +83,26 @@ export function CreateCampaignDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg">
+        <Button>
           <PlusIcon /> New campaign
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Launch a campaign</DialogTitle>
+          <DialogTitle>New campaign</DialogTitle>
           <DialogDescription>
-            Creators earn the highest milestone their post crosses. Payouts stop once the budget is
-            spent.
+            Each post is paid the highest milestone it reaches. Payouts stop once the budget is used up.
           </DialogDescription>
         </DialogHeader>
         <form id="create-campaign" onSubmit={onSubmit} noValidate>
           <FieldGroup>
-            <TextField label="Campaign name" placeholder="Diwali meme drop" error={errors.name} {...register("name")} />
+            <TextField
+              label="Campaign name"
+              placeholder="e.g. Q4 product launch"
+              autoComplete="off"
+              error={errors.name}
+              {...register("name")}
+            />
             <Controller
               control={control}
               name="platform"
@@ -105,6 +118,7 @@ export function CreateCampaignDialog() {
             />
             <TextField
               label="Total budget (₹)"
+              description="Payouts across all posts can never exceed this amount."
               type="number"
               inputMode="numeric"
               min={1}
@@ -112,12 +126,13 @@ export function CreateCampaignDialog() {
               {...register("budget", { valueAsNumber: true })}
             />
             <FieldSet>
-              <FieldLegend variant="label">Milestone ladder</FieldLegend>
+              <FieldLegend variant="label">Payout milestones</FieldLegend>
+              <FieldDescription>Views and payouts must increase with each milestone.</FieldDescription>
               <ol className="flex flex-col gap-3">
                 {milestones.fields.map((field, index) => (
-                  <li key={field.id} className="grid grid-cols-[1fr_1fr_auto] items-start gap-2">
+                  <li key={field.id} className="grid grid-cols-[1fr_1fr_auto] items-start gap-3">
                     <TextField
-                      label={`Views #${index + 1}`}
+                      label={`Views — milestone ${index + 1}`}
                       type="number"
                       inputMode="numeric"
                       min={1}
@@ -155,10 +170,7 @@ export function CreateCampaignDialog() {
                 disabled={milestones.fields.length >= MAX_MILESTONES}
                 onClick={() => {
                   const last = getValues("milestones").at(-1);
-                  milestones.append({
-                    views: (last?.views ?? 0) + 50_000,
-                    payout: (last?.payout ?? 0) + 1_000,
-                  });
+                  milestones.append({ views: (last?.views ?? 0) * 2 || 10_000, payout: (last?.payout ?? 0) * 2 || 500 });
                 }}
               >
                 <PlusIcon /> Add milestone
@@ -167,8 +179,12 @@ export function CreateCampaignDialog() {
           </FieldGroup>
         </form>
         <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button type="submit" form="create-campaign" disabled={create.isPending}>
-            {create.isPending ? "Launching…" : "Launch campaign"}
+            {create.isPending && <LoaderCircleIcon className="animate-spin" />}
+            Create campaign
           </Button>
         </DialogFooter>
       </DialogContent>

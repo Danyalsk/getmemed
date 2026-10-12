@@ -2,25 +2,36 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { Building2Icon, LoaderCircleIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
-import { signupSchema, type SignupInput } from "@contracts/auth";
+import { signupSchema } from "@contracts/auth";
 import type { Role } from "@contracts/common";
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
+import { PasswordField } from "@/components/forms/password-field";
 import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FieldError, FieldGroup } from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { api } from "@/lib/api";
 import { saveSession } from "@/lib/session";
 
 const ROLE_CHOICES: readonly Choice<Role>[] = [
-  { value: "creator", label: "Creator", hint: "I post memes & clips", colorClass: "bg-wl-green" },
-  { value: "brand", label: "Brand", hint: "I run campaigns", colorClass: "bg-wl-purple" },
+  { value: "creator", label: "Creator", hint: "Post content and earn", icon: UserRoundIcon },
+  { value: "brand", label: "Brand", hint: "Run paid campaigns", icon: Building2Icon },
 ];
+
+// Confirmation only exists in the form; the API contract stays unchanged.
+const signupFormSchema = signupSchema
+  .extend({ confirmPassword: z.string().min(1, "Confirm your password") })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords don't match",
+  });
+type SignupFormValues = z.infer<typeof signupFormSchema>;
 
 export default function SignupPage() {
   const {
@@ -28,7 +39,11 @@ export default function SignupPage() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupInput>({ resolver: zodResolver(signupSchema), defaultValues: { role: "creator" } });
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupFormSchema),
+    defaultValues: { role: "creator" },
+  });
+  const role = useWatch({ control, name: "role" });
 
   const signup = useMutation({
     mutationFn: api.signup,
@@ -36,54 +51,70 @@ export default function SignupPage() {
     onError: (error) => toast.error(error.message),
   });
 
-  const onSubmit = handleSubmit((input) => signup.mutate(input));
+  // Parsing with the API schema drops confirmPassword before it leaves the browser.
+  const onSubmit = handleSubmit((values) => signup.mutate(signupSchema.parse(values)));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">Join Meme&apos;d</CardTitle>
-        <CardDescription>Launch campaigns or get paid for your posts.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={onSubmit} noValidate>
-          <FieldGroup>
-            <Controller
-              control={control}
-              name="role"
-              render={({ field, fieldState }) => (
-                <div className="flex flex-col gap-2">
-                  <ChoiceTiles
-                    legend="I am a"
-                    name={field.name}
-                    choices={ROLE_CHOICES}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                  <FieldError errors={[fieldState.error]} />
-                </div>
-              )}
-            />
-            <TextField label="Name" autoComplete="name" error={errors.name} {...register("name")} />
-            <TextField label="Email" type="email" autoComplete="email" error={errors.email} {...register("email")} />
-            <TextField
-              label="Password"
-              type="password"
-              autoComplete="new-password"
-              error={errors.password}
-              {...register("password")}
-            />
-            <Button type="submit" size="lg" disabled={signup.isPending}>
-              {signup.isPending ? "Creating account…" : "Create account"}
-            </Button>
-            <p className="text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/login" className="font-bold underline underline-offset-4">
-                Log in
-              </Link>
-            </p>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
+        <p className="text-sm text-muted-foreground">Get set up in under a minute.</p>
+      </div>
+      <form onSubmit={onSubmit} noValidate>
+        <FieldGroup>
+          <Controller
+            control={control}
+            name="role"
+            render={({ field }) => (
+              <ChoiceTiles
+                legend="I'm joining as"
+                name={field.name}
+                choices={ROLE_CHOICES}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+          <TextField
+            label={role === "brand" ? "Brand name" : "Full name"}
+            autoComplete={role === "brand" ? "organization" : "name"}
+            placeholder={role === "brand" ? "Company or brand name" : "Your name"}
+            error={errors.name}
+            {...register("name")}
+          />
+          <TextField
+            label="Email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            error={errors.email}
+            {...register("email")}
+          />
+          <PasswordField
+            label="Password"
+            autoComplete="new-password"
+            description="At least 8 characters."
+            error={errors.password}
+            {...register("password")}
+          />
+          <PasswordField
+            label="Confirm password"
+            autoComplete="new-password"
+            error={errors.confirmPassword}
+            {...register("confirmPassword")}
+          />
+          <Button type="submit" disabled={signup.isPending}>
+            {signup.isPending && <LoaderCircleIcon className="animate-spin" />}
+            Create account
+          </Button>
+        </FieldGroup>
+      </form>
+      <p className="text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+          Log in
+        </Link>
+      </p>
+    </div>
   );
 }

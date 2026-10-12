@@ -1,5 +1,6 @@
 "use client";
 
+import { LoaderCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -9,8 +10,9 @@ import { HOME_BY_ROLE, useSession } from "@/lib/session";
 
 function PageLoader() {
   return (
-    <div role="status" className="flex flex-1 items-center justify-center p-16 font-heading text-xl">
-      Loading…
+    <div role="status" className="flex flex-1 items-center justify-center p-16 text-muted-foreground">
+      <LoaderCircleIcon className="size-6 animate-spin" />
+      <span className="sr-only">Loading</span>
     </div>
   );
 }

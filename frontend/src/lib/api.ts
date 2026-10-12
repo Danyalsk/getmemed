@@ -2,14 +2,22 @@ import type { z } from "zod";
 
 import { authResponseSchema, type LoginInput, type SignupInput } from "@contracts/auth";
 import {
-  campaignListSchema,
+  brandCampaignsSchema,
+  campaignPageSchema,
   campaignSchema,
+  type BrandCampaignsQuery,
   type CreateCampaignInput,
+  type LiveCampaignsQuery,
 } from "@contracts/campaign";
-import { apiErrorSchema, type ErrorCode } from "@contracts/common";
+import {
+  apiErrorSchema,
+  type CampaignStatus,
+  type ErrorCode,
+  type ListQuery,
+} from "@contracts/common";
 import {
   creatorSubmissionsSchema,
-  submissionListSchema,
+  submissionPageSchema,
   submissionSchema,
   updateViewsResponseSchema,
   type PostSubmissionInput,
@@ -32,6 +40,16 @@ export class ApiRequestError extends Error {
 }
 
 type Method = "GET" | "POST" | "PATCH";
+
+/** Appends defined, non-empty params as a query string. */
+function withQuery(path: string, params: Record<string, string | number | undefined>): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") query.set(key, String(value));
+  }
+  const search = query.toString();
+  return search ? `${path}?${search}` : path;
+}
 
 async function request<T>(
   path: string,
@@ -78,15 +96,20 @@ export const api = {
 
   createCampaign: (input: CreateCampaignInput) =>
     request("/api/campaigns", campaignSchema, "POST", input),
-  myCampaigns: () => request("/api/campaigns/mine", campaignListSchema),
-  liveCampaigns: () => request("/api/campaigns/live", campaignListSchema),
-  closeCampaign: (id: string) => request(`/api/campaigns/${id}/close`, campaignSchema, "PATCH"),
-  campaignSubmissions: (id: string) =>
-    request(`/api/campaigns/${id}/submissions`, submissionListSchema),
+  myCampaigns: (query: BrandCampaignsQuery) =>
+    request(withQuery("/api/campaigns/mine", query), brandCampaignsSchema),
+  campaign: (id: string) => request(`/api/campaigns/${id}`, campaignSchema),
+  liveCampaigns: (query: LiveCampaignsQuery) =>
+    request(withQuery("/api/campaigns/live", query), campaignPageSchema),
+  setCampaignStatus: (id: string, status: CampaignStatus) =>
+    request(`/api/campaigns/${id}/status`, campaignSchema, "PATCH", { status }),
+  campaignSubmissions: (id: string, query: ListQuery) =>
+    request(withQuery(`/api/campaigns/${id}/submissions`, query), submissionPageSchema),
 
   submitPost: (campaignId: string, input: PostSubmissionInput) =>
     request(`/api/campaigns/${campaignId}/submissions`, submissionSchema, "POST", input),
-  mySubmissions: () => request("/api/submissions/mine", creatorSubmissionsSchema),
+  mySubmissions: (query: ListQuery) =>
+    request(withQuery("/api/submissions/mine", query), creatorSubmissionsSchema),
   updateViews: (submissionId: string, input: UpdateViewsInput) =>
     request(`/api/submissions/${submissionId}/views`, updateViewsResponseSchema, "PATCH", input),
 };

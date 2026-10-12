@@ -2,37 +2,36 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Dark mode is not offered; keep shadcn's dark: variants inert unless .dark is set. */
 @custom-variant dark (&:is(.dark *));
 
-/* WLDD brand palette, sampled from the logo. */
+/* WLDD / Meme'd brand, taken from wldd.in: near-black canvas, Meme'd lime, and the WLDD accent set. */
 :root {
-  --wl-green: #8acb88;
-  --wl-purple: #c77dee;
-  --wl-pink: #db5b70;
-  --wl-yellow: #ebcb51;
-  --ink: #0a0a0a;
-  --paper: #fffaf0;
+  --wl-lime: #96ff43;
+  --wl-yellow: #ffd644;
+  --wl-red: #ff3427;
+  --wl-blue: #5271ff;
+  --wl-lavender: #8580f7;
+  --wl-ink: #131313;
 
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: #ffffff;
-  --card-foreground: var(--ink);
-  --popover: #ffffff;
-  --popover-foreground: var(--ink);
-  --primary: var(--wl-yellow);
-  --primary-foreground: var(--ink);
-  --secondary: var(--wl-purple);
-  --secondary-foreground: var(--ink);
-  --muted: #f4eee1;
-  --muted-foreground: #57534e;
-  --accent: var(--wl-green);
-  --accent-foreground: var(--ink);
-  --destructive: var(--wl-pink);
-  --border: var(--ink);
-  --input: var(--ink);
-  --ring: var(--wl-purple);
-  --radius: 0.5rem;
+  --background: var(--wl-ink);
+  --foreground: #f4f4f2;
+  --card: #1a1a1a;
+  --card-foreground: var(--foreground);
+  --popover: #1e1e1e;
+  --popover-foreground: var(--foreground);
+  --primary: var(--wl-lime);
+  --primary-foreground: #0b0b0b;
+  --secondary: #262626;
+  --secondary-foreground: var(--foreground);
+  --muted: #222222;
+  --muted-foreground: #a1a1a1;
+  --accent: #262626;
+  --accent-foreground: var(--foreground);
+  --destructive: var(--wl-red);
+  --border: #2b2b2b;
+  --input: #333333;
+  --ring: color-mix(in oklab, var(--wl-lime) 60%, transparent);
+  --radius: 0.625rem;
 }
 
 @theme inline {
@@ -55,14 +54,16 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-wl-green: var(--wl-green);
-  --color-wl-purple: var(--wl-purple);
-  --color-wl-pink: var(--wl-pink);
+  --color-wl-lime: var(--wl-lime);
   --color-wl-yellow: var(--wl-yellow);
-  --color-ink: var(--ink);
+  --color-wl-red: var(--wl-red);
+  --color-wl-blue: var(--wl-blue);
+  --color-wl-lavender: var(--wl-lavender);
+  --color-wl-ink: var(--wl-ink);
 
-  --font-sans: var(--font-body);
-  --font-heading: var(--font-display);
+  --font-sans: var(--font-bricolage);
+  --font-heading: var(--font-bricolage);
+  --font-pixel: var(--font-silkscreen);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -71,11 +72,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-
-  /* Hard offset shadows, like the extruded letters in the logo. */
-  --shadow-brutal-sm: 2px 2px 0 0 var(--ink);
-  --shadow-brutal: 4px 4px 0 0 var(--ink);
-  --shadow-brutal-lg: 7px 7px 0 0 var(--ink);
 }
 
 @layer base {
@@ -84,6 +80,7 @@
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground;
@@ -92,19 +89,10 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
-}
-
-@layer components {
-  /* Chunky outlined letters with a stepped black extrusion, echoing the WLDD logo. */
-  .wordmark-letter {
-    display: inline-block;
-    color: var(--letter-color);
-    -webkit-text-stroke: 0.05em var(--ink);
-    paint-order: stroke fill;
-    text-shadow:
-      0.02em 0.02em 0 var(--ink),
-      0.04em 0.04em 0 var(--ink),
-      0.06em 0.06em 0 var(--ink),
-      0.08em 0.08em 0 var(--ink);
+  /* Number inputs: hide spinners, they fight with typed amounts. */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
   }
 }
