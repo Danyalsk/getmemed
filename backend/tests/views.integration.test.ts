@@ -30,7 +30,7 @@ async function createCampaign(budget: number): Promise<string> {
   const token = await signup("brand");
   const input: CreateCampaignInput = { name: "Launch", platform: "instagram", budget, milestones: ladder };
   const res = await request(app).post("/api/campaigns").auth(token, { type: "bearer" }).send(input);
-  return campaignSchema.parse(res.body).id;
+  return campaignSchema.parse(res.body)._id;
 }
 
 async function submitPosts(campaignId: string, count: number): Promise<string[]> {
@@ -41,7 +41,7 @@ async function submitPosts(campaignId: string, count: number): Promise<string[]>
       .post(`/api/campaigns/${campaignId}/submissions`)
       .auth(token, { type: "bearer" })
       .send({ postUrl: `https://www.instagram.com/p/post${i}${crypto.randomUUID().slice(0, 6)}/` });
-    ids.push(submissionSchema.parse(res.body).id);
+    ids.push(submissionSchema.parse(res.body)._id);
   }
   return ids;
 }

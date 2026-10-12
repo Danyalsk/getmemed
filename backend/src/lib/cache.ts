@@ -1,5 +1,4 @@
 import { Redis } from "ioredis";
-import type { z } from "zod";
 
 import { env } from "../config/env";
 
@@ -24,30 +23,22 @@ redis?.on("ready", () => {
 });
 
 /**
- * Read-through cache. Falls back to `load` when Redis is not configured, down,
- * or holds data that no longer matches the schema.
+ * Read-through cache for a JSON response body. Falls back to `load` when Redis
+ * is not configured or unreachable.
  */
-export async function cached<T>(
+export async function cachedJson(
   key: string,
   ttlSeconds: number,
-  schema: z.ZodType<T>,
-  load: () => Promise<T>,
-): Promise<T> {
+  load: () => Promise<string>,
+): Promise<string> {
   if (!redis) return load();
 
-  try {
-    const hit = await redis.get(key);
-    if (hit !== null) {
-      const parsed = schema.safeParse(JSON.parse(hit));
-      if (parsed.success) return parsed.data;
-    }
-  } catch {
-    // Cache miss on any Redis or parse failure.
-  }
+  const hit = await redis.get(key).catch(() => null);
+  if (hit !== null) return hit;
 
-  const value = await load();
-  redis.set(key, JSON.stringify(value), "EX", ttlSeconds).catch(() => undefined);
-  return value;
+  const body = await load();
+  redis.set(key, body, "EX", ttlSeconds).catch(() => undefined);
+  return body;
 }
 
 export async function invalidate(key: string): Promise<void> {

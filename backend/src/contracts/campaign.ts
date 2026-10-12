@@ -67,8 +67,8 @@ export const createCampaignSchema = campaignFieldsSchema.superRefine((campaign, 
 export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
 
 export const campaignSchema = campaignFieldsSchema.extend({
-  id: objectIdSchema,
-  brand: z.object({ id: objectIdSchema, name: z.string() }),
+  _id: objectIdSchema,
+  brand: z.object({ _id: objectIdSchema, name: z.string() }),
   status: campaignStatusSchema,
   spent: rupeesSchema,
   remaining: rupeesSchema,

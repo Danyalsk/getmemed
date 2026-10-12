@@ -20,7 +20,7 @@ export const loginSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 
 export const publicUserSchema = z.object({
-  id: objectIdSchema,
+  _id: objectIdSchema,
   name: z.string(),
   email: z.string(),
   role: roleSchema,

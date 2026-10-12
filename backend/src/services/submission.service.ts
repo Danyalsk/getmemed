@@ -1,70 +1,21 @@
 import mongoose from "mongoose";
 
-import type {
-  CreatorSubmissions,
-  Submission,
-  UpdateViewsInput,
-  UpdateViewsResponse,
-} from "../contracts/submission";
-import { postSubmissionSchema } from "../contracts/submission";
+import { postSubmissionSchema, type UpdateViewsInput } from "../contracts/submission";
 import { env } from "../config/env";
 import { AppError } from "../lib/errors";
 import { CampaignModel } from "../models/campaign.model";
-import { SubmissionModel, type SubmissionWithRefs } from "../models/submission.model";
-import { getOwnedCampaign, invalidateLiveCampaigns } from "./campaign.service";
+import { SubmissionModel } from "../models/submission.model";
+import { assertOwnsCampaign, invalidateLiveCampaigns } from "./campaign.service";
 import { entitledPayout, payoutDue } from "./payout";
 import { detectSpike } from "./spike";
-
-type SubmissionRefs = Pick<SubmissionWithRefs, "campaign" | "creator">;
 
 const SUBMISSION_REFS = [
   { path: "campaign", select: "name platform" },
   { path: "creator", select: "name" },
 ];
 
-export function toSubmission(submission: SubmissionWithRefs): Submission {
-  return {
-    id: submission._id.toString(),
-    campaign: {
-      id: submission.campaign._id.toString(),
-      name: submission.campaign.name,
-      platform: submission.campaign.platform,
-    },
-    creator: { id: submission.creator._id.toString(), name: submission.creator.name },
-    postUrl: submission.postUrl,
-    views: submission.views,
-    entitledAmount: submission.entitledAmount,
-    paidAmount: submission.paidAmount,
-    flagged: submission.flagged,
-    flagReason: submission.flagReason ?? null,
-    viewsUpdatedAt: submission.viewsUpdatedAt?.toISOString() ?? null,
-    createdAt: submission.createdAt.toISOString(),
-  };
-}
-
-function findSubmissions(filter: { creator: string } | { campaign: string }) {
-  return SubmissionModel.find(filter)
-    .sort({ createdAt: -1 })
-    .populate<SubmissionRefs>(SUBMISSION_REFS)
-    .lean();
-}
-
-export async function findSubmissionWithRefs(id: string): Promise<SubmissionWithRefs> {
-  const submission = await SubmissionModel.findById(id)
-    .populate<SubmissionRefs>(SUBMISSION_REFS)
-    .lean();
-  if (!submission) {
-    throw AppError.notFound("Submission");
-  }
-  return submission;
-}
-
-export async function createSubmission(
-  creatorId: string,
-  campaignId: string,
-  body: unknown,
-): Promise<Submission> {
-  const campaign = await CampaignModel.findById(campaignId).lean();
+export async function createSubmission(creatorId: string, campaignId: string, body: unknown) {
+  const campaign = await CampaignModel.findById(campaignId);
   if (!campaign) {
     throw AppError.notFound("Campaign");
   }
@@ -73,30 +24,26 @@ export async function createSubmission(
   }
 
   const { postUrl } = postSubmissionSchema(campaign.platform).parse(body);
-  if (await SubmissionModel.exists({ postUrl })) {
+  const alreadySubmitted = await SubmissionModel.exists({ postUrl });
+  if (alreadySubmitted) {
     throw AppError.conflict("This post has already been submitted");
   }
 
-  const submission = await SubmissionModel.create({
-    campaign: campaign._id,
-    creator: creatorId,
-    postUrl,
-  });
-  return toSubmission(await findSubmissionWithRefs(submission.id));
+  const submission = await SubmissionModel.create({ campaign: campaign._id, creator: creatorId, postUrl });
+  return submission.populate(SUBMISSION_REFS);
 }
 
-export async function listCreatorSubmissions(creatorId: string): Promise<CreatorSubmissions> {
-  const submissions = (await findSubmissions({ creator: creatorId })).map(toSubmission);
+export async function listCreatorSubmissions(creatorId: string) {
+  const submissions = await SubmissionModel.find({ creator: creatorId })
+    .sort({ createdAt: -1 })
+    .populate(SUBMISSION_REFS);
   const totalEarnings = submissions.reduce((sum, submission) => sum + submission.paidAmount, 0);
   return { submissions, totalEarnings };
 }
 
-export async function listCampaignSubmissions(
-  brandId: string,
-  campaignId: string,
-): Promise<Submission[]> {
-  await getOwnedCampaign(brandId, campaignId);
-  return (await findSubmissions({ campaign: campaignId })).map(toSubmission);
+export async function listCampaignSubmissions(brandId: string, campaignId: string) {
+  await assertOwnsCampaign(brandId, campaignId);
+  return SubmissionModel.find({ campaign: campaignId }).sort({ createdAt: -1 }).populate(SUBMISSION_REFS);
 }
 
 /**
@@ -107,11 +54,8 @@ export async function listCampaignSubmissions(
  * read. Combined with paying only `entitled - alreadyPaid`, concurrent or
  * repeated updates can neither overspend the budget nor pay twice.
  */
-export async function updateViews(
-  submissionId: string,
-  input: UpdateViewsInput,
-): Promise<UpdateViewsResponse> {
-  const paidNow = await mongoose.connection.transaction(
+export async function updateViews(submissionId: string, input: UpdateViewsInput) {
+  const { submission, paidNow } = await mongoose.connection.transaction(
     async (session) => {
       const submission = await SubmissionModel.findById(submissionId).session(session);
       if (!submission) {
@@ -138,7 +82,7 @@ export async function updateViews(
           { session },
         );
         if (modifiedCount !== 1) {
-          throw new Error(`Budget invariant violated for campaign ${campaign.id}`);
+          throw new Error(`Budget invariant violated for campaign ${campaign._id.toString()}`);
         }
       }
 
@@ -164,7 +108,7 @@ export async function updateViews(
         ...(spike && { flagged: true, flagReason: spike }),
       });
       await submission.save({ session });
-      return pay;
+      return { submission, paidNow: pay };
     },
     { readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } },
   );
@@ -172,5 +116,6 @@ export async function updateViews(
   if (paidNow > 0) {
     await invalidateLiveCampaigns();
   }
-  return { submission: toSubmission(await findSubmissionWithRefs(submissionId)), paidNow };
+  await submission.populate(SUBMISSION_REFS);
+  return { submission, paidNow };
 }

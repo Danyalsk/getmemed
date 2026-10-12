@@ -94,9 +94,9 @@ export const updateViewsSchema = z.object({
 export type UpdateViewsInput = z.infer<typeof updateViewsSchema>;
 
 export const submissionSchema = z.object({
-  id: objectIdSchema,
-  campaign: z.object({ id: objectIdSchema, name: z.string(), platform: platformSchema }),
-  creator: z.object({ id: objectIdSchema, name: z.string() }),
+  _id: objectIdSchema,
+  campaign: z.object({ _id: objectIdSchema, name: z.string(), platform: platformSchema }),
+  creator: z.object({ _id: objectIdSchema, name: z.string() }),
   postUrl: z.string(),
   views: z.number().int().nonnegative(),
   /** What the highest crossed milestone is worth. */

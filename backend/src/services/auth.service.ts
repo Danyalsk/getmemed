@@ -1,49 +1,44 @@
 import bcrypt from "bcryptjs";
 
-import type { AuthResponse, LoginInput, PublicUser, SignupInput } from "../contracts/auth";
+import type { LoginInput, SignupInput } from "../contracts/auth";
+import type { Role } from "../contracts/common";
 import { AppError } from "../lib/errors";
 import { signToken } from "../lib/jwt";
-import { UserModel, type UserDocument } from "../models/user.model";
+import { UserModel } from "../models/user.model";
 
 const BCRYPT_ROUNDS = 12;
 // Compared against when the email is unknown so both paths take the same time.
 const DUMMY_HASH = bcrypt.hashSync("timing-safe-placeholder", BCRYPT_ROUNDS);
 
-function toPublicUser(user: UserDocument): PublicUser {
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+function issueSession<T extends { id: string; role: Role }>(user: T) {
+  const token = signToken({ _id: user.id, role: user.role });
+  return { token, user };
 }
 
-function toAuthResponse(user: UserDocument): AuthResponse {
-  const publicUser = toPublicUser(user);
-  return { token: signToken(publicUser), user: publicUser };
-}
-
-export async function signup(input: SignupInput): Promise<AuthResponse> {
-  if (await UserModel.exists({ email: input.email })) {
+export async function signup(input: SignupInput) {
+  const emailTaken = await UserModel.exists({ email: input.email });
+  if (emailTaken) {
     throw AppError.conflict("An account with this email already exists");
   }
-  const user = await UserModel.create({
-    name: input.name,
-    email: input.email,
-    role: input.role,
-    passwordHash: await bcrypt.hash(input.password, BCRYPT_ROUNDS),
-  });
-  return toAuthResponse(user);
+
+  const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
+  const user = await UserModel.create({ ...input, passwordHash });
+  return issueSession(user);
 }
 
-export async function login(input: LoginInput): Promise<AuthResponse> {
+export async function login(input: LoginInput) {
   const user = await UserModel.findOne({ email: input.email }).select("+passwordHash");
   const valid = await bcrypt.compare(input.password, user?.passwordHash ?? DUMMY_HASH);
   if (!user || !valid) {
     throw AppError.unauthorized("Invalid email or password");
   }
-  return toAuthResponse(user);
+  return issueSession(user);
 }
 
-export async function getUser(id: string): Promise<PublicUser> {
-  const user = await UserModel.findById(id);
+export async function getUser(userId: string) {
+  const user = await UserModel.findById(userId);
   if (!user) {
     throw AppError.unauthorized("Account no longer exists");
   }
-  return toPublicUser(user);
+  return user;
 }

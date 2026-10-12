@@ -1,6 +1,4 @@
-import { model, Schema, type InferSchemaType, type Types } from "mongoose";
-
-import type { Platform } from "../contracts/common";
+import { model, Schema } from "mongoose";
 
 const submissionSchema = new Schema(
   {
@@ -15,16 +13,7 @@ const submissionSchema = new Schema(
     flagReason: { type: String, default: null },
     viewsUpdatedAt: { type: Date, default: null },
   },
-  { timestamps: true },
+  { timestamps: true, versionKey: false },
 );
-
-export type SubmissionFields = InferSchemaType<typeof submissionSchema>;
-
-/** A submission with campaign and creator populated for API responses. */
-export type SubmissionWithRefs = Omit<SubmissionFields, "campaign" | "creator"> & {
-  _id: Types.ObjectId;
-  campaign: { _id: Types.ObjectId; name: string; platform: Platform };
-  creator: { _id: Types.ObjectId; name: string };
-};
 
 export const SubmissionModel = model("Submission", submissionSchema);

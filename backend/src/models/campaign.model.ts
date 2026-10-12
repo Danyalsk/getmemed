@@ -1,4 +1,4 @@
-import { model, Schema, type HydratedDocument, type InferSchemaType, type Types } from "mongoose";
+import { model, Schema } from "mongoose";
 
 import { campaignStatusSchema, platformSchema } from "../contracts/common";
 
@@ -25,18 +25,21 @@ const campaignSchema = new Schema(
       default: "active",
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    versionKey: false,
+    id: false,
+    toJSON: { virtuals: true },
+    virtuals: {
+      remaining: {
+        get(this: { budget: number; spent: number }) {
+          return this.budget - this.spent;
+        },
+      },
+    },
+  },
 );
 
 campaignSchema.index({ status: 1, createdAt: -1 });
-
-export type CampaignFields = InferSchemaType<typeof campaignSchema>;
-export type CampaignDocument = HydratedDocument<CampaignFields>;
-
-/** A campaign with its brand populated to `{ _id, name }`. */
-export type CampaignWithBrand = Omit<CampaignFields, "brand"> & {
-  _id: Types.ObjectId;
-  brand: { _id: Types.ObjectId; name: string };
-};
 
 export const CampaignModel = model("Campaign", campaignSchema);

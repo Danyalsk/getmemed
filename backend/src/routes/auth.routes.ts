@@ -1,7 +1,7 @@
-import { Router, type Response } from "express";
+import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 
-import { loginSchema, signupSchema, type AuthResponse, type PublicUser } from "../contracts/auth";
+import { loginSchema, signupSchema } from "../contracts/auth";
 import type { ApiError } from "../contracts/common";
 import { authenticate, requireUser } from "../middleware/auth";
 import { getUser, login, signup } from "../services/auth.service";
@@ -18,14 +18,19 @@ const credentialsLimiter = rateLimit({
   message: rateLimitedBody,
 });
 
-authRouter.post("/signup", credentialsLimiter, async (req, res: Response<AuthResponse>) => {
-  res.status(201).json(await signup(signupSchema.parse(req.body)));
+authRouter.post("/signup", credentialsLimiter, async (req, res) => {
+  const input = signupSchema.parse(req.body);
+  const session = await signup(input);
+  res.status(201).json(session);
 });
 
-authRouter.post("/login", credentialsLimiter, async (req, res: Response<AuthResponse>) => {
-  res.json(await login(loginSchema.parse(req.body)));
+authRouter.post("/login", credentialsLimiter, async (req, res) => {
+  const input = loginSchema.parse(req.body);
+  const session = await login(input);
+  res.json(session);
 });
 
-authRouter.get("/me", authenticate, async (req, res: Response<PublicUser>) => {
-  res.json(await getUser(requireUser(req).id));
+authRouter.get("/me", authenticate, async (req, res) => {
+  const user = await getUser(requireUser(req)._id);
+  res.json(user);
 });
