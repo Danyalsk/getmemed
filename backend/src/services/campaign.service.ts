@@ -1,11 +1,6 @@
 import { Types } from "mongoose";
-import type { z } from "zod";
 
-import type {
-  brandCampaignsQuerySchema,
-  CreateCampaignInput,
-  liveCampaignsQuerySchema,
-} from "../contracts/campaign";
+import type { BrandCampaignsQuery, CreateCampaignInput, LiveCampaignsQuery } from "../contracts/campaign";
 import type { CampaignStatus } from "../contracts/common";
 import { cachedJson, invalidate } from "../lib/cache";
 import { AppError } from "../lib/errors";
@@ -45,7 +40,7 @@ async function budgetSummary(brandId: string) {
 
 export async function listBrandCampaigns(
   brandId: string,
-  query: z.output<typeof brandCampaignsQuerySchema>,
+  query: BrandCampaignsQuery,
 ) {
   const filter = {
     brand: brandId,
@@ -66,7 +61,7 @@ export async function listBrandCampaigns(
  * Live = active with budget left. Returns the serialised page so cache hits
  * skip Mongo entirely.
  */
-export function listLiveCampaignsJson(query: z.output<typeof liveCampaignsQuerySchema>): Promise<string> {
+export function listLiveCampaignsJson(query: LiveCampaignsQuery): Promise<string> {
   return cachedJson(LIVE_CAMPAIGNS, JSON.stringify(query), LIVE_CAMPAIGNS_TTL_SECONDS, async () => {
     const filter = {
       status: "active" as const,

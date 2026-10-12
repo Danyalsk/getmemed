@@ -1,8 +1,4 @@
-import type { z } from "zod";
-
-import type { listQuerySchema } from "../contracts/common";
-
-type ListQuery = z.output<typeof listQuerySchema>;
+import type { ListQuery } from "../contracts/common";
 
 /** Case-insensitive "contains" match for user-typed search text. */
 export function searchPattern(search: string): RegExp {

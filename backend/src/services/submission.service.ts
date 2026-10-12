@@ -1,11 +1,7 @@
 import mongoose, { Types } from "mongoose";
-import type { z } from "zod";
 
-import {
-  postSubmissionSchema,
-  type submissionsQuerySchema,
-  type UpdateViewsInput,
-} from "../contracts/submission";
+import type { ListQuery } from "../contracts/common";
+import { postSubmissionSchema, type UpdateViewsInput } from "../contracts/submission";
 import { env } from "../config/env";
 import { AppError } from "../lib/errors";
 import { pageWindow, searchPattern, toPage } from "../lib/list";
@@ -40,8 +36,6 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
   return submission.populate(SUBMISSION_REFS);
 }
 
-type SubmissionsQuery = z.output<typeof submissionsQuerySchema>;
-
 /** Matches the post link, the creator's name or the campaign's name. */
 async function searchFilter(search: string | undefined) {
   if (!search) return {};
@@ -55,7 +49,7 @@ async function searchFilter(search: string | undefined) {
   };
 }
 
-async function listSubmissions(scope: { creator: string } | { campaign: string }, query: SubmissionsQuery) {
+async function listSubmissions(scope: { creator: string } | { campaign: string }, query: ListQuery) {
   const filter = { ...scope, ...(await searchFilter(query.search)) };
   const { skip, limit } = pageWindow(query);
   const [submissions, total] = await Promise.all([
@@ -73,7 +67,7 @@ async function totalEarnings(creatorId: string): Promise<number> {
   return result?.total ?? 0;
 }
 
-export async function listCreatorSubmissions(creatorId: string, query: SubmissionsQuery) {
+export async function listCreatorSubmissions(creatorId: string, query: ListQuery) {
   const [page, earnings] = await Promise.all([
     listSubmissions({ creator: creatorId }, query),
     totalEarnings(creatorId),
@@ -81,7 +75,7 @@ export async function listCreatorSubmissions(creatorId: string, query: Submissio
   return { ...page, totalEarnings: earnings };
 }
 
-export async function listCampaignSubmissions(brandId: string, campaignId: string, query: SubmissionsQuery) {
+export async function listCampaignSubmissions(brandId: string, campaignId: string, query: ListQuery) {
   await findOwnedCampaign(brandId, campaignId);
   return listSubmissions({ campaign: campaignId }, query);
 }

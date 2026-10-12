@@ -81,12 +81,12 @@ export type Campaign = z.infer<typeof campaignSchema>;
 export const brandCampaignsQuerySchema = listQuerySchema.extend({
   status: campaignStatusSchema.optional(),
 });
-export type BrandCampaignsQuery = z.input<typeof brandCampaignsQuerySchema>;
+export type BrandCampaignsQuery = z.output<typeof brandCampaignsQuerySchema>;
 
 export const liveCampaignsQuerySchema = listQuerySchema.extend({
   platform: platformSchema.optional(),
 });
-export type LiveCampaignsQuery = z.input<typeof liveCampaignsQuerySchema>;
+export type LiveCampaignsQuery = z.output<typeof liveCampaignsQuerySchema>;
 
 export const campaignPageSchema = pageSchema(campaignSchema);
 

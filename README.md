@@ -125,7 +125,7 @@ Where the brief was open, these are the calls I made:
 2. **Pay the difference.** Each update pays `entitled − alreadyPaid`. Going from 10K (₹500) to 50K (₹2,000) pays ₹1,500 more, for ₹2,000 total.
 3. **Budget runs out mid-payout → partial payout.** If ₹3,000 is owed but ₹1,200 is left, ₹1,200 is paid and the campaign is exhausted. The submission records both `entitledAmount` and `paidAmount`, and the UI shows "capped by budget".
 4. **Views never go down.** A lower count than the stored one is treated as stale/out-of-order and ignored. Payouts are never clawed back.
-5. **Live campaign** = status `active` and `spent < budget`. Exhausted or closed campaigns disappear from the creator list and reject new submissions.
+5. **Live campaign** = status `active` and `spent < budget`. Exhausted, paused or closed campaigns disappear from the creator list and reject new submissions.
 6. **Pause, resume, close.** Brands can pause an active campaign and resume it later, or close it for good. A paused campaign is hidden from creators, takes no new submissions and pays nothing, but views are still recorded. Because each update pays `entitled − alreadyPaid`, the first update after resuming pays whatever was earned while paused. Closing is final: no submissions or payouts, and the remaining budget stays unspent.
 7. **Money is whole rupees** (integers).
 8. **Milestone ladder:** 1–10 rungs, views and payouts strictly increasing, and the top payout must fit inside the budget.
