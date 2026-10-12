@@ -1,0 +1,45 @@
+services:
+  mongo:
+    image: mongo:8
+    # Payouts run in transactions, which need a replica set.
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    healthcheck:
+      test: >
+        mongosh --quiet --eval
+        "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }).ok }"
+      interval: 5s
+      retries: 20
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:8-alpine
+
+  api:
+    build: ./backend
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/memed?replicaSet=rs0
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (32+ characters) before running compose}
+      CORS_ORIGINS: http://localhost:3000
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "4000:4000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  mongo-data:
