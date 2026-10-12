@@ -1,24 +1,11 @@
-import { MongoMemoryReplSet } from "mongodb-memory-server";
-import mongoose from "mongoose";
 import request from "supertest";
 
-import { createApp } from "../src/app";
 import { authResponseSchema } from "../src/contracts/auth";
+import { app } from "./support/api";
+import { useTestDatabase } from "./support/database";
 
 jest.setTimeout(60_000);
-
-const app = createApp();
-let replSet: MongoMemoryReplSet;
-
-beforeAll(async () => {
-  replSet = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
-  await mongoose.connect(replSet.getUri());
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await replSet.stop();
-});
+useTestDatabase();
 
 describe("auth responses", () => {
   it("never expose the password hash", async () => {

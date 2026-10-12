@@ -51,6 +51,7 @@ export const milestoneLadderSchema = z
 
 const campaignFieldsSchema = z.object({
   name: z.string().trim().min(3, "Name is too short").max(100),
+  description: z.string().trim().min(20, "Describe the campaign in at least 20 characters").max(2000),
   platform: platformSchema,
   budget: positiveIntegerField("Budget"),
   milestones: milestoneLadderSchema,
@@ -71,6 +72,7 @@ export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
 
 export const campaignSchema = campaignFieldsSchema.extend({
   _id: objectIdSchema,
+  description: z.string().default(""),
   coverImage: objectIdSchema.nullable().default(null),
   submissionCount: z.number().int().nonnegative().default(0),
   brand: z.object({ _id: objectIdSchema, name: z.string() }),
@@ -86,8 +88,12 @@ export const brandCampaignsQuerySchema = listQuerySchema.extend({
 });
 export type BrandCampaignsQuery = z.output<typeof brandCampaignsQuerySchema>;
 
+export const campaignSortSchema = z.enum(["newest", "trending", "budget"]);
+export type CampaignSort = z.infer<typeof campaignSortSchema>;
+
 export const liveCampaignsQuerySchema = listQuerySchema.extend({
   platform: platformSchema.optional(),
+  sort: campaignSortSchema.default("newest"),
 });
 export type LiveCampaignsQuery = z.output<typeof liveCampaignsQuerySchema>;
 
@@ -102,6 +108,23 @@ export const budgetSummarySchema = z.object({
 
 export const brandCampaignsSchema = campaignPageSchema.extend({ summary: budgetSummarySchema });
 export type BrandCampaigns = z.infer<typeof brandCampaignsSchema>;
+
+export const participationSchema = z.object({
+  posts: z.number().int().nonnegative(),
+  views: z.number().int().nonnegative(),
+  earned: rupeesSchema,
+});
+export type Participation = z.infer<typeof participationSchema>;
+
+export const joinedCampaignSchema = campaignSchema.extend({ participation: participationSchema });
+export type JoinedCampaign = z.infer<typeof joinedCampaignSchema>;
+export const joinedCampaignPageSchema = pageSchema(joinedCampaignSchema);
+
+export const leaderboardEntrySchema = participationSchema.extend({
+  creator: z.object({ _id: objectIdSchema, name: z.string() }),
+});
+export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;
+export const leaderboardSchema = z.array(leaderboardEntrySchema);
 
 export const updateCampaignStatusSchema = z.object({ status: campaignStatusSchema });
 export type UpdateCampaignStatusInput = z.infer<typeof updateCampaignStatusSchema>;

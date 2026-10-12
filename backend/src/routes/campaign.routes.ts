@@ -6,17 +6,22 @@ import {
   liveCampaignsQuerySchema,
   updateCampaignStatusSchema,
 } from "../contracts/campaign";
-import { idParamsSchema } from "../contracts/common";
+import { idParamsSchema, listQuerySchema } from "../contracts/common";
 import { submissionsQuerySchema } from "../contracts/submission";
 import { authenticate, requireRole, getAuthUser } from "../middleware/auth";
 import {
   createCampaign,
-  findBrandCampaign,
+  findCampaignForViewer,
   listBrandCampaigns,
   listLiveCampaignsJson,
   updateCampaignStatus,
 } from "../services/campaign.service";
-import { createSubmission, listCampaignSubmissions } from "../services/submission.service";
+import {
+  createSubmission,
+  getCampaignLeaderboard,
+  listCampaignSubmissions,
+  listJoinedCampaigns,
+} from "../services/submission.service";
 
 export const campaignRouter = Router();
 
@@ -52,11 +57,32 @@ campaignRouter.get("/live", requireRole("creator"), async (req, res, next) => {
   }
 });
 
-campaignRouter.get("/:id", requireRole("brand"), async (req, res, next) => {
+campaignRouter.get("/joined", requireRole("creator"), async (req, res, next) => {
+  try {
+    const query = listQuerySchema.parse(req.query);
+    const result = await listJoinedCampaigns(getAuthUser(req)._id, query);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+campaignRouter.get("/:id", async (req, res, next) => {
   try {
     const { id } = idParamsSchema.parse(req.params);
-    const campaign = await findBrandCampaign(getAuthUser(req)._id, id);
+    const campaign = await findCampaignForViewer(getAuthUser(req), id);
     res.json(campaign);
+  } catch (error) {
+    next(error);
+  }
+});
+
+campaignRouter.get("/:id/leaderboard", async (req, res, next) => {
+  try {
+    const { id } = idParamsSchema.parse(req.params);
+    await findCampaignForViewer(getAuthUser(req), id);
+    const leaderboard = await getCampaignLeaderboard(id);
+    res.json(leaderboard);
   } catch (error) {
     next(error);
   }

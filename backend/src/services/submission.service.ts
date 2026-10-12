@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
 
 import type { ListQuery } from "../contracts/common";
+import type { BrandSubmissionsQuery } from "../contracts/submission";
 import { postSubmissionSchemaFor, type UpdateViewsInput } from "../contracts/submission";
 import { env } from "../config/env";
 import { AppError } from "../lib/errors";
@@ -8,7 +9,7 @@ import { toSkipLimit, toSearchRegex, toPageResult } from "../lib/list";
 import { CampaignModel } from "../models/campaign.model";
 import { SubmissionModel } from "../models/submission.model";
 import { UserModel } from "../models/user.model";
-import { findBrandCampaign, invalidateLiveCampaigns } from "./campaign.service";
+import { findBrandCampaign, invalidateLiveCampaigns, listBrandCampaignIds } from "./campaign.service";
 import { calculateEntitledPayout, calculatePayoutDue } from "./payout";
 import { detectViewSpike } from "./spike";
 
@@ -58,7 +59,15 @@ async function buildSubmissionSearchFilter(search: string | undefined) {
   };
 }
 
-async function findSubmissionPage(scope: { creator: string } | { campaign: string }, query: ListQuery) {
+type SubmissionScope = { creator: string } | { campaign: string } | { campaign: { $in: Types.ObjectId[] } };
+
+export const PARTICIPATION_TOTALS = {
+  posts: { $sum: 1 },
+  views: { $sum: "$views" },
+  earned: { $sum: "$paidAmount" },
+};
+
+async function findSubmissionPage(scope: SubmissionScope, query: ListQuery) {
   const filter = { ...scope, ...(await buildSubmissionSearchFilter(query.search)) };
   const { skip, limit } = toSkipLimit(query);
   const [submissions, total] = await Promise.all([
@@ -87,6 +96,57 @@ export async function listCreatorSubmissions(creatorId: string, query: ListQuery
 export async function listCampaignSubmissions(brandId: string, campaignId: string, query: ListQuery) {
   await findBrandCampaign(brandId, campaignId);
   return findSubmissionPage({ campaign: campaignId }, query);
+}
+
+export async function listBrandSubmissions(brandId: string, query: BrandSubmissionsQuery) {
+  if (query.campaign) {
+    await findBrandCampaign(brandId, query.campaign);
+    return findSubmissionPage({ campaign: query.campaign }, query);
+  }
+  const campaignIds = await listBrandCampaignIds(brandId);
+  return findSubmissionPage({ campaign: { $in: campaignIds } }, query);
+}
+
+export async function getCampaignLeaderboard(campaignId: string, limit = 5) {
+  return SubmissionModel.aggregate<{
+    creator: { _id: Types.ObjectId; name: string };
+    posts: number;
+    views: number;
+    earned: number;
+  }>([
+    { $match: { campaign: new Types.ObjectId(campaignId) } },
+    { $group: { _id: "$creator", ...PARTICIPATION_TOTALS } },
+    { $sort: { earned: -1, views: -1 } },
+    { $limit: limit },
+    { $lookup: { from: "users", localField: "_id", foreignField: "_id", as: "creator", pipeline: [{ $project: { name: 1 } }] } },
+    { $unwind: "$creator" },
+    { $project: { _id: 0, creator: 1, posts: 1, views: 1, earned: 1 } },
+  ]);
+}
+
+export async function listJoinedCampaigns(creatorId: string, query: ListQuery) {
+  const campaignFilter = query.search
+    ? { campaign: { $in: await CampaignModel.find({ name: toSearchRegex(query.search) }).distinct("_id") } }
+    : {};
+  const { skip, limit } = toSkipLimit(query);
+  const [result] = await SubmissionModel.aggregate<{
+    items: { _id: Types.ObjectId; posts: number; views: number; earned: number }[];
+    total: { count: number }[];
+  }>([
+    { $match: { creator: new Types.ObjectId(creatorId), ...campaignFilter } },
+    { $group: { _id: "$campaign", ...PARTICIPATION_TOTALS, lastSubmittedAt: { $max: "$createdAt" } } },
+    { $sort: { lastSubmittedAt: -1 } },
+    { $facet: { items: [{ $skip: skip }, { $limit: limit }], total: [{ $count: "count" }] } },
+  ]);
+
+  const rows = result?.items ?? [];
+  const campaigns = await CampaignModel.find({ _id: { $in: rows.map((row) => row._id) } }).populate("brand", "name");
+  const campaignsById = new Map(campaigns.map((campaign) => [campaign._id.toString(), campaign]));
+  const items = rows.flatMap(({ _id, posts, views, earned }) => {
+    const campaign = campaignsById.get(_id.toString());
+    return campaign ? [{ ...campaign.toJSON(), participation: { posts, views, earned } }] : [];
+  });
+  return toPageResult(items, result?.total[0]?.count ?? 0, query);
 }
 
 export async function recordViewsAndPayout(submissionId: string, input: UpdateViewsInput) {

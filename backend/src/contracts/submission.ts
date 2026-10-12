@@ -105,6 +105,11 @@ export type Submission = z.infer<typeof submissionSchema>;
 
 export const submissionsQuerySchema = listQuerySchema;
 
+export const brandSubmissionsQuerySchema = listQuerySchema.extend({
+  campaign: objectIdSchema.optional(),
+});
+export type BrandSubmissionsQuery = z.output<typeof brandSubmissionsQuerySchema>;
+
 export const submissionPageSchema = pageSchema(submissionSchema);
 
 export const creatorSubmissionsSchema = submissionPageSchema.extend({

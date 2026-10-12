@@ -4,6 +4,7 @@ import helmet from "helmet";
 
 import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler";
+import { analyticsRouter } from "./routes/analytics.routes";
 import { authRouter } from "./routes/auth.routes";
 import { campaignRouter } from "./routes/campaign.routes";
 import { imageRouter } from "./routes/image.routes";
@@ -23,6 +24,7 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/campaigns", campaignRouter);
   app.use("/api/images", imageRouter);
+  app.use("/api/analytics", analyticsRouter);
   app.use("/api/submissions", submissionRouter);
 
   app.use(notFoundHandler);

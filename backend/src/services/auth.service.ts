@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 
-import type { LoginInput, SignupInput } from "../contracts/auth";
+import type { ChangePasswordInput, LoginInput, SignupInput, UpdateProfileInput } from "../contracts/auth";
 import type { Role } from "../contracts/common";
 import { AppError } from "../lib/errors";
 import { signAuthToken } from "../lib/jwt";
@@ -40,4 +40,25 @@ export async function findUserById(userId: string) {
     throw AppError.unauthorized("Account no longer exists");
   }
   return user;
+}
+
+export async function updateProfile(userId: string, input: UpdateProfileInput) {
+  const user = await UserModel.findByIdAndUpdate(userId, { name: input.name }, { new: true });
+  if (!user) {
+    throw AppError.unauthorized("Account no longer exists");
+  }
+  return user;
+}
+
+export async function changePassword(userId: string, input: ChangePasswordInput): Promise<void> {
+  const user = await UserModel.findById(userId).select("+passwordHash");
+  if (!user) {
+    throw AppError.unauthorized("Account no longer exists");
+  }
+  const valid = await bcrypt.compare(input.currentPassword, user.passwordHash);
+  if (!valid) {
+    throw AppError.badRequest("Current password is incorrect");
+  }
+  user.passwordHash = await bcrypt.hash(input.newPassword, BCRYPT_ROUNDS);
+  await user.save();
 }

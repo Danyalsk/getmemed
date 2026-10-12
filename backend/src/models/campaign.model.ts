@@ -14,6 +14,7 @@ const campaignSchema = new Schema(
   {
     brand: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true, trim: true },
+    description: { type: String, trim: true, default: "" },
     platform: { type: String, enum: platformSchema.options, required: true },
     budget: { type: Number, required: true, min: 1 },
     spent: { type: Number, required: true, default: 0, min: 0 },

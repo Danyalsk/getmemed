@@ -1,9 +1,9 @@
 import { Router } from "express";
 
 import { idParamsSchema } from "../contracts/common";
-import { submissionsQuerySchema, updateViewsSchema } from "../contracts/submission";
+import { brandSubmissionsQuerySchema, submissionsQuerySchema, updateViewsSchema } from "../contracts/submission";
 import { authenticate, requireRole, getAuthUser } from "../middleware/auth";
-import { listCreatorSubmissions, recordViewsAndPayout } from "../services/submission.service";
+import { listBrandSubmissions, listCreatorSubmissions, recordViewsAndPayout } from "../services/submission.service";
 
 export const submissionRouter = Router();
 
@@ -11,6 +11,16 @@ submissionRouter.get("/mine", authenticate, requireRole("creator"), async (req, 
   try {
     const query = submissionsQuerySchema.parse(req.query);
     const result = await listCreatorSubmissions(getAuthUser(req)._id, query);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+submissionRouter.get("/brand", authenticate, requireRole("brand"), async (req, res, next) => {
+  try {
+    const query = brandSubmissionsQuerySchema.parse(req.query);
+    const result = await listBrandSubmissions(getAuthUser(req)._id, query);
     res.json(result);
   } catch (error) {
     next(error);
