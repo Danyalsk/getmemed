@@ -84,7 +84,7 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
 
       {campaign ? (
         <section className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
-          <div className="relative aspect-[3/1] min-h-40">
+          <div className="relative aspect-video md:aspect-[3/1]">
             <SharedCover id={campaign._id}>
               <div className="absolute inset-0">
                 <CampaignCover campaign={campaign} sizes="(min-width: 1152px) 1152px, 100vw" priority />

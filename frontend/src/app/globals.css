@@ -84,6 +84,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* WLDD background pattern, rotated 180° so its W shapes read as M. */
+    background-image: url("/pattern-m.svg");
+    background-size: 1441px 1416px;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
