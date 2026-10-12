@@ -18,6 +18,8 @@ const campaignSchema = new Schema(
     budget: { type: Number, required: true, min: 1 },
     spent: { type: Number, required: true, default: 0, min: 0 },
     milestones: { type: [milestoneSchema], required: true },
+    coverImage: { type: Schema.Types.ObjectId, ref: "Image", default: null },
+    submissionCount: { type: Number, required: true, default: 0, min: 0 },
     status: {
       type: String,
       enum: campaignStatusSchema.options,

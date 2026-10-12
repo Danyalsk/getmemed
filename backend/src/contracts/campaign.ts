@@ -54,6 +54,7 @@ const campaignFieldsSchema = z.object({
   platform: platformSchema,
   budget: wholeNumber("Budget"),
   milestones: milestoneLadderSchema,
+  coverImage: objectIdSchema.meta({ description: "Id returned by POST /api/images" }),
 });
 
 export const createCampaignSchema = campaignFieldsSchema.superRefine((campaign, ctx) => {
@@ -70,6 +71,9 @@ export type CreateCampaignInput = z.infer<typeof createCampaignSchema>;
 
 export const campaignSchema = campaignFieldsSchema.extend({
   _id: objectIdSchema,
+  // Campaigns created before cover photos were required have none.
+  coverImage: objectIdSchema.nullable().default(null),
+  submissionCount: z.number().int().nonnegative().default(0),
   brand: z.object({ _id: objectIdSchema, name: z.string() }),
   status: campaignStatusSchema,
   spent: rupeesSchema,

@@ -32,7 +32,18 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
     throw AppError.conflict("This post has already been submitted");
   }
 
-  const submission = await SubmissionModel.create({ campaign: campaign._id, creator: creatorId, postUrl });
+  // submissionCount is denormalised for campaign cards; both writes commit together.
+  const submission = await mongoose.connection.transaction(async (session) => {
+    const [created] = await SubmissionModel.create([{ campaign: campaign._id, creator: creatorId, postUrl }], {
+      session,
+    });
+    await CampaignModel.updateOne({ _id: campaign._id }, { $inc: { submissionCount: 1 } }, { session });
+    return created;
+  });
+  if (!submission) {
+    throw new Error("Submission insert returned no document");
+  }
+  await invalidateLiveCampaigns();
   return submission.populate(SUBMISSION_REFS);
 }
 

@@ -5,6 +5,7 @@ import request from "supertest";
 import { createApp } from "../src/app";
 import { authResponseSchema } from "../src/contracts/auth";
 import { campaignSchema, type CreateCampaignInput } from "../src/contracts/campaign";
+import { uploadedImageSchema } from "../src/contracts/image";
 import {
   submissionPageSchema,
   submissionSchema,
@@ -32,10 +33,22 @@ async function signup(role: "brand" | "creator"): Promise<string> {
 
 let brandToken = "";
 
+// Smallest valid PNG (1×1 pixel).
+const PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "base64",
+);
+
 async function createCampaign(budget: number): Promise<string> {
   const token = await signup("brand");
   brandToken = token;
-  const input: CreateCampaignInput = { name: "Launch", platform: "instagram", budget, milestones: ladder };
+  const upload = await request(app)
+    .post("/api/images")
+    .auth(token, { type: "bearer" })
+    .set("Content-Type", "image/png")
+    .send(PNG);
+  const coverImage = uploadedImageSchema.parse(upload.body)._id;
+  const input: CreateCampaignInput = { name: "Launch", platform: "instagram", budget, milestones: ladder, coverImage };
   const res = await request(app).post("/api/campaigns").auth(token, { type: "bearer" }).send(input);
   return campaignSchema.parse(res.body)._id;
 }
@@ -176,6 +189,29 @@ describe("PATCH /api/submissions/:id/views", () => {
 
     const byCreator = submissionPageSchema.parse((await list("search=CREATOR")).body);
     expect(byCreator.total).toBe(12);
+  });
+
+  it("counts submissions on the campaign and serves its cover", async () => {
+    const campaignId = await createCampaign(10_000);
+    await submitPosts(campaignId, 3);
+    const campaign = campaignSchema.parse(
+      (await request(app).get(`/api/campaigns/${campaignId}`).auth(brandToken, { type: "bearer" })).body,
+    );
+    expect(campaign.submissionCount).toBe(3);
+
+    const cover = await request(app).get(`/api/images/${campaign.coverImage ?? ""}`);
+    expect(cover.status).toBe(200);
+    expect(cover.headers["content-type"]).toBe("image/png");
+  });
+
+  it("rejects non-image uploads", async () => {
+    const token = await signup("brand");
+    const res = await request(app)
+      .post("/api/images")
+      .auth(token, { type: "bearer" })
+      .set("Content-Type", "image/png")
+      .send(Buffer.from("<script>alert(1)</script>"));
+    expect(res.status).toBe(400);
   });
 
   it("rejects invalid input", async () => {

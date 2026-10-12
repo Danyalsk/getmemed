@@ -6,6 +6,7 @@ import { cachedJson, invalidate } from "../lib/cache";
 import { AppError } from "../lib/errors";
 import { pageWindow, searchPattern, toPage } from "../lib/list";
 import { CampaignModel } from "../models/campaign.model";
+import { assertImageOwner } from "./image.service";
 
 const BRAND_FIELDS = "name";
 const LIVE_CAMPAIGNS = "campaigns:live";
@@ -24,6 +25,7 @@ export function invalidateLiveCampaigns(): Promise<void> {
 }
 
 export async function createCampaign(brandId: string, input: CreateCampaignInput) {
+  await assertImageOwner(input.coverImage, brandId);
   const campaign = await CampaignModel.create({ ...input, brand: brandId });
   await Promise.all([campaign.populate("brand", BRAND_FIELDS), invalidateLiveCampaigns()]);
   return campaign;
