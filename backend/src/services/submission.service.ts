@@ -11,7 +11,7 @@ import { env } from "../config/env";
 import { AppError } from "../lib/errors";
 import { CampaignModel } from "../models/campaign.model";
 import { SubmissionModel, type SubmissionWithRefs } from "../models/submission.model";
-import { getOwnedCampaign } from "./campaign.service";
+import { getOwnedCampaign, invalidateLiveCampaigns } from "./campaign.service";
 import { entitledPayout, payoutDue } from "./payout";
 import { detectSpike } from "./spike";
 
@@ -169,5 +169,8 @@ export async function updateViews(
     { readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } },
   );
 
+  if (paidNow > 0) {
+    await invalidateLiveCampaigns();
+  }
   return { submission: toSubmission(await findSubmissionWithRefs(submissionId)), paidNow };
 }

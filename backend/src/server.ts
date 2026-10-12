@@ -1,6 +1,7 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { connectMongo, disconnectMongo } from "./db/mongo";
+import { disconnectCache } from "./lib/cache";
 
 async function main(): Promise<void> {
   await connectMongo(env.MONGODB_URI);
@@ -12,7 +13,7 @@ async function main(): Promise<void> {
   const shutdown = (signal: NodeJS.Signals): void => {
     console.log(`${signal} received, shutting down`);
     server.close(() => {
-      disconnectMongo()
+      Promise.all([disconnectMongo(), disconnectCache()])
         .then(() => process.exit(0))
         .catch((error: unknown) => {
           console.error(error);
