@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, InboxIcon } from "lucide-react";
 import Link from "next/link";
 
+import { CampaignCover } from "@/components/campaign-cover";
 import { CampaignStatusBadge } from "@/components/campaign-status-badge";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
@@ -70,44 +71,53 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
 
   return (
     <>
-      <Link href="/brand" className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        href="/brand"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeftIcon className="size-4" /> All campaigns
       </Link>
 
       {error && <QueryError error={error} onRetry={() => void refetch()} />}
 
       {campaign ? (
-        <section className="flex flex-col gap-6 rounded-xl border bg-card p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-semibold tracking-tight">{campaign.name}</h1>
-                <CampaignStatusBadge campaign={campaign} />
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                <PlatformLabel platform={campaign.platform} />
-                <span>Created {formatDate(campaign.createdAt)}</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <CampaignActions campaign={campaign} layout="buttons" />
-            </div>
+        <section className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
+          <div className="relative aspect-[3/1] min-h-40">
+            <CampaignCover campaign={campaign} sizes="(min-width: 1152px) 1152px, 100vw" priority />
+            <div aria-hidden className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
           </div>
-          <div className="grid gap-6 md:grid-cols-[2fr_3fr]">
-            <div className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">
-                Budget · <span className="text-foreground tabular-nums">{formatRupees(campaign.budget)}</span>
-              </span>
-              <BudgetUsage campaign={campaign} />
+          <div className="-mt-12 flex flex-col gap-6 p-6 pt-0">
+            <div className="relative flex flex-wrap items-start justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl font-semibold tracking-tight">{campaign.name}</h1>
+                  <CampaignStatusBadge campaign={campaign} />
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <PlatformLabel platform={campaign.platform} />
+                  <span>Created {formatDate(campaign.createdAt)}</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <CampaignActions campaign={campaign} layout="buttons" />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">Payout milestones</span>
-              <MilestoneLadder milestones={campaign.milestones} />
+            <div className="grid gap-6 md:grid-cols-[2fr_3fr]">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Budget · <span className="text-foreground tabular-nums">{formatRupees(campaign.budget)}</span>
+                </span>
+                <BudgetUsage campaign={campaign} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-muted-foreground">Payout milestones</span>
+                <MilestoneLadder milestones={campaign.milestones} />
+              </div>
             </div>
           </div>
         </section>
       ) : (
-        !error && <Skeleton className="h-52 w-full rounded-xl" />
+        !error && <Skeleton className="h-96 w-full rounded-2xl" />
       )}
 
       <CampaignSubmissions campaignId={campaignId} />

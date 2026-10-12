@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { LoaderCircleIcon, SendIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { LoaderCircleIcon } from "lucide-react";
+import { useMemo, useState, type ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -11,7 +11,9 @@ import type { Campaign } from "@contracts/campaign";
 import { PLATFORM_LABELS } from "@contracts/common";
 import { postSubmissionSchema, type PostSubmissionInput } from "@contracts/submission";
 
+import { CampaignCover } from "@/components/campaign-cover";
 import { TextField } from "@/components/forms/text-field";
+import { MilestoneLadder } from "@/components/milestone-ladder";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ApiRequestError, api } from "@/lib/api";
+import { formatRupees } from "@/lib/format";
 import { queryKeys } from "@/lib/queries";
 
 const PLACEHOLDERS = {
@@ -30,7 +33,12 @@ const PLACEHOLDERS = {
   youtube: "https://youtube.com/shorts/…",
 } satisfies Record<Campaign["platform"], string>;
 
-export function SubmitPostDialog({ campaign }: { campaign: Campaign }) {
+interface SubmitPostDialogProps {
+  campaign: Campaign;
+  trigger: ReactElement;
+}
+
+export function SubmitPostDialog({ campaign, trigger }: SubmitPostDialogProps) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const schema = useMemo(() => postSubmissionSchema(campaign.platform), [campaign.platform]);
@@ -66,19 +74,25 @@ export function SubmitPostDialog({ campaign }: { campaign: Campaign }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <SendIcon /> Submit post
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="gap-5 overflow-hidden sm:max-w-lg">
+        <div className="relative -mx-4 -mt-4 aspect-video">
+          <CampaignCover campaign={campaign} sizes="512px" />
+        </div>
         <DialogHeader>
-          <DialogTitle>Submit a post to {campaign.name}</DialogTitle>
+          <DialogTitle className="text-lg">{campaign.name}</DialogTitle>
           <DialogDescription>
-            Paste the public link to your {PLATFORM_LABELS[campaign.platform]} post. Each post can only be
-            submitted once, and earnings start when its views cross the first milestone.
+            by {campaign.brand.name} · {formatRupees(campaign.remaining)} budget left
           </DialogDescription>
         </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm text-muted-foreground">Payout milestones</span>
+          <MilestoneLadder milestones={campaign.milestones} />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Post on {PLATFORM_LABELS[campaign.platform]}, then paste the public link below. Each post can only be
+          submitted once, and you earn the highest milestone its views reach.
+        </p>
         <form id={`submit-${campaign._id}`} onSubmit={onSubmit} noValidate>
           <TextField
             label="Post link"

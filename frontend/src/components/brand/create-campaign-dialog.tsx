@@ -11,6 +11,7 @@ import { createCampaignSchema, MAX_MILESTONES, type CreateCampaignInput } from "
 import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/common";
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
+import { CoverImageField } from "@/components/forms/cover-image-field";
 import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +40,8 @@ const PLATFORM_CHOICES: readonly Choice<Platform>[] = platformSchema.options.map
   icon: PLATFORM_ICONS[platform],
 }));
 
-const DEFAULT_VALUES: CreateCampaignInput = {
+// The cover id is filled in by the upload field; validation requires it before submit.
+const DEFAULT_VALUES: Partial<CreateCampaignInput> = {
   name: "",
   platform: "instagram",
   budget: 50_000,
@@ -96,6 +98,13 @@ export function CreateCampaignDialog() {
         </DialogHeader>
         <form id="create-campaign" onSubmit={onSubmit} noValidate>
           <FieldGroup>
+            <Controller
+              control={control}
+              name="coverImage"
+              render={({ field, fieldState }) => (
+                <CoverImageField value={field.value} onChange={field.onChange} error={fieldState.error} />
+              )}
+            />
             <TextField
               label="Campaign name"
               placeholder="e.g. Q4 product launch"

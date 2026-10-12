@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { CAMPAIGN_STATUS_LABELS, campaignStatusSchema, type CampaignStatus } from "@contracts/common";
 
+import { CampaignCardSkeleton } from "@/components/campaign-card";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
 import { QueryError } from "@/components/list/query-error";
@@ -17,7 +18,7 @@ import { useListState } from "@/hooks/use-list-state";
 import { formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
-import { CampaignsTable } from "./campaigns-table";
+import { CampaignGridItem } from "./campaign-grid-item";
 import { CreateCampaignDialog } from "./create-campaign-dialog";
 
 const ALL_STATUSES = "all";
@@ -83,8 +84,12 @@ export function BrandDashboard() {
             action={filtered ? undefined : <CreateCampaignDialog />}
           />
         ) : (
-          <div className={isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"}>
-            <CampaignsTable campaigns={data?.items} />
+          <div
+            className={`grid gap-5 sm:grid-cols-2 xl:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
+          >
+            {data
+              ? data.items.map((campaign) => <CampaignGridItem key={campaign._id} campaign={campaign} />)
+              : Array.from({ length: 6 }, (_, index) => <CampaignCardSkeleton key={index} />)}
           </div>
         )}
 

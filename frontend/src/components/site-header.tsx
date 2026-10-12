@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Wordmark } from "@/components/wordmark";
+import { initials } from "@/lib/format";
 import { clearSession, HOME_BY_ROLE, useSession } from "@/lib/session";
 
 const NAV: Record<Role, readonly { href: string; label: string }[]> = {
@@ -25,14 +26,6 @@ const NAV: Record<Role, readonly { href: string; label: string }[]> = {
     { href: "/creator/posts", label: "My posts" },
   ],
 };
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 export function SiteHeader() {
   const session = useSession();

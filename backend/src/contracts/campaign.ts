@@ -54,7 +54,8 @@ const campaignFieldsSchema = z.object({
   platform: platformSchema,
   budget: wholeNumber("Budget"),
   milestones: milestoneLadderSchema,
-  coverImage: objectIdSchema.meta({ description: "Id returned by POST /api/images" }),
+  // Id returned by POST /api/images.
+  coverImage: z.string({ error: "Add a cover photo" }).pipe(objectIdSchema),
 });
 
 export const createCampaignSchema = campaignFieldsSchema.superRefine((campaign, ctx) => {

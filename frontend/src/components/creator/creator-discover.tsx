@@ -6,17 +6,17 @@ import { useState } from "react";
 
 import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/common";
 
+import { CampaignCard, CampaignCardSkeleton, CARD_TARGET_CLASS } from "@/components/campaign-card";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
 import { QueryError } from "@/components/list/query-error";
 import { SearchInput } from "@/components/list/search-input";
 import { PageHeader } from "@/components/page-header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useListState } from "@/hooks/use-list-state";
 import { queries } from "@/lib/queries";
 
-import { LiveCampaignCard } from "./live-campaign-card";
+import { SubmitPostDialog } from "./submit-post-dialog";
 
 const ALL_PLATFORMS = "all";
 
@@ -69,11 +69,22 @@ export function CreatorDiscover() {
         />
       ) : (
         <div
-          className={`grid gap-4 md:grid-cols-2 xl:grid-cols-3 ${isPlaceholderData ? "opacity-60" : ""} transition-opacity`}
+          className={`grid gap-5 sm:grid-cols-2 xl:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
         >
           {data
-            ? data.items.map((campaign) => <LiveCampaignCard key={campaign._id} campaign={campaign} />)
-            : Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-64 rounded-xl" />)}
+            ? data.items.map((campaign) => (
+                <CampaignCard
+                  key={campaign._id}
+                  campaign={campaign}
+                  title={
+                    <SubmitPostDialog
+                      campaign={campaign}
+                      trigger={<button type="button" className={CARD_TARGET_CLASS}>{campaign.name}</button>}
+                    />
+                  }
+                />
+              ))
+            : Array.from({ length: 6 }, (_, index) => <CampaignCardSkeleton key={index} />)}
         </div>
       )}
 

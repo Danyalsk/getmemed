@@ -15,6 +15,7 @@ import {
   type ErrorCode,
   type ListQuery,
 } from "@contracts/common";
+import { uploadedImageSchema } from "@contracts/image";
 import {
   creatorSubmissionsSchema,
   submissionPageSchema,
@@ -59,7 +60,8 @@ async function request<T>(
 ): Promise<T> {
   const token = getToken();
   const headers = new Headers();
-  if (body !== undefined) headers.set("Content-Type", "application/json");
+  const isFile = body instanceof Blob;
+  if (body !== undefined) headers.set("Content-Type", isFile ? body.type : "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   let response: Response;
@@ -67,7 +69,7 @@ async function request<T>(
     response = await fetch(`${API_URL}${path}`, {
       method,
       headers,
-      body: body === undefined ? null : JSON.stringify(body),
+      body: body === undefined ? null : isFile ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiRequestError(0, "INTERNAL_ERROR", "Can't reach the server. Please try again.");
@@ -90,7 +92,11 @@ async function request<T>(
   return schema.parse(json);
 }
 
+/** Public URL of an uploaded image. */
+export const imageUrl = (imageId: string): string => `${API_URL}/api/images/${imageId}`;
+
 export const api = {
+  uploadImage: (file: Blob) => request("/api/images", uploadedImageSchema, "POST", file),
   signup: (input: SignupInput) => request("/api/auth/signup", authResponseSchema, "POST", input),
   login: (input: LoginInput) => request("/api/auth/login", authResponseSchema, "POST", input),
 
