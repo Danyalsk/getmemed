@@ -1,9 +1,17 @@
-import type { CreatorSubmissions, Submission } from "../contracts/submission";
+import mongoose from "mongoose";
+
+import type {
+  CreatorSubmissions,
+  Submission,
+  UpdateViewsInput,
+  UpdateViewsResponse,
+} from "../contracts/submission";
 import { postSubmissionSchema } from "../contracts/submission";
 import { AppError } from "../lib/errors";
 import { CampaignModel } from "../models/campaign.model";
 import { SubmissionModel, type SubmissionWithRefs } from "../models/submission.model";
 import { getOwnedCampaign } from "./campaign.service";
+import { entitledPayout, payoutDue } from "./payout";
 
 type SubmissionRefs = Pick<SubmissionWithRefs, "campaign" | "creator">;
 
@@ -87,4 +95,62 @@ export async function listCampaignSubmissions(
 ): Promise<Submission[]> {
   await getOwnedCampaign(brandId, campaignId);
   return (await findSubmissions({ campaign: campaignId })).map(toSubmission);
+}
+
+/**
+ * Applies a new view count and pays out whatever the post is now owed.
+ *
+ * Runs in a snapshot transaction: two updates touching the same campaign or
+ * submission hit a write conflict, and Mongoose retries the loser from a fresh
+ * read. Combined with paying only `entitled - alreadyPaid`, concurrent or
+ * repeated updates can neither overspend the budget nor pay twice.
+ */
+export async function updateViews(
+  submissionId: string,
+  input: UpdateViewsInput,
+): Promise<UpdateViewsResponse> {
+  const paidNow = await mongoose.connection.transaction(
+    async (session) => {
+      const submission = await SubmissionModel.findById(submissionId).session(session);
+      if (!submission) {
+        throw AppError.notFound("Submission");
+      }
+      const campaign = await CampaignModel.findById(submission.campaign).session(session);
+      if (!campaign) {
+        throw AppError.notFound("Campaign");
+      }
+
+      // Platform counts only grow; a lower number is a stale or out-of-order update.
+      const views = Math.max(submission.views, input.views);
+      const entitled = entitledPayout(campaign.milestones, views);
+      const pay = payoutDue({
+        entitled,
+        alreadyPaid: submission.paidAmount,
+        remainingBudget: campaign.status === "active" ? campaign.budget - campaign.spent : 0,
+      });
+
+      if (pay > 0) {
+        const { modifiedCount } = await CampaignModel.updateOne(
+          { _id: campaign._id, $expr: { $lte: [{ $add: ["$spent", pay] }, "$budget"] } },
+          { $inc: { spent: pay } },
+          { session },
+        );
+        if (modifiedCount !== 1) {
+          throw new Error(`Budget invariant violated for campaign ${campaign.id}`);
+        }
+      }
+
+      submission.set({
+        views,
+        entitledAmount: entitled,
+        paidAmount: submission.paidAmount + pay,
+        viewsUpdatedAt: new Date(),
+      });
+      await submission.save({ session });
+      return pay;
+    },
+    { readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } },
+  );
+
+  return { submission: toSubmission(await findSubmissionWithRefs(submissionId)), paidNow };
 }
