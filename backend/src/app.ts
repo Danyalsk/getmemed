@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { env } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler";
 import { authRouter } from "./routes/auth.routes";
+import { campaignRouter } from "./routes/campaign.routes";
 
 export function createApp() {
   const app = express();
@@ -19,6 +20,7 @@ export function createApp() {
     res.json({ status: "ok" });
   });
   app.use("/api/auth", authRouter);
+  app.use("/api/campaigns", campaignRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

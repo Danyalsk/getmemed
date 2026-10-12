@@ -16,6 +16,9 @@ export type CampaignStatus = z.infer<typeof campaignStatusSchema>;
 
 export const objectIdSchema = z.string().regex(/^[a-f\d]{24}$/i, "Invalid id");
 
+/** Route params for `/:id` endpoints. */
+export const idParamsSchema = z.object({ id: objectIdSchema });
+
 /** Whole rupees. Paise are out of scope, so money is always an integer. */
 export const rupeesSchema = z.number().int().nonnegative();
 
