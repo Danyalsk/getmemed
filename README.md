@@ -7,7 +7,7 @@ Brands run campaigns with a milestone payout ladder. Creators submit Instagram /
 | | Stack |
 |---|---|
 | Backend | Node.js, Express 5, TypeScript, MongoDB + Mongoose, Zod, JWT, Redis (optional) |
-| Frontend | Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui, react-hook-form |
+| Frontend | Next.js 16 (App Router), TypeScript, TanStack Query, Tailwind CSS v4, shadcn/ui, react-hook-form |
 | Tests | Jest, Supertest, mongodb-memory-server |
 
 ## Repository layout
@@ -26,6 +26,10 @@ frontend/
 ```
 
 **Single source of truth for types.** Every API shape is defined once as a Zod schema in `backend/src/contracts`. The backend validates requests with it; the frontend imports the same files through the `@contracts/*` path alias, uses them for form validation, and parses every API response with them. Nothing is redeclared on either side.
+
+The API returns Mongoose documents as-is — the response shape is owned by the schemas (`remaining` is a virtual, `passwordHash` is stripped in `toJSON`), so there are no hand-written DTO mappers. The integration tests parse every response with the contract schemas, which keeps the two in sync.
+
+Route handlers have no `try/catch`: Express 5 forwards rejected promises to the central error handler (`middleware/error-handler.ts`), which maps Zod, domain, duplicate-key and body-parser errors to the shared error shape.
 
 ## Running locally
 
@@ -143,7 +147,7 @@ If two updates touch the same campaign or submission at once, MongoDB raises a w
 
 ## Caching
 
-`GET /api/campaigns/live` is a read-through Redis cache (`campaigns:live`, 30s TTL). It is invalidated whenever a campaign is created, closed, or any payout changes its spend, so remaining budgets shown to creators stay current. Cached JSON is re-validated with the contract schema; any Redis error falls back to MongoDB.
+`GET /api/campaigns/live` is a read-through Redis cache (`campaigns:live`, 30s TTL). It stores the serialised response body, so a hit skips MongoDB and serialisation entirely. It is invalidated whenever a campaign is created, closed, or any payout changes its spend, so remaining budgets shown to creators stay current. Any Redis error falls back to MongoDB.
 
 ## Tests
 
