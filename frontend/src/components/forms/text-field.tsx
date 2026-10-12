@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import type { FieldError as FormFieldError } from "react-hook-form";
 
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -10,12 +10,12 @@ type TextFieldProps = ComponentProps<"input"> & {
 };
 
 /** Labelled input wired for react-hook-form: spread `register(name)` into it. */
-export function TextField({ label, error, id, name, ...props }: TextFieldProps) {
-  const inputId = id ?? name;
+export function TextField({ label, error, ...props }: TextFieldProps) {
+  const inputId = useId();
   return (
     <Field data-invalid={error !== undefined}>
       <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
-      <Input id={inputId} name={name} aria-invalid={error !== undefined} {...props} />
+      <Input id={inputId} aria-invalid={error !== undefined} {...props} />
       <FieldError errors={[error]} />
     </Field>
   );
