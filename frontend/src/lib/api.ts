@@ -90,7 +90,3 @@ export const api = {
   updateViews: (submissionId: string, input: UpdateViewsInput) =>
     request(`/api/submissions/${submissionId}/views`, updateViewsResponseSchema, "PATCH", input),
 };
-
-export function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Something went wrong";
-}

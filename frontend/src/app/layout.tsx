@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo_Black, DM_Sans } from "next/font/google";
 
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        {children}
+        <Providers>{children}</Providers>
         <Toaster position="top-center" />
       </body>
     </html>

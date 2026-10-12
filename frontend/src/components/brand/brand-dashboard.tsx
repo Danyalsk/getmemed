@@ -1,14 +1,16 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+
+import { StatCard } from "@/components/stat-card";
+import { formatRupees } from "@/lib/format";
+import { queries } from "@/lib/queries";
+
 import { CampaignCard } from "./campaign-card";
 import { CreateCampaignDialog } from "./create-campaign-dialog";
-import { StatCard } from "@/components/stat-card";
-import { api } from "@/lib/api";
-import { formatRupees } from "@/lib/format";
-import { useApiData } from "@/lib/use-api-data";
 
 export function BrandDashboard() {
-  const { data: campaigns, error, reload } = useApiData(api.myCampaigns);
+  const { data: campaigns, error, isPending } = useQuery(queries.myCampaigns);
 
   const totals = (campaigns ?? []).reduce(
     (sum, campaign) => ({
@@ -26,7 +28,7 @@ export function BrandDashboard() {
           <h1 className="font-heading text-4xl">Your campaigns</h1>
           <p className="text-muted-foreground">Track what each campaign has paid out and what is left.</p>
         </div>
-        <CreateCampaignDialog onCreated={reload} />
+        <CreateCampaignDialog />
       </section>
 
       <section aria-label="Budget overview" className="grid gap-4 sm:grid-cols-3">
@@ -36,14 +38,12 @@ export function BrandDashboard() {
       </section>
 
       <section aria-label="Campaigns" className="grid gap-6 lg:grid-cols-2">
-        {error && <p className="font-semibold text-red-700">{error}</p>}
-        {!campaigns && !error && <p>Loading campaigns…</p>}
+        {error && <p className="font-semibold text-red-700">{error.message}</p>}
+        {isPending && <p>Loading campaigns…</p>}
         {campaigns?.length === 0 && (
           <p className="text-muted-foreground">No campaigns yet. Launch your first one to start paying creators.</p>
         )}
-        {campaigns?.map((campaign) => (
-          <CampaignCard key={campaign.id} campaign={campaign} onChanged={reload} />
-        ))}
+        {campaigns?.map((campaign) => <CampaignCard key={campaign._id} campaign={campaign} />)}
       </section>
     </>
   );

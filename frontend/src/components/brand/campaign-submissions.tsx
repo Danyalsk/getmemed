@@ -1,19 +1,17 @@
 "use client";
 
-import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { Earnings, SpikeFlag } from "@/components/submission-status";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/lib/api";
 import { formatViews } from "@/lib/format";
-import { useApiData } from "@/lib/use-api-data";
+import { queries } from "@/lib/queries";
 
 export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
-  const load = useCallback(() => api.campaignSubmissions(campaignId), [campaignId]);
-  const { data: submissions, error } = useApiData(load);
+  const { data: submissions, error, isPending } = useQuery(queries.campaignSubmissions(campaignId));
 
-  if (error) return <p className="text-sm font-semibold text-red-700">{error}</p>;
-  if (!submissions) return <p className="text-sm">Loading submissions…</p>;
+  if (error) return <p className="text-sm font-semibold text-red-700">{error.message}</p>;
+  if (isPending) return <p className="text-sm">Loading submissions…</p>;
   if (submissions.length === 0) return <p className="text-sm text-muted-foreground">No posts submitted yet.</p>;
 
   return (
@@ -29,7 +27,7 @@ export function CampaignSubmissions({ campaignId }: { campaignId: string }) {
       </TableHeader>
       <TableBody>
         {submissions.map((submission) => (
-          <TableRow key={submission.id}>
+          <TableRow key={submission._id}>
             <TableCell className="font-semibold">{submission.creator.name}</TableCell>
             <TableCell>
               <a href={submission.postUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">

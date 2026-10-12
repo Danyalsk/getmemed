@@ -6,7 +6,7 @@ import { formatViews } from "@/lib/format";
 
 import { SimulateViewsForm } from "./simulate-views-form";
 
-export function MySubmissions({ submissions, onUpdated }: { submissions: Submission[]; onUpdated: () => void }) {
+export function MySubmissions({ submissions }: { submissions: Submission[] }) {
   if (submissions.length === 0) {
     return <p className="text-muted-foreground">You haven&apos;t submitted any posts yet. Pick a campaign above.</p>;
   }
@@ -26,7 +26,7 @@ export function MySubmissions({ submissions, onUpdated }: { submissions: Submiss
         </TableHeader>
         <TableBody>
           {submissions.map((submission) => (
-            <TableRow key={submission.id}>
+            <TableRow key={submission._id}>
               <TableCell className="font-semibold">{submission.campaign.name}</TableCell>
               <TableCell>
                 <a href={submission.postUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">
@@ -41,11 +41,7 @@ export function MySubmissions({ submissions, onUpdated }: { submissions: Submiss
                 <SpikeFlag submission={submission} />
               </TableCell>
               <TableCell>
-                <SimulateViewsForm
-                  key={submission.views}
-                  submission={submission}
-                  onUpdated={onUpdated}
-                />
+                <SimulateViewsForm key={submission.views} submission={submission} />
               </TableCell>
             </TableRow>
           ))}

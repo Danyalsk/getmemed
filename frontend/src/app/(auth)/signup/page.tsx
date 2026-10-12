@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,7 +14,7 @@ import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FieldError, FieldGroup } from "@/components/ui/field";
-import { api, errorMessage } from "@/lib/api";
+import { api } from "@/lib/api";
 import { saveSession } from "@/lib/session";
 
 const ROLE_CHOICES: readonly Choice<Role>[] = [
@@ -26,16 +27,16 @@ export default function SignupPage() {
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignupInput>({ resolver: zodResolver(signupSchema), defaultValues: { role: "creator" } });
 
-  const onSubmit = handleSubmit(async (input) => {
-    try {
-      saveSession(await api.signup(input));
-    } catch (error) {
-      toast.error(errorMessage(error));
-    }
+  const signup = useMutation({
+    mutationFn: api.signup,
+    onSuccess: saveSession,
+    onError: (error) => toast.error(error.message),
   });
+
+  const onSubmit = handleSubmit((input) => signup.mutate(input));
 
   return (
     <Card>
@@ -71,8 +72,8 @@ export default function SignupPage() {
               error={errors.password}
               {...register("password")}
             />
-            <Button type="submit" size="lg" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account…" : "Create account"}
+            <Button type="submit" size="lg" disabled={signup.isPending}>
+              {signup.isPending ? "Creating account…" : "Create account"}
             </Button>
             <p className="text-center text-sm">
               Already have an account?{" "}

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -22,7 +23,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { FieldError, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
-import { api, errorMessage } from "@/lib/api";
+import { api } from "@/lib/api";
+import { queryKeys } from "@/lib/queries";
 
 const PLATFORM_CHOICES: readonly Choice<Platform>[] = [
   { value: "instagram", label: PLATFORM_LABELS.instagram, hint: "Reels & posts", colorClass: "bg-wl-pink" },
@@ -40,15 +42,16 @@ const DEFAULT_VALUES: CreateCampaignInput = {
   ],
 };
 
-export function CreateCampaignDialog({ onCreated }: { onCreated: () => void }) {
+export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
   const {
     register,
     control,
     handleSubmit,
     reset,
     getValues,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CreateCampaignInput>({
     resolver: zodResolver(createCampaignSchema),
     defaultValues: DEFAULT_VALUES,
@@ -56,17 +59,18 @@ export function CreateCampaignDialog({ onCreated }: { onCreated: () => void }) {
   const milestones = useFieldArray({ control, name: "milestones" });
   const ladderError = errors.milestones?.root ?? errors.milestones;
 
-  const onSubmit = handleSubmit(async (input) => {
-    try {
-      const campaign = await api.createCampaign(input);
+  const create = useMutation({
+    mutationFn: api.createCampaign,
+    onSuccess: (campaign) => {
       toast.success(`"${campaign.name}" is live`);
       reset(DEFAULT_VALUES);
       setOpen(false);
-      onCreated();
-    } catch (error) {
-      toast.error(errorMessage(error));
-    }
+      return queryClient.invalidateQueries({ queryKey: queryKeys.campaigns });
+    },
+    onError: (error) => toast.error(error.message),
   });
+
+  const onSubmit = handleSubmit((input) => create.mutate(input));
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -163,8 +167,8 @@ export function CreateCampaignDialog({ onCreated }: { onCreated: () => void }) {
           </FieldGroup>
         </form>
         <DialogFooter>
-          <Button type="submit" form="create-campaign" disabled={isSubmitting}>
-            {isSubmitting ? "Launching…" : "Launch campaign"}
+          <Button type="submit" form="create-campaign" disabled={create.isPending}>
+            {create.isPending ? "Launching…" : "Launch campaign"}
           </Button>
         </DialogFooter>
       </DialogContent>

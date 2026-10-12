@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -21,8 +22,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { api, errorMessage } from "@/lib/api";
+import { api } from "@/lib/api";
 import { formatRupees } from "@/lib/format";
+import { queryKeys } from "@/lib/queries";
 
 import { CampaignSubmissions } from "./campaign-submissions";
 
@@ -32,21 +34,16 @@ function CampaignStatus({ campaign }: { campaign: Campaign }) {
   return <Badge variant="green">Live</Badge>;
 }
 
-function CloseCampaignButton({ campaign, onClosed }: { campaign: Campaign; onClosed: () => void }) {
-  const [closing, setClosing] = useState(false);
-
-  const close = async () => {
-    setClosing(true);
-    try {
-      await api.closeCampaign(campaign.id);
+function CloseCampaignButton({ campaign }: { campaign: Campaign }) {
+  const queryClient = useQueryClient();
+  const close = useMutation({
+    mutationFn: () => api.closeCampaign(campaign._id),
+    onSuccess: () => {
       toast.success(`"${campaign.name}" closed`);
-      onClosed();
-    } catch (error) {
-      toast.error(errorMessage(error));
-    } finally {
-      setClosing(false);
-    }
-  };
+      return queryClient.invalidateQueries({ queryKey: queryKeys.campaigns });
+    },
+    onError: (error) => toast.error(error.message),
+  });
 
   return (
     <Dialog>
@@ -67,8 +64,8 @@ function CloseCampaignButton({ campaign, onClosed }: { campaign: Campaign; onClo
           <DialogClose asChild>
             <Button variant="outline">Keep it running</Button>
           </DialogClose>
-          <Button variant="destructive" disabled={closing} onClick={() => void close()}>
-            {closing ? "Closing…" : "Close campaign"}
+          <Button variant="destructive" disabled={close.isPending} onClick={() => close.mutate()}>
+            {close.isPending ? "Closing…" : "Close campaign"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -76,7 +73,7 @@ function CloseCampaignButton({ campaign, onClosed }: { campaign: Campaign; onClo
   );
 }
 
-export function CampaignCard({ campaign, onChanged }: { campaign: Campaign; onChanged: () => void }) {
+export function CampaignCard({ campaign }: { campaign: Campaign }) {
   const [showSubmissions, setShowSubmissions] = useState(false);
   const spentPercent = Math.round((campaign.spent / campaign.budget) * 100);
 
@@ -90,7 +87,7 @@ export function CampaignCard({ campaign, onChanged }: { campaign: Campaign; onCh
         </CardDescription>
         {campaign.status === "active" && (
           <CardAction>
-            <CloseCampaignButton campaign={campaign} onClosed={onChanged} />
+            <CloseCampaignButton campaign={campaign} />
           </CardAction>
         )}
       </CardHeader>
@@ -108,7 +105,7 @@ export function CampaignCard({ campaign, onChanged }: { campaign: Campaign; onCh
           <Progress value={spentPercent} aria-label={`${spentPercent}% of budget spent`} />
         </div>
         <MilestoneLadder milestones={campaign.milestones} />
-        {showSubmissions && <CampaignSubmissions campaignId={campaign.id} />}
+        {showSubmissions && <CampaignSubmissions campaignId={campaign._id} />}
       </CardContent>
       <CardFooter>
         <Button variant="outline" size="sm" onClick={() => setShowSubmissions((shown) => !shown)}>

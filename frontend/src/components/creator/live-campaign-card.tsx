@@ -8,7 +8,7 @@ import { formatRupees } from "@/lib/format";
 
 import { SubmitPostDialog } from "./submit-post-dialog";
 
-export function LiveCampaignCard({ campaign, onSubmitted }: { campaign: Campaign; onSubmitted: () => void }) {
+export function LiveCampaignCard({ campaign }: { campaign: Campaign }) {
   return (
     <Card className="h-full">
       <CardHeader>
@@ -25,7 +25,7 @@ export function LiveCampaignCard({ campaign, onSubmitted }: { campaign: Campaign
         </p>
       </CardContent>
       <CardFooter>
-        <SubmitPostDialog campaign={campaign} onSubmitted={onSubmitted} />
+        <SubmitPostDialog campaign={campaign} />
       </CardFooter>
     </Card>
   );

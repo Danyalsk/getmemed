@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -11,23 +12,23 @@ import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
-import { api, errorMessage } from "@/lib/api";
+import { api } from "@/lib/api";
 import { saveSession } from "@/lib/session";
 
 export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = handleSubmit(async (input) => {
-    try {
-      saveSession(await api.login(input));
-    } catch (error) {
-      toast.error(errorMessage(error));
-    }
+  const login = useMutation({
+    mutationFn: api.login,
+    onSuccess: saveSession,
+    onError: (error) => toast.error(error.message),
   });
+
+  const onSubmit = handleSubmit((input) => login.mutate(input));
 
   return (
     <Card>
@@ -46,8 +47,8 @@ export default function LoginPage() {
               error={errors.password}
               {...register("password")}
             />
-            <Button type="submit" size="lg" disabled={isSubmitting}>
-              {isSubmitting ? "Logging in…" : "Log in"}
+            <Button type="submit" size="lg" disabled={login.isPending}>
+              {login.isPending ? "Logging in…" : "Log in"}
             </Button>
             <p className="text-center text-sm">
               New here?{" "}

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -8,36 +9,43 @@ import { updateViewsSchema, type Submission, type UpdateViewsInput } from "@cont
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api, errorMessage } from "@/lib/api";
+import { api } from "@/lib/api";
 import { formatRupees } from "@/lib/format";
+import { queryKeys } from "@/lib/queries";
 
 /**
  * Stand-in for the platform pushing view counts (PATCH /api/submissions/:id/views),
  * so the payout flow can be tried end to end.
  */
-export function SimulateViewsForm({ submission, onUpdated }: { submission: Submission; onUpdated: () => void }) {
+export function SimulateViewsForm({ submission }: { submission: Submission }) {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<UpdateViewsInput>({
     resolver: zodResolver(updateViewsSchema),
     defaultValues: { views: submission.views },
   });
 
-  const onSubmit = handleSubmit(async (input) => {
-    try {
-      const { paidNow } = await api.updateViews(submission.id, input);
+  const update = useMutation({
+    mutationFn: (input: UpdateViewsInput) => api.updateViews(submission._id, input),
+    onSuccess: ({ paidNow }) => {
       if (paidNow > 0) {
         toast.success(`Milestone hit! ${formatRupees(paidNow)} paid out`);
       } else {
         toast.info("Views updated, no new payout");
       }
-      onUpdated();
-    } catch (error) {
-      toast.error(errorMessage(error));
-    }
+      // A payout changes both the creator's earnings and the campaign's remaining budget.
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.submissions }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns }),
+      ]);
+    },
+    onError: (error) => toast.error(error.message),
   });
+
+  const onSubmit = handleSubmit((input) => update.mutate(input));
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex items-start gap-2">
@@ -53,7 +61,7 @@ export function SimulateViewsForm({ submission, onUpdated }: { submission: Submi
         />
         {errors.views && <span className="text-xs font-semibold text-red-700">{errors.views.message}</span>}
       </div>
-      <Button type="submit" size="sm" variant="secondary" disabled={isSubmitting}>
+      <Button type="submit" size="sm" variant="secondary" disabled={update.isPending}>
         Update
       </Button>
     </form>
