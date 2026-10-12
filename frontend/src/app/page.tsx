@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { SignedInRedirect } from "@/components/auth-gate";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 
@@ -13,6 +14,7 @@ const SAMPLE_LADDER = [
 export default function LandingPage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center gap-14 px-6 py-16">
+      <SignedInRedirect />
       <section className="flex flex-col items-start gap-6">
         <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
           <Image src="/wldd-logo.jpg" alt="WLDD" width={60} height={36} className="h-auto w-[60px] mix-blend-multiply" />
