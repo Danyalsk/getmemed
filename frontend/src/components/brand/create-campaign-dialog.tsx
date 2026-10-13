@@ -12,6 +12,7 @@ import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/commo
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
 import { CoverImageField } from "@/components/forms/cover-image-field";
+import { DateField } from "@/components/forms/date-field";
 import { TextAreaField } from "@/components/forms/text-area-field";
 import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
@@ -150,14 +151,20 @@ export function CreateCampaignDialog() {
               error={errors.budget}
               {...register("budget", { valueAsNumber: true })}
             />
-            <TextField
-              label="End date"
-              description="Creators can submit posts until the end of this day (IST)."
-              type="date"
-              min={indiaDateFromNow(0)}
-              max={indiaDateFromNow(MAX_CAMPAIGN_DAYS)}
-              error={errors.endsAt}
-              {...register("endsAt")}
+            <Controller
+              control={control}
+              name="endsAt"
+              render={({ field, fieldState }) => (
+                <DateField
+                  label="End date"
+                  description="Creators can submit posts until the end of this day (IST)."
+                  value={field.value}
+                  onChange={field.onChange}
+                  min={indiaDateFromNow(0)}
+                  max={indiaDateFromNow(MAX_CAMPAIGN_DAYS)}
+                  error={fieldState.error}
+                />
+              )}
             />
             <FieldSet>
               <FieldLegend variant="label">Payout milestones</FieldLegend>
