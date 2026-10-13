@@ -26,12 +26,17 @@ export function BrandHome() {
   const campaigns = useQuery(queries.myCampaigns({ page: 1, pageSize: 10, status: "active" }));
   const recent = useQuery(queries.brandSubmissions({ page: 1, pageSize: RECENT_COUNT }));
   const totals = analytics.data?.totals;
+  const returning = totals !== undefined && totals.campaigns > 0;
 
   return (
     <>
       <PageHeader
-        title={`Welcome back${session ? `, ${session.user.name}` : ""}`}
-        description="A snapshot of your campaigns and the latest creator posts."
+        title={`${returning ? "Welcome back" : "Welcome"}${session ? `, ${session.user.name}` : ""}`}
+        description={
+          totals?.campaigns === 0
+            ? "Launch your first campaign and creators can start posting for it."
+            : "A snapshot of your campaigns and the latest creator posts."
+        }
         actions={<CreateCampaignDialog />}
       />
 

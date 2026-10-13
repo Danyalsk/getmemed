@@ -23,12 +23,17 @@ export function CreatorHome() {
   const joined = useQuery(queries.joinedCampaigns({ page: 1, pageSize: 10 }));
   const totals = analytics.data?.totals;
   const firstName = session?.user.name.split(" ")[0] ?? "";
+  const returning = totals !== undefined && totals.posts > 0;
 
   return (
     <>
       <PageHeader
-        title={`Welcome back${firstName ? `, ${firstName}` : ""}`}
-        description="Here's how your posts are doing."
+        title={`${returning ? "Welcome back" : "Welcome"}${firstName ? `, ${firstName}` : ""}`}
+        description={
+          totals?.posts === 0
+            ? "Pick a campaign, post your content and get paid as the views come in."
+            : "Here's how your posts are doing."
+        }
         actions={
           <Button asChild>
             <Link href="/creator/discover">
