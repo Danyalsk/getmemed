@@ -271,6 +271,7 @@ async function seedCampaign(
     budget: campaign.budget,
     milestones: campaign.milestones,
     coverImage: cover._id,
+    endsAt: new Date(Date.now() + (2 + ((campaignIndex * 5) % 26)) * DAY_MS),
   });
   await CampaignModel.updateOne({ _id: created._id }, { createdAt: daysAgo(campaign.ageDays) }, { timestamps: false, overwriteImmutable: true });
 

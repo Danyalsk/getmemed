@@ -1,6 +1,12 @@
 import { Types } from "mongoose";
 
-import type { BrandCampaignsQuery, CampaignSort, CreateCampaignInput, LiveCampaignsQuery } from "../contracts/campaign";
+import {
+  campaignEndsAt,
+  type BrandCampaignsQuery,
+  type CampaignSort,
+  type CreateCampaignInput,
+  type LiveCampaignsQuery,
+} from "../contracts/campaign";
 import type { CampaignStatus } from "../contracts/common";
 import type { AuthUser } from "../lib/jwt";
 import { getOrSetJson, invalidate } from "../lib/cache";
@@ -31,7 +37,7 @@ export function invalidateLiveCampaigns(): Promise<void> {
 
 export async function createCampaign(brandId: string, input: CreateCampaignInput) {
   await assertBrandOwnsImage(input.coverImage, brandId);
-  const campaign = await CampaignModel.create({ ...input, brand: brandId });
+  const campaign = await CampaignModel.create({ ...input, endsAt: campaignEndsAt(input.endsAt), brand: brandId });
   await Promise.all([campaign.populate("brand", BRAND_FIELDS), invalidateLiveCampaigns()]);
   return campaign;
 }
@@ -68,6 +74,7 @@ export function listLiveCampaignsJson(query: LiveCampaignsQuery): Promise<string
   return getOrSetJson(LIVE_CAMPAIGNS, JSON.stringify(query), LIVE_CAMPAIGNS_TTL_SECONDS, async () => {
     const filter = {
       status: "active" as const,
+      endsAt: { $gt: new Date() },
       $expr: { $lt: ["$spent", "$budget"] },
       ...(query.platform && { platform: query.platform }),
       ...(query.search && { name: toSearchRegex(query.search) }),
@@ -121,4 +128,13 @@ export async function updateCampaignStatus(brandId: string, campaignId: string, 
   await campaign.save();
   await invalidateLiveCampaigns();
   return campaign;
+}
+
+export async function deleteCampaign(brandId: string, campaignId: string): Promise<void> {
+  await findBrandCampaign(brandId, campaignId);
+  const deleted = await CampaignModel.findOneAndDelete({ _id: campaignId, brand: brandId, submissionCount: 0 });
+  if (!deleted) {
+    throw AppError.conflict("Campaigns with posts can't be deleted. Close it instead.");
+  }
+  await invalidateLiveCampaigns();
 }

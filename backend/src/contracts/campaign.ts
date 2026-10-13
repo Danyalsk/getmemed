@@ -11,6 +11,13 @@ import {
 } from "./common";
 
 export const MAX_MILESTONES = 10;
+export const MAX_CAMPAIGN_DAYS = 365;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Campaigns run until the end of the chosen day, India time.
+export function campaignEndsAt(date: string): Date {
+  return new Date(`${date}T23:59:59.999+05:30`);
+}
 
 const positiveIntegerField = (field: string) =>
   z
@@ -56,6 +63,7 @@ const campaignFieldsSchema = z.object({
   budget: positiveIntegerField("Budget"),
   milestones: milestoneLadderSchema,
   coverImage: z.string({ error: "Add a cover photo" }).pipe(objectIdSchema),
+  endsAt: z.iso.date("Pick an end date"),
 });
 
 export const createCampaignSchema = campaignFieldsSchema.superRefine((campaign, ctx) => {
@@ -65,6 +73,14 @@ export const createCampaignSchema = campaignFieldsSchema.superRefine((campaign, 
       code: "custom",
       path: ["budget"],
       message: "Budget must cover at least the top milestone payout",
+    });
+  }
+  const runsFor = campaignEndsAt(campaign.endsAt).getTime() - Date.now();
+  if (runsFor <= 0 || runsFor > MAX_CAMPAIGN_DAYS * DAY_MS) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["endsAt"],
+      message: `Pick a date between today and ${MAX_CAMPAIGN_DAYS} days from now`,
     });
   }
 });
@@ -79,6 +95,7 @@ export const campaignSchema = campaignFieldsSchema.extend({
   status: campaignStatusSchema,
   spent: rupeesSchema,
   remaining: rupeesSchema,
+  endsAt: isoDateSchema,
   createdAt: isoDateSchema,
 });
 export type Campaign = z.infer<typeof campaignSchema>;

@@ -26,6 +26,9 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
   if (campaign.status !== "active" || campaign.spent >= campaign.budget) {
     throw AppError.conflict("This campaign is no longer accepting submissions");
   }
+  if (campaign.endsAt <= new Date()) {
+    throw AppError.conflict("This campaign has ended");
+  }
 
   const { postUrl } = postSubmissionSchemaFor(campaign.platform).parse(body);
   const alreadySubmitted = await SubmissionModel.exists({ postUrl });
@@ -37,7 +40,14 @@ export async function createSubmission(creatorId: string, campaignId: string, bo
     const [created] = await SubmissionModel.create([{ campaign: campaign._id, creator: creatorId, postUrl }], {
       session,
     });
-    await CampaignModel.updateOne({ _id: campaign._id }, { $inc: { submissionCount: 1 } }, { session });
+    const counted = await CampaignModel.updateOne(
+      { _id: campaign._id },
+      { $inc: { submissionCount: 1 } },
+      { session },
+    );
+    if (counted.matchedCount === 0) {
+      throw AppError.notFound("Campaign");
+    }
     return created;
   });
   if (!submission) {

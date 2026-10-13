@@ -9,8 +9,11 @@ import {
 import { idParamsSchema, listQuerySchema } from "../contracts/common";
 import { submissionsQuerySchema } from "../contracts/submission";
 import { authenticate, requireRole, getAuthUser } from "../middleware/auth";
+import { getCampaignPerformance } from "../services/analytics.service";
 import {
   createCampaign,
+  deleteCampaign,
+  findBrandCampaign,
   findCampaignForViewer,
   listBrandCampaigns,
   listLiveCampaignsJson,
@@ -105,6 +108,27 @@ campaignRouter.patch("/:id/status", requireRole("brand"), async (req, res, next)
     const { status } = updateCampaignStatusSchema.parse(req.body);
     const campaign = await updateCampaignStatus(getAuthUser(req)._id, id, status);
     res.json(campaign);
+  } catch (error) {
+    next(error);
+  }
+});
+
+campaignRouter.delete("/:id", requireRole("brand"), async (req, res, next) => {
+  try {
+    const { id } = idParamsSchema.parse(req.params);
+    await deleteCampaign(getAuthUser(req)._id, id);
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
+campaignRouter.get("/:id/performance", requireRole("brand"), async (req, res, next) => {
+  try {
+    const { id } = idParamsSchema.parse(req.params);
+    await findBrandCampaign(getAuthUser(req)._id, id);
+    const performance = await getCampaignPerformance(id);
+    res.json(performance);
   } catch (error) {
     next(error);
   }

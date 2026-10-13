@@ -1,6 +1,6 @@
 import request from "supertest";
 
-import { brandAnalyticsSchema, creatorAnalyticsSchema } from "../src/contracts/analytics";
+import { brandAnalyticsSchema, campaignPerformanceSchema, creatorAnalyticsSchema } from "../src/contracts/analytics";
 import { authResponseSchema } from "../src/contracts/auth";
 import {
   campaignPageSchema,
@@ -9,7 +9,8 @@ import {
   leaderboardSchema,
 } from "../src/contracts/campaign";
 import { submissionPageSchema } from "../src/contracts/submission";
-import { app, createCampaign, patchViews, signup, submitPosts } from "./support/api";
+import { CampaignModel } from "../src/models/campaign.model";
+import { app, createCampaign, daysFromNow, LADDER, patchViews, signup, submitPosts, uploadCover } from "./support/api";
 import { useTestDatabase } from "./support/database";
 
 jest.setTimeout(60_000);
@@ -115,6 +116,62 @@ describe("brand workspace", () => {
     const analytics = brandAnalyticsSchema.parse((await get("/api/analytics/brand", first.brandToken)).body);
     expect(analytics.totals).toMatchObject({ campaigns: 2, budget: 20_000, posts: 3, earned: 500, creators: 2 });
     expect(analytics.topCreators[0]?.earned).toBe(500);
+  });
+});
+describe("campaign lifecycle", () => {
+  it("rejects an end date in the past", async () => {
+    const brandToken = await signup("brand");
+    const res = await request(app)
+      .post("/api/campaigns")
+      .auth(brandToken, { type: "bearer" })
+      .send({
+        name: "Old news",
+        description: "Post a reel about the launch and tag the brand.",
+        platform: "instagram",
+        budget: 10_000,
+        milestones: LADDER,
+        coverImage: await uploadCover(brandToken),
+        endsAt: daysFromNow(-1),
+      });
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body)).toContain("Pick a date between today");
+  });
+
+  it("stops taking posts and leaves the live list once the end date passes", async () => {
+    const { campaignId } = await createCampaign(10_000);
+    await CampaignModel.updateOne({ _id: campaignId }, { endsAt: new Date(Date.now() - 1_000) });
+    const creator = await signup("creator");
+
+    const submit = await request(app)
+      .post(`/api/campaigns/${campaignId}/submissions`)
+      .auth(creator, { type: "bearer" })
+      .send({ postUrl: "https://www.instagram.com/p/too-late/" });
+    expect(submit.status).toBe(409);
+
+    const page = campaignPageSchema.parse((await get("/api/campaigns/live?pageSize=50", creator)).body);
+    expect(page.items.map((campaign) => campaign._id)).not.toContain(campaignId);
+  });
+
+  it("deletes a campaign only while it has no posts", async () => {
+    const empty = await createCampaign(10_000);
+    const busy = await createCampaign(10_000);
+    await submitPosts(busy.campaignId, 1);
+    const remove = (id: string, token: string) => request(app).delete(`/api/campaigns/${id}`).auth(token, { type: "bearer" });
+
+    expect((await remove(busy.campaignId, busy.brandToken)).status).toBe(409);
+    expect((await remove(empty.campaignId, await signup("brand"))).status).toBe(404);
+    expect((await remove(empty.campaignId, empty.brandToken)).status).toBe(204);
+    expect((await get(`/api/campaigns/${empty.campaignId}`, empty.brandToken)).status).toBe(404);
+  });
+
+  it("reports performance for a single campaign", async () => {
+    const { campaignId, brandToken } = await createCampaign(10_000);
+    const [first = "", second = ""] = await submitPosts(campaignId, 2);
+    await patchViews(first, 12_000);
+    await patchViews(second, 3_000);
+
+    const performance = campaignPerformanceSchema.parse((await get(`/api/campaigns/${campaignId}/performance`, brandToken)).body);
+    expect(performance).toMatchObject({ posts: 2, views: 15_000, earned: 500, creators: 1 });
   });
 });
 

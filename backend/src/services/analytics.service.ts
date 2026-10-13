@@ -47,6 +47,22 @@ const PLATFORM_BREAKDOWN: PipelineStage.FacetPipelineStage[] = [
   { $project: { _id: 0, platform: "$_id", posts: 1, views: 1, earned: 1 } },
 ];
 
+const EMPTY_PERFORMANCE = { ...EMPTY_PARTICIPATION, flagged: 0, creators: 0 };
+
+const PERFORMANCE_TOTALS: PipelineStage.FacetPipelineStage[] = [
+  {
+    $group: {
+      _id: null,
+      ...PARTICIPATION_TOTALS,
+      flagged: { $sum: { $cond: ["$flagged", 1, 0] } },
+      creatorIds: { $addToSet: "$creator" },
+    },
+  },
+  { $project: { _id: 0, posts: 1, views: 1, earned: 1, flagged: 1, creators: { $size: "$creatorIds" } } },
+];
+
+type Performance = Participation & { flagged: number; creators: number };
+
 type CampaignBreakdown = Participation & {
   campaign: { _id: Types.ObjectId; name: string; platform: Platform };
 };
@@ -143,7 +159,7 @@ export async function getBrandAnalytics(brandId: string) {
   ]);
 
   const [summary] = await SubmissionModel.aggregate<{
-    totals: (Participation & { flagged: number; creators: number })[];
+    totals: Performance[];
     byCampaign: CampaignBreakdown[];
     byPlatform: PlatformBreakdown[];
     topCreators: CreatorBreakdown[];
@@ -151,26 +167,7 @@ export async function getBrandAnalytics(brandId: string) {
     { $match: { campaign: { $in: campaignIds } } },
     {
       $facet: {
-        totals: [
-          {
-            $group: {
-              _id: null,
-              ...PARTICIPATION_TOTALS,
-              flagged: { $sum: { $cond: ["$flagged", 1, 0] } },
-              creatorIds: { $addToSet: "$creator" },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              posts: 1,
-              views: 1,
-              earned: 1,
-              flagged: 1,
-              creators: { $size: "$creatorIds" },
-            },
-          },
-        ],
+        totals: PERFORMANCE_TOTALS,
         byCampaign: CAMPAIGN_BREAKDOWN,
         byPlatform: PLATFORM_BREAKDOWN,
         topCreators: [
@@ -196,14 +193,18 @@ export async function getBrandAnalytics(brandId: string) {
   return {
     totals: {
       ...(campaignTotals[0] ?? { campaigns: 0, activeCampaigns: 0, budget: 0 }),
-      ...(summary?.totals[0] ?? {
-        ...EMPTY_PARTICIPATION,
-        flagged: 0,
-        creators: 0,
-      }),
+      ...(summary?.totals[0] ?? EMPTY_PERFORMANCE),
     },
     byCampaign: summary?.byCampaign ?? [],
     byPlatform: summary?.byPlatform ?? [],
     topCreators: summary?.topCreators ?? [],
   };
+}
+
+export async function getCampaignPerformance(campaignId: string): Promise<Performance> {
+  const [totals] = await SubmissionModel.aggregate<Performance>([
+    { $match: { campaign: new Types.ObjectId(campaignId) } },
+    ...PERFORMANCE_TOTALS,
+  ]);
+  return totals ?? EMPTY_PERFORMANCE;
 }

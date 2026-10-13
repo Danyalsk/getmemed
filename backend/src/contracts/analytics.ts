@@ -23,13 +23,17 @@ export const creatorAnalyticsSchema = z.object({
 });
 export type CreatorAnalytics = z.infer<typeof creatorAnalyticsSchema>;
 
+export const campaignPerformanceSchema = participationSchema.extend({
+  creators: z.number().int().nonnegative(),
+  flagged: z.number().int().nonnegative(),
+});
+export type CampaignPerformance = z.infer<typeof campaignPerformanceSchema>;
+
 export const brandAnalyticsSchema = z.object({
-  totals: participationSchema.extend({
+  totals: campaignPerformanceSchema.extend({
     campaigns: z.number().int().nonnegative(),
     activeCampaigns: z.number().int().nonnegative(),
     budget: rupeesSchema,
-    creators: z.number().int().nonnegative(),
-    flagged: z.number().int().nonnegative(),
   }),
   byCampaign: z.array(campaignBreakdownSchema),
   byPlatform: z.array(platformBreakdownSchema),

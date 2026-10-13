@@ -19,6 +19,10 @@ const PNG = Buffer.from(
   "base64",
 );
 
+export function daysFromNow(days: number): string {
+  return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+}
+
 export async function signup(role: Role, name = `${role} user`): Promise<string> {
   const res = await request(app)
     .post("/api/auth/signup")
@@ -48,6 +52,7 @@ export async function createCampaign(
     budget,
     milestones: LADDER,
     coverImage: await uploadCover(brandToken),
+    endsAt: daysFromNow(14),
     ...overrides,
   };
   const res = await request(app).post("/api/campaigns").auth(brandToken, { type: "bearer" }).send(input);
