@@ -49,13 +49,8 @@ export default function LandingPage() {
       <PageTransition>
         <main className="flex flex-1 flex-col">
           <section className="relative overflow-hidden">
-            <div aria-hidden className="pointer-events-none absolute inset-0">
-              <div className="absolute top-6 right-0 h-24 w-1/3 bg-wl-red lg:top-10 lg:h-48" />
-              <div className="absolute top-6 right-1/3 h-12 w-16 bg-wl-yellow lg:top-10 lg:h-20 lg:w-28" />
-              <div className="absolute top-30 right-0 h-14 w-12 bg-wl-lavender lg:top-58 lg:h-32 lg:w-20" />
-            </div>
-            <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 pt-48 pb-20 lg:py-24">
-              <p className="text-sm font-medium text-wl-lime">Creator campaigns, paid on performance</p>
+            <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-20 lg:py-28">
+              <p className="text-sm font-medium text-brand">Creator campaigns, paid on performance</p>
               <h1 className="max-w-2xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
                 Pay for reach, not for promises.
               </h1>
@@ -81,14 +76,14 @@ export default function LandingPage() {
           <section className="border-y bg-[#0e0e0e]">
             <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-[1fr_1.2fr]">
               <div className="flex flex-col gap-3">
-                <TrendingUpIcon className="size-6 text-wl-lime" />
+                <TrendingUpIcon className="size-6 text-brand" />
                 <h2 className="text-2xl font-semibold tracking-tight">How payouts work</h2>
                 <p className="text-muted-foreground">
                   A post earns the highest milestone it has crossed. Moving from 10K to 100K views tops the creator up
                   to ₹5,000 in total, never the sum of every milestone.
                 </p>
                 <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <ShieldCheckIcon className="size-4 text-wl-lime" /> Total payouts can never exceed the campaign
+                  <ShieldCheckIcon className="size-4 text-brand" /> Total payouts can never exceed the campaign
                   budget.
                 </p>
               </div>
@@ -97,7 +92,7 @@ export default function LandingPage() {
                   <li key={views} className="flex flex-col gap-2 rounded-xl border bg-card p-5">
                     <span className="text-xs text-muted-foreground">Milestone {index + 1}</span>
                     <span className="text-sm">{views}</span>
-                    <span className="text-2xl font-semibold text-wl-lime">{payout}</span>
+                    <span className="text-2xl font-semibold text-brand">{payout}</span>
                   </li>
                 ))}
               </ol>
@@ -107,12 +102,12 @@ export default function LandingPage() {
           <section className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-16 md:grid-cols-2">
             {AUDIENCES.map(({ icon: Icon, title, points }) => (
               <div key={title} className="flex flex-col gap-4 rounded-xl border bg-card p-6">
-                <Icon className="size-6 text-wl-lavender" />
+                <Icon className="size-6 text-brand" />
                 <h3 className="text-xl font-semibold">{title}</h3>
                 <ul className="flex flex-col gap-2 text-muted-foreground">
                   {points.map((point) => (
                     <li key={point} className="flex items-center gap-2">
-                      <span aria-hidden className="size-1.5 rounded-full bg-wl-lime" />
+                      <span aria-hidden className="size-1.5 rounded-full bg-brand" />
                       {point}
                     </li>
                   ))}

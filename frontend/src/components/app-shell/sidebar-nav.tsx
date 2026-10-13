@@ -50,7 +50,7 @@ export function SidebarNav({ user, onNavigate }: SidebarNavProps) {
       </nav>
 
       <div className="flex items-center gap-3 rounded-xl border bg-card p-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-wl-lavender text-xs font-semibold text-wl-ink">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
           {getInitials(user.name)}
         </span>
         <div className="flex min-w-0 flex-1 flex-col">

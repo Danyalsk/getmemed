@@ -13,13 +13,6 @@ import { PLATFORM_ICONS } from "@/lib/platforms";
 export const CARD_LINK_CLASS =
   "text-left outline-none after:absolute after:inset-0 after:rounded-2xl after:content-[''] focus-visible:after:ring-2 focus-visible:after:ring-ring";
 
-const AVATAR_COLORS = ["bg-wl-lavender", "bg-wl-yellow", "bg-wl-red", "bg-wl-blue", "bg-wl-lime"];
-
-function getAvatarColor(name: string): string {
-  const hash = [...name].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length] ?? "bg-wl-lavender";
-}
-
 interface CampaignCardProps {
   campaign: Campaign;
   title: ReactNode;
@@ -50,7 +43,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
         <div className="flex items-center justify-between gap-3 text-sm">
           <div className="flex min-w-0 items-center gap-2">
             <span
-              className={`flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold text-wl-ink ${getAvatarColor(campaign.brand.name)}`}
+              className="flex size-6 shrink-0 items-center justify-center rounded-md bg-brand text-[10px] font-bold text-ink"
             >
               {getInitials(campaign.brand.name)}
             </span>
@@ -79,7 +72,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
               <UsersRoundIcon className="size-3" /> {campaign.submissionCount}
             </span>
             {firstRung && (
-              <span className="rounded-full bg-wl-lime/15 px-2 py-0.5 text-xs font-medium text-wl-lime tabular-nums">
+              <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-medium text-brand tabular-nums">
                 {formatRupees(firstRung.payout)}/{formatViews(firstRung.views)}
               </span>
             )}
@@ -93,7 +86,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
           aria-valuemax={100}
           className="h-1.5 overflow-hidden rounded-full bg-muted"
         >
-          <div className="h-full rounded-full bg-wl-red transition-[width]" style={{ width: `${spentPercent}%` }} />
+          <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${spentPercent}%` }} />
         </div>
         {footer}
       </div>

@@ -87,7 +87,7 @@ export function SubmitPostSheet({ campaign, trigger }: SubmitPostSheetProps) {
           <div className="flex flex-col gap-1">
             <SheetTitle className="text-lg">{campaign.name}</SheetTitle>
             <SheetDescription>
-              {campaign.brand.name} · up to <span className="text-wl-lime">{formatRupees(topPayout)}</span> per post
+              {campaign.brand.name} · up to <span className="text-brand">{formatRupees(topPayout)}</span> per post
             </SheetDescription>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function SubmitPostSheet({ campaign, trigger }: SubmitPostSheetProps) {
               {campaign.milestones.map((rung) => (
                 <li key={rung.views} className="flex items-center justify-between px-4 py-2.5 text-sm tabular-nums">
                   <span className="text-muted-foreground">{formatViews(rung.views)} views</span>
-                  <span className="font-semibold text-wl-lime">{formatRupees(rung.payout)}</span>
+                  <span className="font-semibold text-brand">{formatRupees(rung.payout)}</span>
                 </li>
               ))}
             </ol>

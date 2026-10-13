@@ -31,7 +31,7 @@ function FeedRow({ campaign }: { campaign: Campaign }) {
         </span>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-0.5">
-        <span className="text-lg font-semibold text-wl-lime tabular-nums">{formatRupees(topPayout)}</span>
+        <span className="text-lg font-semibold text-brand tabular-nums">{formatRupees(topPayout)}</span>
         <span className="text-xs text-muted-foreground">max per post</span>
       </div>
     </div>

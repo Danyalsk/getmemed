@@ -15,7 +15,7 @@ export function ParticipationSummary({ participation }: { participation: Partici
       </div>
       <div className="flex flex-col">
         <span className="text-muted-foreground">Earned</span>
-        <span className="font-semibold text-wl-lime tabular-nums">{formatRupees(participation.earned)}</span>
+        <span className="font-semibold text-brand tabular-nums">{formatRupees(participation.earned)}</span>
       </div>
     </div>
   );

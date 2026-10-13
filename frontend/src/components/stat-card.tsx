@@ -6,15 +6,14 @@ interface StatCardProps {
   label: string;
   value: string | undefined;
   icon: LucideIcon;
-  accent: string;
 }
 
-export function StatCard({ label, value, icon: Icon, accent }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon }: StatCardProps) {
   return (
     <div className="flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4 sm:p-5">
       <div className="flex items-start justify-between gap-2 text-xs text-muted-foreground sm:text-sm">
         {label}
-        <Icon className={`size-4 shrink-0 ${accent}`} />
+        <Icon className="size-4 shrink-0 text-brand" />
       </div>
       {value === undefined ? (
         <Skeleton className="h-7 w-24 sm:h-8 sm:w-28" />

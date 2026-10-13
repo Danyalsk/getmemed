@@ -11,7 +11,7 @@ export function SubmissionEarnings({ submission }: { submission: Submission }) {
     <div className="flex flex-col gap-0.5">
       <span className="font-medium tabular-nums">{formatRupees(submission.paidAmount)}</span>
       {capped && (
-        <span className="text-xs text-wl-yellow">
+        <span className="text-xs text-warning">
           Capped · earned {formatRupees(submission.entitledAmount)}
         </span>
       )}

@@ -26,7 +26,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
       <div className="flex min-w-0 flex-col gap-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
           <span className="flex items-center gap-2 text-foreground">
-            <span className="flex size-7 items-center justify-center rounded-full bg-wl-yellow text-[10px] font-bold text-wl-ink">
+            <span className="flex size-7 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-ink">
               {getInitials(campaign.brand.name)}
             </span>
             {campaign.brand.name}
@@ -43,7 +43,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1 px-4 py-3">
               <dt className="text-xs text-muted-foreground">{stat.label}</dt>
-              <dd className={`text-lg font-semibold tabular-nums sm:text-xl ${stat.highlight ? "text-wl-lime" : ""}`}>
+              <dd className={`text-lg font-semibold tabular-nums sm:text-xl ${stat.highlight ? "text-brand" : ""}`}>
                 {stat.value}
               </dd>
             </div>
@@ -54,7 +54,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
       </div>
 
       <div className="relative order-first lg:order-none">
-        <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-wl-lime/80" />
+        <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-brand/80" />
         <div className="relative aspect-video overflow-hidden rounded-2xl border bg-muted">
           <SharedCampaignCover id={campaign._id}>
             <div className="absolute inset-0">

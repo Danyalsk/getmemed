@@ -29,13 +29,11 @@ export function CreatorSubmissions() {
           label="Total earned"
           value={data && formatRupees(data.totalEarnings)}
           icon={IndianRupeeIcon}
-          accent="text-wl-lime"
         />
         <StatCard
           label={list.query.search ? "Matching posts" : "Posts submitted"}
           value={data && String(data.total)}
           icon={FileVideoIcon}
-          accent="text-wl-lavender"
         />
       </section>
 

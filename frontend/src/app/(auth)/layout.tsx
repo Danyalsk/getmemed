@@ -30,11 +30,6 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <SignedInRedirect />
       <div className="hidden border-r bg-[#0e0e0e] lg:block">
         <aside className="sticky top-0 flex h-svh flex-col gap-10 overflow-hidden p-12">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="absolute top-14 -right-10 h-20 w-64 bg-wl-red" />
-            <div className="absolute top-10 right-44 size-16 bg-wl-yellow" />
-            <div className="absolute top-24 right-0 h-20 w-16 bg-wl-lavender" />
-          </div>
           <Link href="/" aria-label="Meme'd home" className="relative w-fit">
             <Wordmark className="text-3xl" />
           </Link>
@@ -54,7 +49,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           <ul className="relative grid shrink-0 grid-cols-3 gap-6 border-t pt-6">
             {PROMISES.map((promise) => (
               <li key={promise.title} className="flex flex-col gap-1.5">
-                <promise.icon className="size-4 text-wl-lime" />
+                <promise.icon className="size-4 text-brand" />
                 <span className="text-sm font-medium">{promise.title}</span>
                 <span className="text-xs text-muted-foreground">
                   {promise.detail}

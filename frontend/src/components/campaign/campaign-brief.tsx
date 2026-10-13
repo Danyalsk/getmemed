@@ -19,7 +19,7 @@ export function CampaignBrief({ campaign }: { campaign: Pick<Campaign, "descript
       <ol className="grid gap-3 border-t pt-4 sm:grid-cols-2">
         {steps.map((step, index) => (
           <li key={step} className="flex gap-3 text-sm text-muted-foreground">
-            <span className="font-pixel text-wl-lime">{String(index + 1).padStart(2, "0")}</span>
+            <span className="font-pixel text-brand">{String(index + 1).padStart(2, "0")}</span>
             {step}
           </li>
         ))}

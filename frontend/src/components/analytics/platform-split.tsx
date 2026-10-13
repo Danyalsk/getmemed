@@ -11,8 +11,8 @@ interface PlatformRow {
 }
 
 const PLATFORM_COLORS: Record<Platform, string> = {
-  instagram: "bg-wl-red",
-  youtube: "bg-wl-lavender",
+  instagram: "bg-brand",
+  youtube: "bg-foreground/60",
 };
 
 export function PlatformSplit({ rows, earnedLabel }: { rows: PlatformRow[]; earnedLabel: string }) {
@@ -37,7 +37,7 @@ export function PlatformSplit({ rows, earnedLabel }: { rows: PlatformRow[]; earn
           const Icon = PLATFORM_ICONS[row.platform];
           return (
             <li key={row.platform} className="flex items-center gap-3 rounded-xl border p-3">
-              <span className={`flex size-9 items-center justify-center rounded-lg ${PLATFORM_COLORS[row.platform]} text-wl-ink`}>
+              <span className={`flex size-9 items-center justify-center rounded-lg ${PLATFORM_COLORS[row.platform]} text-ink`}>
                 <Icon className="size-4" />
               </span>
               <div className="flex flex-col text-sm">

@@ -56,7 +56,7 @@ function Slide({ campaign, visible, priority }: { campaign: Campaign; visible: b
       >
         <div className="flex max-w-xl flex-col gap-3">
           <span className="flex items-center gap-2 text-sm font-medium">
-            <span className="flex size-7 items-center justify-center rounded-md bg-wl-yellow text-[10px] font-bold text-wl-ink">
+            <span className="flex size-7 items-center justify-center rounded-md bg-brand text-[10px] font-bold text-ink">
               {getInitials(campaign.brand.name)}
             </span>
             {campaign.brand.name}
@@ -72,7 +72,7 @@ function Slide({ campaign, visible, priority }: { campaign: Campaign; visible: b
           href={campaignHref(campaign._id)}
           transitionTypes={TRANSITION_TYPES.forward}
           tabIndex={visible ? 0 : -1}
-          className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-wl-ink transition-transform hover:scale-[1.03]"
+          className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-ink transition-transform hover:scale-[1.03]"
         >
           View campaign <ArrowRightIcon className="size-4" />
         </Link>
@@ -137,7 +137,7 @@ export function FeaturedCarousel() {
                   {campaign.brand.name} · {formatRupeesCompact(campaign.remaining)} left
                 </span>
               </span>
-              <span className="absolute inset-x-3 bottom-0 h-0.5 overflow-hidden text-wl-lime">
+              <span className="absolute inset-x-3 bottom-0 h-0.5 overflow-hidden text-brand">
                 <SlideProgress active={index === active} paused={paused} onDone={advance} />
               </span>
             </button>

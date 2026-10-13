@@ -26,15 +26,14 @@ export function CreatorEarnings() {
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       <section aria-label="Earnings overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Total earned" value={totals && formatRupees(totals.earned)} icon={IndianRupeeIcon} accent="text-wl-lime" />
+        <StatCard label="Total earned" value={totals && formatRupees(totals.earned)} icon={IndianRupeeIcon} />
         <StatCard
           label="Avg. per post"
           value={totals && formatRupees(totals.posts ? Math.round(totals.earned / totals.posts) : 0)}
           icon={ReceiptIndianRupeeIcon}
-          accent="text-wl-yellow"
         />
-        <StatCard label="Paying campaigns" value={data && String(data.byCampaign.filter((row) => row.earned > 0).length)} icon={MegaphoneIcon} accent="text-wl-lavender" />
-        <StatCard label="Lost to budget caps" value={uncapped === undefined ? undefined : formatRupees(uncapped)} icon={HourglassIcon} accent="text-wl-red" />
+        <StatCard label="Paying campaigns" value={data && String(data.byCampaign.filter((row) => row.earned > 0).length)} icon={MegaphoneIcon} />
+        <StatCard label="Lost to budget caps" value={uncapped === undefined ? undefined : formatRupees(uncapped)} icon={HourglassIcon} />
       </section>
 
       <Panel title="Earnings by campaign" description="What each campaign has paid you so far.">

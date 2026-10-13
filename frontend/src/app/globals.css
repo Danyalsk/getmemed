@@ -5,20 +5,17 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --wl-lime: #96ff43;
-  --wl-yellow: #ffd644;
-  --wl-red: #ff3427;
-  --wl-blue: #5271ff;
-  --wl-lavender: #8580f7;
-  --wl-ink: #131313;
+  --brand: #96ff43;
+  --ink: #131313;
+  --warning: #f5b544;
 
-  --background: var(--wl-ink);
+  --background: var(--ink);
   --foreground: #f4f4f2;
   --card: #1a1a1a;
   --card-foreground: var(--foreground);
   --popover: #1e1e1e;
   --popover-foreground: var(--foreground);
-  --primary: var(--wl-lime);
+  --primary: var(--brand);
   --primary-foreground: #0b0b0b;
   --secondary: #262626;
   --secondary-foreground: var(--foreground);
@@ -26,10 +23,10 @@
   --muted-foreground: #a1a1a1;
   --accent: #262626;
   --accent-foreground: var(--foreground);
-  --destructive: var(--wl-red);
+  --destructive: #ef4444;
   --border: #2b2b2b;
   --input: #333333;
-  --ring: color-mix(in oklab, var(--wl-lime) 60%, transparent);
+  --ring: color-mix(in oklab, var(--brand) 60%, transparent);
   --radius: 0.625rem;
 }
 
@@ -53,12 +50,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-wl-lime: var(--wl-lime);
-  --color-wl-yellow: var(--wl-yellow);
-  --color-wl-red: var(--wl-red);
-  --color-wl-blue: var(--wl-blue);
-  --color-wl-lavender: var(--wl-lavender);
-  --color-wl-ink: var(--wl-ink);
+  --color-brand: var(--brand);
+  --color-ink: var(--ink);
+  --color-warning: var(--warning);
 
   --font-sans: var(--font-bricolage);
   --font-heading: var(--font-bricolage);
@@ -83,8 +77,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: url("/pattern-m.svg");
-    background-size: 1441px 1416px;
+    background-image: url("/pattern-pixel.svg");
+    background-size: 160px 160px;
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {

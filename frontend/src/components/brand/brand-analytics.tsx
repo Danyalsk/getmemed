@@ -24,19 +24,17 @@ export function BrandAnalytics() {
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} accent="text-wl-yellow" />
+        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
         <StatCard
           label="Paid out"
           value={totals && `${formatRupees(totals.earned)} of ${formatRupees(totals.budget)}`}
           icon={ChartPieIcon}
-          accent="text-wl-red"
         />
-        <StatCard label="Cost per 1K views" value={totals && formatRupees(costPerThousand)} icon={ChartPieIcon} accent="text-wl-lime" />
+        <StatCard label="Cost per 1K views" value={totals && formatRupees(costPerThousand)} icon={ChartPieIcon} />
         <StatCard
           label="Creators · flagged posts"
           value={totals && `${totals.creators} · ${totals.flagged}`}
           icon={totals?.flagged ? FlagIcon : UsersRoundIcon}
-          accent="text-wl-lavender"
         />
       </section>
 
@@ -44,7 +42,7 @@ export function BrandAnalytics() {
         <Panel title="Spend by campaign" description="What each campaign has paid creators.">
           <BarList
             emptyMessage="Spend appears here once posts cross their first milestone."
-            barClassName="bg-wl-red"
+            barClassName="bg-brand"
             items={(data?.byCampaign ?? []).map((row) => ({
               key: row.campaign._id,
               label: row.campaign.name,
@@ -62,12 +60,12 @@ export function BrandAnalytics() {
       <Panel title="Top creators" description="Creators who have earned the most from your campaigns.">
         <BarList
           emptyMessage="No creator has earned from your campaigns yet."
-          barClassName="bg-wl-lavender"
+          barClassName="bg-foreground/60"
           items={(data?.topCreators ?? []).map((row) => ({
             key: row.creator._id,
             label: (
               <span className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-wl-lavender text-[10px] font-semibold text-wl-ink">
+                <span className="flex size-6 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-foreground">
                   {getInitials(row.creator.name)}
                 </span>
                 {row.creator.name}

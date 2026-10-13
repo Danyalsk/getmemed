@@ -24,22 +24,21 @@ export function CreatorAnalytics() {
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} accent="text-wl-yellow" />
-        <StatCard label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} accent="text-wl-lavender" />
+        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
+        <StatCard label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
         <StatCard
           label="Avg. views per post"
           value={totals && formatViews(totals.posts ? Math.round(totals.views / totals.posts) : 0)}
           icon={TrendingUpIcon}
-          accent="text-wl-lime"
         />
-        <StatCard label="Flagged posts" value={totals && String(totals.flagged)} icon={FlagIcon} accent="text-wl-red" />
+        <StatCard label="Flagged posts" value={totals && String(totals.flagged)} icon={FlagIcon} />
       </section>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Views by campaign" description="Where your posts are getting the most reach.">
           <BarList
             emptyMessage="Submit a post to see campaign performance."
-            barClassName="bg-wl-yellow"
+            barClassName="bg-brand"
             items={(data?.byCampaign ?? []).map((row) => ({
               key: row.campaign._id,
               label: row.campaign.name,

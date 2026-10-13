@@ -40,15 +40,13 @@ export function BrandHome() {
           label="Active campaigns"
           value={totals && `${totals.activeCampaigns} of ${totals.campaigns}`}
           icon={MegaphoneIcon}
-          accent="text-wl-lavender"
         />
-        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} accent="text-wl-yellow" />
-        <StatCard label="Paid out" value={totals && formatRupees(totals.earned)} icon={ChartPieIcon} accent="text-wl-red" />
+        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
+        <StatCard label="Paid out" value={totals && formatRupees(totals.earned)} icon={ChartPieIcon} />
         <StatCard
           label="Budget remaining"
           value={totals && formatRupees(totals.budget - totals.earned)}
           icon={PiggyBankIcon}
-          accent="text-wl-lime"
         />
       </section>
 

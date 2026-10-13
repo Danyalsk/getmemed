@@ -11,7 +11,7 @@ const READY_VISIBLE_MS = 2500;
 
 type WakeState = "checking" | "waking" | "ready" | "hidden";
 
-const PIXEL_COLORS = ["bg-wl-lime", "bg-wl-yellow", "bg-wl-lavender"];
+const PIXEL_COLORS = ["bg-brand", "bg-brand/70", "bg-brand/40"];
 
 function formatElapsed(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -85,7 +85,7 @@ export function ServerWakeNotice() {
         </>
       ) : (
         <>
-          <CircleCheckIcon className="size-5 shrink-0 text-wl-lime" />
+          <CircleCheckIcon className="size-5 shrink-0 text-brand" />
           <span className="text-sm font-medium">Server is ready</span>
         </>
       )}
