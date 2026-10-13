@@ -21,6 +21,7 @@ const CAMPAIGN_BREAKDOWN: PipelineStage.FacetPipelineStage[] = [
     $lookup: {
       from: "campaigns",
       localField: "_id",
+
       foreignField: "_id",
       as: "campaign",
       pipeline: [{ $project: { name: 1, platform: 1 } }],
@@ -46,14 +47,22 @@ const PLATFORM_BREAKDOWN: PipelineStage.FacetPipelineStage[] = [
   { $project: { _id: 0, platform: "$_id", posts: 1, views: 1, earned: 1 } },
 ];
 
-type CampaignBreakdown = Participation & { campaign: { _id: Types.ObjectId; name: string; platform: Platform } };
+type CampaignBreakdown = Participation & {
+  campaign: { _id: Types.ObjectId; name: string; platform: Platform };
+};
 type PlatformBreakdown = Participation & { platform: Platform };
-type CreatorBreakdown = Participation & { creator: { _id: Types.ObjectId; name: string } };
+type CreatorBreakdown = Participation & {
+  creator: { _id: Types.ObjectId; name: string };
+};
 
 export async function getCreatorAnalytics(creatorId: string) {
   const creator = new Types.ObjectId(creatorId);
   const [summary] = await SubmissionModel.aggregate<{
-    totals: (Participation & { entitled: number; flagged: number; campaigns: number })[];
+    totals: (Participation & {
+      entitled: number;
+      flagged: number;
+      campaigns: number;
+    })[];
     byCampaign: CampaignBreakdown[];
     byPlatform: PlatformBreakdown[];
   }>([
@@ -70,7 +79,17 @@ export async function getCreatorAnalytics(creatorId: string) {
               campaignIds: { $addToSet: "$campaign" },
             },
           },
-          { $project: { _id: 0, posts: 1, views: 1, earned: 1, entitled: 1, flagged: 1, campaigns: { $size: "$campaignIds" } } },
+          {
+            $project: {
+              _id: 0,
+              posts: 1,
+              views: 1,
+              earned: 1,
+              entitled: 1,
+              flagged: 1,
+              campaigns: { $size: "$campaignIds" },
+            },
+          },
         ],
         byCampaign: CAMPAIGN_BREAKDOWN,
         byPlatform: PLATFORM_BREAKDOWN,
@@ -87,7 +106,12 @@ export async function getCreatorAnalytics(creatorId: string) {
     ]);
 
   return {
-    totals: summary?.totals[0] ?? { ...EMPTY_PARTICIPATION, entitled: 0, flagged: 0, campaigns: 0 },
+    totals: summary?.totals[0] ?? {
+      ...EMPTY_PARTICIPATION,
+      entitled: 0,
+      flagged: 0,
+      campaigns: 0,
+    },
     byCampaign: summary?.byCampaign ?? [],
     byPlatform: summary?.byPlatform ?? [],
     topPosts,
@@ -97,13 +121,19 @@ export async function getCreatorAnalytics(creatorId: string) {
 export async function getBrandAnalytics(brandId: string) {
   const brand = new Types.ObjectId(brandId);
   const [campaignTotals, campaignIds] = await Promise.all([
-    CampaignModel.aggregate<{ campaigns: number; activeCampaigns: number; budget: number }>([
+    CampaignModel.aggregate<{
+      campaigns: number;
+      activeCampaigns: number;
+      budget: number;
+    }>([
       { $match: { brand } },
       {
         $group: {
           _id: null,
           campaigns: { $sum: 1 },
-          activeCampaigns: { $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] } },
+          activeCampaigns: {
+            $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
+          },
           budget: { $sum: "$budget" },
         },
       },
@@ -130,7 +160,16 @@ export async function getBrandAnalytics(brandId: string) {
               creatorIds: { $addToSet: "$creator" },
             },
           },
-          { $project: { _id: 0, posts: 1, views: 1, earned: 1, flagged: 1, creators: { $size: "$creatorIds" } } },
+          {
+            $project: {
+              _id: 0,
+              posts: 1,
+              views: 1,
+              earned: 1,
+              flagged: 1,
+              creators: { $size: "$creatorIds" },
+            },
+          },
         ],
         byCampaign: CAMPAIGN_BREAKDOWN,
         byPlatform: PLATFORM_BREAKDOWN,
@@ -157,7 +196,11 @@ export async function getBrandAnalytics(brandId: string) {
   return {
     totals: {
       ...(campaignTotals[0] ?? { campaigns: 0, activeCampaigns: 0, budget: 0 }),
-      ...(summary?.totals[0] ?? { ...EMPTY_PARTICIPATION, flagged: 0, creators: 0 }),
+      ...(summary?.totals[0] ?? {
+        ...EMPTY_PARTICIPATION,
+        flagged: 0,
+        creators: 0,
+      }),
     },
     byCampaign: summary?.byCampaign ?? [],
     byPlatform: summary?.byPlatform ?? [],

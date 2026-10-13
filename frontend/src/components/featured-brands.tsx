@@ -1,25 +1,23 @@
 import Image from "next/image";
 
 const FEATURED_BRANDS = [
-  { name: "Amazon", logo: "amazon" },
-  { name: "Myntra", logo: "myntra" },
-  { name: "OnePlus", logo: "one-plus" },
-  { name: "boAt", logo: "boat" },
-  { name: "Tata Motors", logo: "tata-motors" },
-  { name: "Xiaomi", logo: "xiaomi" },
-  { name: "Audible", logo: "audible" },
-  { name: "Philips", logo: "philips" },
-  { name: "Fastrack", logo: "fastrack" },
-  { name: "TVS", logo: "tvs" },
-  { name: "Unacademy", logo: "unacademy" },
-  { name: "Masters' Union", logo: "masters-union" },
+  { name: "Zing Beverages", logo: "zing" },
+  { name: "Kraft Arena Games", logo: "kraft-arena" },
+  { name: "Masala Monk Foods", logo: "masala-monk" },
+  { name: "Kadak Chai Co.", logo: "kadak-chai" },
+  { name: "Pulse Fitness", logo: "pulse" },
+  { name: "Orbit Wallet", logo: "orbit" },
+  { name: "Neon Nights Festival", logo: "neon-nights" },
+  { name: "Nimbus Audio", logo: "nimbus" },
+  { name: "Lumen Skincare", logo: "lumen" },
+  { name: "Byteside Media", logo: "byteside" },
 ];
 
 export function FeaturedBrands() {
   return (
     <section aria-labelledby="featured-brands-heading" className="flex w-full max-w-xl flex-col items-center gap-5">
       <h2 id="featured-brands-heading" className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        The kind of brands you&apos;ll work with
+        Brands running campaigns on Meme&apos;d
       </h2>
       <div className="flex w-full overflow-hidden mask-x-from-80%">
         <ul className="flex shrink-0 animate-[marquee_40s_linear_infinite] items-center gap-10 pr-10 motion-reduce:animate-none">
@@ -28,12 +26,12 @@ export function FeaturedBrands() {
             return (
               <li key={`${brand.logo}-${index}`} aria-hidden={duplicate} className="shrink-0">
                 <Image
-                  src={`/brands/${brand.logo}.png`}
+                  src={`/brands/${brand.logo}.svg`}
                   alt={duplicate ? "" : brand.name}
-                  width={720}
-                  height={360}
-                  sizes="112px"
-                  className="h-14 w-28 object-contain opacity-80 transition-opacity hover:opacity-100"
+                  width={240}
+                  height={80}
+                  unoptimized
+                  className="h-12 w-36 object-contain opacity-80 transition-opacity hover:opacity-100"
                 />
               </li>
             );
