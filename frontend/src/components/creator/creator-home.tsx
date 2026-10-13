@@ -35,11 +35,13 @@ export function CreatorHome() {
             : "Here's how your posts are doing."
         }
         actions={
-          <Button asChild>
-            <Link href="/creator/discover">
-              Find campaigns <ArrowRightIcon />
-            </Link>
-          </Button>
+          totals?.posts === 0 && (
+            <Button asChild>
+              <Link href="/creator/discover">
+                Find campaigns <ArrowRightIcon />
+              </Link>
+            </Button>
+          )
         }
       />
 
@@ -82,7 +84,12 @@ export function CreatorHome() {
         </ScrollRow>
       )}
 
-      <CampaignRow title="New for you" description="The latest campaigns from brands on Meme'd." sort="newest" />
+      <CampaignRow
+        title="New for you"
+        description="The latest campaigns from brands on Meme'd."
+        sort="newest"
+        seeAllHref="/creator/discover"
+      />
     </>
   );
 }

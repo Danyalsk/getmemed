@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 interface ScrollRowProps {
   title: string;
   description?: string;
+  action?: ReactNode;
   children: ReactNode;
 }
 
-export function ScrollRow({ title, description, children }: ScrollRowProps) {
+export function ScrollRow({ title, description, action, children }: ScrollRowProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const scroll = (direction: 1 | -1) => {
     const track = trackRef.current;
@@ -25,11 +26,24 @@ export function ScrollRow({ title, description, children }: ScrollRowProps) {
           <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h2>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
-        <div className="hidden gap-2 sm:flex">
-          <Button variant="outline" size="icon" aria-label={`Scroll ${title} left`} onClick={() => scroll(-1)}>
+        <div className="flex shrink-0 items-center gap-2">
+          {action}
+          <Button
+            variant="outline"
+            size="icon"
+            className="hidden sm:inline-flex"
+            aria-label={`Scroll ${title} left`}
+            onClick={() => scroll(-1)}
+          >
             <ArrowLeftIcon />
           </Button>
-          <Button variant="outline" size="icon" aria-label={`Scroll ${title} right`} onClick={() => scroll(1)}>
+          <Button
+            variant="outline"
+            size="icon"
+            className="hidden sm:inline-flex"
+            aria-label={`Scroll ${title} right`}
+            onClick={() => scroll(1)}
+          >
             <ArrowRightIcon />
           </Button>
         </div>
