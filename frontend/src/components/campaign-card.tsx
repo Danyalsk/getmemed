@@ -43,7 +43,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-[translate,border-color,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_16px_40px_-16px_rgb(150_255_67_/_0.25)] motion-reduce:hover:translate-y-0">
       <div className="relative aspect-video overflow-hidden bg-muted">
         {morphCover ? <SharedCampaignCover id={campaign._id}>{cover}</SharedCampaignCover> : cover}
-        {topLeft && <div className="absolute top-3 left-3">{topLeft}</div>}
+        {topLeft && <div className="absolute top-3 left-3 rounded-full bg-black/75 backdrop-blur">{topLeft}</div>}
         {topRight && <div className="absolute top-2 right-2 z-10">{topRight}</div>}
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
