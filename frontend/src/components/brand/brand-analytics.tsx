@@ -10,13 +10,12 @@ import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
 import { accentBackground } from "@/lib/accents";
-import { formatRupees, formatViews, getInitials } from "@/lib/format";
+import { formatCostPerThousand, formatRupees, formatViews, getInitials } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
 export function BrandAnalytics() {
   const { data, error, refetch } = useQuery(queries.brandAnalytics);
   const totals = data?.totals;
-  const costPerThousand = totals && totals.views ? Math.round((totals.earned / totals.views) * 1000) : 0;
 
   return (
     <>
@@ -40,7 +39,7 @@ export function BrandAnalytics() {
         <StatCard
           accent="text-pop-violet"
           label="Cost per 1K views"
-          value={totals && formatRupees(costPerThousand)}
+          value={totals && formatCostPerThousand(totals.earned, totals.views)}
           icon={ChartPieIcon}
         />
         <StatCard

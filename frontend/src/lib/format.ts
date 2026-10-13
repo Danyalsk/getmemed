@@ -4,6 +4,13 @@ const rupees = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 
+const rupeesWithPaise = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 const compactRupees = new Intl.NumberFormat("en-IN", {
   style: "currency",
   currency: "INR",
@@ -31,6 +38,9 @@ const UNITS: readonly [Intl.RelativeTimeFormatUnit, number][] = [
 ];
 
 export const formatRupees = (amount: number): string => rupees.format(amount);
+
+export const formatCostPerThousand = (paid: number, views: number): string =>
+  rupeesWithPaise.format(views ? (paid / views) * 1000 : 0);
 
 export const formatRupeesCompact = (amount: number): string => compactRupees.format(amount);
 

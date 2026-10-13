@@ -6,12 +6,11 @@ import { ChartPieIcon, FlagIcon, TrendingUpIcon, UsersRoundIcon } from "lucide-r
 import type { Campaign } from "@contracts/campaign";
 
 import { StatCard } from "@/components/stat-card";
-import { formatRupees, formatViews } from "@/lib/format";
+import { formatCostPerThousand, formatRupees, formatViews } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
 export function CampaignPerformance({ campaign }: { campaign: Pick<Campaign, "_id" | "budget"> }) {
   const { data } = useQuery(queries.campaignPerformance(campaign._id));
-  const costPerThousand = data?.views ? Math.round((data.earned / data.views) * 1000) : 0;
 
   return (
     <section aria-labelledby="performance-heading" className="flex flex-col gap-3">
@@ -29,7 +28,7 @@ export function CampaignPerformance({ campaign }: { campaign: Pick<Campaign, "_i
         <StatCard
           accent="text-pop-violet"
           label="Cost per 1K views"
-          value={data && formatRupees(costPerThousand)}
+          value={data && formatCostPerThousand(data.earned, data.views)}
           icon={ChartPieIcon}
         />
         <StatCard
