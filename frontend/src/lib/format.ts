@@ -89,3 +89,10 @@ export function formatTimeLeft(endsAt: string): string {
 }
 
 export const indiaDateFromNow = (days: number): string => indiaDay.format(Date.now() + days * 24 * HOUR_MS);
+
+// Budget bars go amber when most of the money is gone and red once it's all spent.
+export function budgetBarClass(spentPercent: number): string {
+  if (spentPercent >= 100) return "bg-destructive";
+  if (spentPercent >= 80) return "bg-warning";
+  return "bg-info";
+}

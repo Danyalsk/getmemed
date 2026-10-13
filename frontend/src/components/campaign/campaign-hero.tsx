@@ -18,7 +18,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
   const topPayout = campaign.milestones.at(-1)?.payout ?? 0;
   const deadline = getDeadline(campaign.endsAt);
   const stats = [
-    { label: "Top payout per post", value: formatRupees(topPayout), tone: "text-brand" },
+    { label: "Top payout per post", value: formatRupees(topPayout), tone: "text-success" },
     { label: "Budget left", value: formatRupees(campaign.remaining), tone: "" },
     { label: "Posts submitted", value: campaign.submissionCount.toLocaleString("en-IN"), tone: "" },
     deadline.ended
@@ -26,7 +26,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
       : {
           label: `Ends ${deadline.date}`,
           value: `${deadline.countdown} left`,
-          tone: deadline.urgent ? "text-pop-orange" : "",
+          tone: deadline.urgent ? "text-warning" : "",
         },
   ];
 
@@ -50,7 +50,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
 
         <h1 className="text-3xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl">{campaign.name}</h1>
 
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-border sm:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-border sm:grid-cols-4 lg:grid-cols-2">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1 bg-card px-4 py-3">
               <dt className="text-xs text-muted-foreground">{stat.label}</dt>
@@ -65,7 +65,7 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
       </div>
 
       <div className="relative order-first lg:order-none">
-        <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-brand/80" />
+        <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-2xl bg-foreground/10" />
         <div className="relative aspect-video overflow-hidden rounded-2xl border bg-muted">
           <SharedCampaignCover id={campaign._id}>
             <div className="absolute inset-0">

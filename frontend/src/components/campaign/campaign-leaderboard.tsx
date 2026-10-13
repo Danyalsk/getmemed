@@ -33,7 +33,7 @@ export function CampaignLeaderboard({ campaignId }: { campaignId: string }) {
                   {entry.posts} {entry.posts === 1 ? "post" : "posts"} · {formatViews(entry.views)} views
                 </span>
               </div>
-              <span className="text-sm font-semibold text-brand tabular-nums">{formatRupees(entry.earned)}</span>
+              <span className="text-sm font-semibold text-success tabular-nums">{formatRupees(entry.earned)}</span>
             </li>
           ))}
         </ol>

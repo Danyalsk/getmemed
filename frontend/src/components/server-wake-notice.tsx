@@ -11,7 +11,7 @@ const READY_VISIBLE_MS = 2500;
 
 type WakeState = "checking" | "waking" | "ready" | "hidden";
 
-const PIXEL_COLORS = ["bg-brand", "bg-pop-cyan", "bg-pop-violet"];
+const PIXEL_DELAYS = [0, 150, 300];
 
 function formatElapsed(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -67,11 +67,11 @@ export function ServerWakeNotice() {
       {state === "waking" ? (
         <>
           <span aria-hidden className="flex shrink-0 items-end gap-1">
-            {PIXEL_COLORS.map((color, index) => (
+            {PIXEL_DELAYS.map((delay) => (
               <span
-                key={color}
-                className={`size-2.5 animate-bounce ${color} motion-reduce:animate-none`}
-                style={{ animationDelay: `${index * 150}ms` }}
+                key={delay}
+                className="size-2.5 animate-bounce bg-info motion-reduce:animate-none"
+                style={{ animationDelay: `${delay}ms` }}
               />
             ))}
           </span>
@@ -85,7 +85,7 @@ export function ServerWakeNotice() {
         </>
       ) : (
         <>
-          <CircleCheckIcon className="size-5 shrink-0 text-brand" />
+          <CircleCheckIcon className="size-5 shrink-0 text-success" />
           <span className="text-sm font-medium">Server is ready</span>
         </>
       )}

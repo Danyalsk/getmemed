@@ -28,7 +28,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm transition-colors ${active ? "border-brand bg-brand/15 text-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground"}`}
+      className={`flex h-9 items-center gap-1.5 rounded-full border px-4 text-sm transition-colors ${active ? "border-foreground bg-foreground/10 text-foreground" : "text-muted-foreground hover:bg-card hover:text-foreground"}`}
     >
       {children}
     </button>

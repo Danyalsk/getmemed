@@ -13,7 +13,7 @@ import { PaginationBar } from "@/components/list/pagination-bar";
 import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SharedCampaignCover, TRANSITION_TYPES } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatRupees, formatRupeesCompact, formatTimeLeft } from "@/lib/format";
+import { budgetBarClass, formatRupees, formatRupeesCompact, formatTimeLeft } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 import { queries } from "@/lib/queries";
 
@@ -48,13 +48,13 @@ function CampaignListRow({ campaign }: { campaign: Campaign }) {
           {campaign.brand.name} · {formatTimeLeft(campaign.endsAt)}
         </span>
         <span className="text-xs text-muted-foreground sm:hidden">
-          <span className="text-brand">{formatRupees(topPayout)}</span> max · {formatRupeesCompact(campaign.remaining)}{" "}
+          <span className="text-success">{formatRupees(topPayout)}</span> max · {formatRupeesCompact(campaign.remaining)}{" "}
           left
         </span>
       </span>
       <span className="hidden flex-col gap-0.5 sm:flex">
         <span className="text-sm font-medium tabular-nums">
-          {formatRupees(firstPayout)} → <span className="text-brand">{formatRupees(topPayout)}</span>
+          {formatRupees(firstPayout)} → <span className="text-success">{formatRupees(topPayout)}</span>
         </span>
         <span className="text-xs text-muted-foreground">per post</span>
       </span>
@@ -64,7 +64,7 @@ function CampaignListRow({ campaign }: { campaign: Campaign }) {
           <span>{leftPercent}%</span>
         </span>
         <span className="h-1.5 overflow-hidden rounded-full bg-muted">
-          <span className="block h-full rounded-full bg-pop-cyan" style={{ width: `${leftPercent}%` }} />
+          <span className={`block h-full rounded-full ${budgetBarClass(100 - leftPercent)}`} style={{ width: `${leftPercent}%` }} />
         </span>
       </span>
       <ChevronRightIcon className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />

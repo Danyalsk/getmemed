@@ -14,7 +14,7 @@ interface BarListProps {
   barClassName?: string;
 }
 
-export function BarList({ items, emptyMessage, barClassName = "bg-brand" }: BarListProps) {
+export function BarList({ items, emptyMessage, barClassName = "bg-info" }: BarListProps) {
   if (items.length === 0) {
     return <p className="py-6 text-center text-sm text-muted-foreground">{emptyMessage}</p>;
   }

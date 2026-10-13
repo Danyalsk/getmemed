@@ -17,9 +17,9 @@ import { campaignHref } from "../creator-campaign-card";
 const TOP_COUNT = 10;
 
 const PODIUM_STEPS = [
-  { rank: 2, sticker: "bg-pop-cyan", placement: "order-2 md:order-1 md:mt-12" },
-  { rank: 1, sticker: "bg-brand", placement: "order-1 md:order-2" },
-  { rank: 3, sticker: "bg-pop-violet", placement: "order-3 md:mt-20" },
+  { rank: 2, sticker: "bg-zinc-300", placement: "order-2 md:order-1 md:mt-12" },
+  { rank: 1, sticker: "bg-warning", placement: "order-1 md:order-2" },
+  { rank: 3, sticker: "bg-pop-orange", placement: "order-3 md:mt-20" },
 ] as const;
 
 function HeatMeter({ posts, hottest }: { posts: number; hottest: number }) {
@@ -62,7 +62,7 @@ function PodiumStep({ campaign, rank, sticker, hottest }: { campaign: Campaign; 
         <span className="flex flex-col gap-1.5 px-1 pb-1">
           <span className="truncate font-semibold group-hover:underline">{campaign.name}</span>
           <span className="truncate text-xs text-muted-foreground">
-            {campaign.brand.name} · up to <span className="text-brand">{topPayout(campaign)}</span>
+            {campaign.brand.name} · up to <span className="text-success">{topPayout(campaign)}</span>
           </span>
           <HeatMeter posts={campaign.submissionCount} hottest={hottest} />
         </span>

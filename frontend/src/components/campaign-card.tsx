@@ -8,7 +8,7 @@ import { CampaignCover } from "@/components/campaign-cover";
 import { SharedCampaignCover } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
 import { accentBackground } from "@/lib/accents";
-import { formatRupees, formatRupeesCompact, formatTimeLeft, formatViews, getDeadline, getInitials } from "@/lib/format";
+import { budgetBarClass, formatRupees, formatRupeesCompact, formatTimeLeft, formatViews, getDeadline, getInitials } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 
 export const CARD_LINK_CLASS =
@@ -50,7 +50,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
             </span>
             <span className="truncate font-medium">{campaign.brand.name}</span>
             <span
-              className={`shrink-0 ${getDeadline(campaign.endsAt).urgent ? "text-pop-orange" : "text-muted-foreground"}`}
+              className={`shrink-0 ${getDeadline(campaign.endsAt).urgent ? "text-warning" : "text-muted-foreground"}`}
             >
               · {formatTimeLeft(campaign.endsAt)}
             </span>
@@ -77,7 +77,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
               <UsersRoundIcon className="size-3" /> {campaign.submissionCount}
             </span>
             {firstRung && (
-              <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-medium text-brand tabular-nums">
+              <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success tabular-nums">
                 {formatRupees(firstRung.payout)}/{formatViews(firstRung.views)}
               </span>
             )}
@@ -91,7 +91,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
           aria-valuemax={100}
           className="h-1.5 overflow-hidden rounded-full bg-muted"
         >
-          <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${spentPercent}%` }} />
+          <div className={`h-full rounded-full transition-[width] ${budgetBarClass(spentPercent)}`} style={{ width: `${spentPercent}%` }} />
         </div>
         {footer}
       </div>

@@ -73,7 +73,7 @@ export function CoverImageField({ value, onChange, error }: CoverImageFieldProps
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={`relative flex aspect-video cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed transition-colors ${
-          dragging ? "border-brand bg-brand/10" : "hover:bg-muted/50"
+          dragging ? "border-info bg-info/10" : "hover:bg-muted/50"
         } ${message ? "border-destructive" : ""}`}
       >
         {value && <Image src={getImageUrl(value)} alt="Cover preview" fill unoptimized className="object-cover" />}

@@ -32,7 +32,7 @@ export function ChoiceTiles<T extends string>({ legend, name, choices, value, on
               className={cn(
                 "flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors",
                 "has-focus-visible:ring-3 has-focus-visible:ring-ring",
-                selected ? "border-brand bg-brand/10" : "hover:bg-muted/60",
+                selected ? "border-foreground bg-foreground/5" : "hover:bg-muted/60",
               )}
             >
               <input
@@ -43,7 +43,7 @@ export function ChoiceTiles<T extends string>({ legend, name, choices, value, on
                 onChange={() => onChange(choiceValue)}
                 className="sr-only"
               />
-              <Icon className={cn("mt-0.5 size-4 shrink-0", selected ? "text-brand" : "text-muted-foreground")} />
+              <Icon className={cn("mt-0.5 size-4 shrink-0", selected ? "text-foreground" : "text-muted-foreground")} />
               <span className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">{label}</span>
                 <span className="text-xs text-muted-foreground">{hint}</span>

@@ -23,7 +23,7 @@ export function ViewSpikeFlag({ submission }: { submission: Submission }) {
   if (!submission.flagged) return <span className="text-muted-foreground">—</span>;
   return (
     <div className="flex max-w-56 flex-col gap-1">
-      <Badge variant="destructive">
+      <Badge variant="warning">
         <TriangleAlertIcon /> View spike
       </Badge>
       {submission.flagReason && <span className="text-xs text-muted-foreground">{submission.flagReason}</span>}

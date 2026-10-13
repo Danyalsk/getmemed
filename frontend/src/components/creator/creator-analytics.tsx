@@ -25,20 +25,17 @@ export function CreatorAnalytics() {
 
       <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
-          accent="text-brand"
           label="Total views"
           value={totals && formatViews(totals.views)}
           icon={TrendingUpIcon}
         />
-        <StatCard accent="text-pop-cyan" label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
+        <StatCard label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
         <StatCard
-          accent="text-pop-violet"
           label="Avg. views per post"
           value={totals && formatViews(totals.posts ? Math.round(totals.views / totals.posts) : 0)}
           icon={TrendingUpIcon}
         />
         <StatCard
-          accent="text-pop-orange"
           label="Flagged posts"
           value={totals && String(totals.flagged)}
           icon={FlagIcon}
@@ -49,7 +46,7 @@ export function CreatorAnalytics() {
         <Panel title="Views by campaign" description="Where your posts are getting the most reach.">
           <BarList
             emptyMessage="Submit a post to see campaign performance."
-            barClassName="bg-pop-cyan"
+            barClassName="bg-success"
             items={(data?.byCampaign ?? []).map((row) => ({
               key: row.campaign._id,
               label: row.campaign.name,

@@ -18,21 +18,18 @@ export function CampaignPerformance({ campaign }: { campaign: Pick<Campaign, "_i
         Performance
       </h2>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard accent="text-brand" label="Views" value={data && formatViews(data.views)} icon={TrendingUpIcon} />
+        <StatCard label="Views" value={data && formatViews(data.views)} icon={TrendingUpIcon} />
         <StatCard
-          accent="text-pop-cyan"
           label="Paid out"
           value={data && `${formatRupees(data.earned)} of ${formatRupees(campaign.budget)}`}
           icon={ChartPieIcon}
         />
         <StatCard
-          accent="text-pop-violet"
           label="Cost per 1K views"
           value={data && formatCostPerThousand(data.earned, data.views)}
           icon={ChartPieIcon}
         />
         <StatCard
-          accent="text-pop-orange"
           label="Creators · flagged"
           value={data && `${data.creators} · ${data.flagged}`}
           icon={data?.flagged ? FlagIcon : UsersRoundIcon}

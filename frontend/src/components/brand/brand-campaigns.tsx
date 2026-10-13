@@ -40,25 +40,21 @@ export function BrandCampaigns() {
 
       <section aria-label="Budget overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
-          accent="text-brand"
           label="Campaigns"
           value={summary && String(summary.campaigns)}
           icon={MegaphoneIcon}
         />
         <StatCard
-          accent="text-pop-cyan"
           label="Total budget"
           value={summary && formatRupees(summary.budget)}
           icon={WalletIcon}
         />
         <StatCard
-          accent="text-pop-violet"
           label="Paid out"
           value={summary && formatRupees(summary.spent)}
           icon={ChartPieIcon}
         />
         <StatCard
-          accent="text-pop-orange"
           label="Remaining"
           value={summary && formatRupees(summary.remaining)}
           icon={PiggyBankIcon}

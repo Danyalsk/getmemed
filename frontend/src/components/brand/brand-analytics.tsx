@@ -25,25 +25,21 @@ export function BrandAnalytics() {
 
       <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
-          accent="text-brand"
           label="Total views"
           value={totals && formatViews(totals.views)}
           icon={TrendingUpIcon}
         />
         <StatCard
-          accent="text-pop-cyan"
           label="Paid out"
           value={totals && `${formatRupees(totals.earned)} of ${formatRupees(totals.budget)}`}
           icon={ChartPieIcon}
         />
         <StatCard
-          accent="text-pop-violet"
           label="Cost per 1K views"
           value={totals && formatCostPerThousand(totals.earned, totals.views)}
           icon={ChartPieIcon}
         />
         <StatCard
-          accent="text-pop-orange"
           label="Creators · flagged posts"
           value={totals && `${totals.creators} · ${totals.flagged}`}
           icon={totals?.flagged ? FlagIcon : UsersRoundIcon}
@@ -54,7 +50,7 @@ export function BrandAnalytics() {
         <Panel title="Spend by campaign" description="What each campaign has paid creators.">
           <BarList
             emptyMessage="Spend appears here once posts cross their first milestone."
-            barClassName="bg-brand"
+            barClassName="bg-success"
             items={(data?.byCampaign ?? []).map((row) => ({
               key: row.campaign._id,
               label: row.campaign.name,
@@ -72,7 +68,7 @@ export function BrandAnalytics() {
       <Panel title="Top creators" description="Creators who have earned the most from your campaigns.">
         <BarList
           emptyMessage="No creator has earned from your campaigns yet."
-          barClassName="bg-pop-cyan"
+          barClassName="bg-success"
           items={(data?.topCreators ?? []).map((row) => ({
             key: row.creator._id,
             label: (

@@ -7,6 +7,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme="dark"
+      richColors
       className="toaster group"
       icons={{
         success: (
@@ -31,6 +32,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
+          "--success-bg": "color-mix(in oklab, var(--success) 12%, var(--popover))",
+          "--success-text": "var(--success)",
+          "--success-border": "color-mix(in oklab, var(--success) 30%, transparent)",
+          "--error-bg": "color-mix(in oklab, var(--destructive) 12%, var(--popover))",
+          "--error-text": "var(--destructive)",
+          "--error-border": "color-mix(in oklab, var(--destructive) 30%, transparent)",
+          "--warning-bg": "color-mix(in oklab, var(--warning) 12%, var(--popover))",
+          "--warning-text": "var(--warning)",
+          "--warning-border": "color-mix(in oklab, var(--warning) 30%, transparent)",
+          "--info-bg": "color-mix(in oklab, var(--info) 12%, var(--popover))",
+          "--info-text": "var(--info)",
+          "--info-border": "color-mix(in oklab, var(--info) 30%, transparent)",
         } as React.CSSProperties
       }
       toastOptions={{
