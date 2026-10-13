@@ -11,6 +11,12 @@ const body = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["lati
 const pixel = Silkscreen({ variable: "--font-silkscreen", weight: ["400", "700"], subsets: ["latin"] });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SHARE_IMAGE = {
+  url: "/og.png",
+  width: 1200,
+  height: 630,
+  alt: "Meme'd: pay creators for the reach they actually deliver",
+};
 const DESCRIPTION = "Run creator campaigns with milestone payouts that track real views and never exceed your budget.";
 
 export const metadata: Metadata = {
@@ -23,13 +29,14 @@ export const metadata: Metadata = {
     siteName: "Meme'd",
     title: "Meme'd · Creator campaigns, paid on performance",
     description: DESCRIPTION,
-    url: "/",
     locale: "en_IN",
+    images: [SHARE_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "Meme'd · Creator campaigns, paid on performance",
     description: DESCRIPTION,
+    images: [SHARE_IMAGE],
   },
 };
 
