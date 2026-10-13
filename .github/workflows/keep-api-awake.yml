@@ -1,0 +1,18 @@
+name: Keep API awake
+
+# Render's free tier sleeps after 15 minutes without traffic. One always-on
+# instance fits inside the free 750 instance hours a month.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping health check
+        run: curl -fsS --retry 3 --retry-delay 20 --max-time 60 "$API_URL/api/health"
+        env:
+          API_URL: ${{ vars.API_URL }}
