@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { api } from "@/lib/api";
-import { invalidateQueryRoots } from "@/lib/queries";
+import { queryKeys } from "@/lib/queries";
 
 interface DeleteCampaignDialogProps {
   campaign: Pick<Campaign, "_id" | "name">;
@@ -34,7 +34,11 @@ export function DeleteCampaignDialog({ campaign, open, onOpenChange, redirectTo 
     onSuccess: () => {
       toast.success(`${campaign.name} deleted`);
       if (redirectTo) router.replace(redirectTo);
-      return invalidateQueryRoots(queryClient, "campaigns", "analytics");
+      queryClient.removeQueries({ queryKey: [...queryKeys.campaigns, campaign._id] });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.analytics }),
+      ]);
     },
     onError: (error) => toast.error(error.message),
   });

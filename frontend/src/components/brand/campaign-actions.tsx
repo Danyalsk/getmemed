@@ -87,7 +87,7 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
             <EllipsisIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-auto">
           <DropdownMenuItem asChild>
             <Link href={`/brand/campaigns/${campaign._id}`} transitionTypes={TRANSITION_TYPES.forward}>
               <EyeIcon /> View details
@@ -109,7 +109,7 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" disabled={!canDelete} onSelect={() => setConfirmDelete(true)}>
             <Trash2Icon />
-            {canDelete ? "Delete campaign" : "Delete (has posts, close instead)"}
+            {canDelete ? "Delete campaign" : "Can't delete, has posts"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

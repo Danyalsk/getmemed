@@ -64,7 +64,7 @@ export interface Deadline {
 
 export function getDeadline(endsAt: string): Deadline {
   const hoursLeft = (new Date(endsAt).getTime() - Date.now()) / HOUR_MS;
-  const days = Math.ceil(hoursLeft / 24);
+  const days = Math.floor(hoursLeft / 24);
   return {
     ended: hoursLeft <= 0,
     urgent: hoursLeft > 0 && hoursLeft < URGENT_HOURS,

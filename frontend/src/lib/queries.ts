@@ -6,7 +6,7 @@ import type { BrandSubmissionsQuery } from "@contracts/submission";
 
 import { api } from "./api";
 
-const queryKeys = {
+export const queryKeys = {
   campaigns: ["campaigns"] as const,
   submissions: ["submissions"] as const,
   analytics: ["analytics"] as const,
