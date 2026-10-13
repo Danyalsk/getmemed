@@ -36,3 +36,5 @@ export function useListState() {
     resetPage: () => setPage(1),
   };
 }
+
+export type ListState = ReturnType<typeof useListState>;

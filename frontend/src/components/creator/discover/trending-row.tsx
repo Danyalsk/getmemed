@@ -17,13 +17,9 @@ import { campaignHref } from "../creator-campaign-card";
 const TOP_COUNT = 10;
 
 const PODIUM_STEPS = [
-  {
-    rank: 2,
-    base: "h-20 border-pop-cyan/60 from-pop-cyan/25 text-pop-cyan",
-    order: "order-2 md:order-1",
-  },
-  { rank: 1, base: "h-28 border-brand/60 from-brand/25 text-brand", order: "order-1 md:order-2" },
-  { rank: 3, base: "h-14 border-pop-violet/60 from-pop-violet/25 text-pop-violet", order: "order-3" },
+  { rank: 2, sticker: "bg-pop-cyan", placement: "order-2 md:order-1 md:mt-12" },
+  { rank: 1, sticker: "bg-brand", placement: "order-1 md:order-2" },
+  { rank: 3, sticker: "bg-pop-violet", placement: "order-3 md:mt-20" },
 ] as const;
 
 function HeatMeter({ posts, hottest }: { posts: number; hottest: number }) {
@@ -45,7 +41,7 @@ function HeatMeter({ posts, hottest }: { posts: number; hottest: number }) {
 
 const topPayout = (campaign: Campaign): string => formatRupees(campaign.milestones.at(-1)?.payout ?? 0);
 
-function PodiumStep({ campaign, rank, base, hottest }: { campaign: Campaign; rank: number; base: string; hottest: number }) {
+function PodiumStep({ campaign, rank, sticker, hottest }: { campaign: Campaign; rank: number; sticker: string; hottest: number }) {
   return (
     <Link
       href={campaignHref(campaign._id)}
@@ -56,6 +52,12 @@ function PodiumStep({ campaign, rank, base, hottest }: { campaign: Campaign; ran
       <span className="flex flex-col gap-3 p-3">
         <span className="relative aspect-video overflow-hidden rounded-xl bg-muted">
           <CampaignCover campaign={campaign} sizes="(min-width: 768px) 420px, 100vw" />
+          <span
+            aria-hidden
+            className={`absolute top-3 left-3 -rotate-6 rounded-xl px-3 py-0.5 text-3xl font-extrabold text-ink shadow-[0.08em_0.1em_0_rgb(0_0_0/0.65)] transition-transform duration-300 group-hover:-rotate-12 motion-reduce:transition-none ${sticker}`}
+          >
+            {rank}
+          </span>
         </span>
         <span className="flex flex-col gap-1.5 px-1 pb-1">
           <span className="truncate font-semibold group-hover:underline">{campaign.name}</span>
@@ -64,12 +66,6 @@ function PodiumStep({ campaign, rank, base, hottest }: { campaign: Campaign; ran
           </span>
           <HeatMeter posts={campaign.submissionCount} hottest={hottest} />
         </span>
-      </span>
-      <span
-        aria-hidden
-        className={`flex items-center justify-center border-t-2 bg-linear-to-b to-transparent ${base}`}
-      >
-        <span className="text-5xl font-extrabold tracking-tight">{rank}</span>
       </span>
     </Link>
   );
@@ -94,19 +90,19 @@ export function TrendingRow() {
 
       {data ? (
         <>
-          <div className="grid items-end gap-4 md:grid-cols-[1fr_1.2fr_1fr]">
-            {PODIUM_STEPS.map(({ rank, base, order }) => {
+          <div className="grid items-start gap-4 md:grid-cols-[1fr_1.2fr_1fr]">
+            {PODIUM_STEPS.map(({ rank, sticker, placement }) => {
               const campaign = campaigns[rank - 1];
               return campaign ? (
-                <div key={rank} className={order}>
-                  <PodiumStep campaign={campaign} rank={rank} base={base} hottest={hottest} />
+                <div key={rank} className={placement}>
+                  <PodiumStep campaign={campaign} rank={rank} sticker={sticker} hottest={hottest} />
                 </div>
               ) : null;
             })}
           </div>
 
           {rest.length > 0 && (
-            <ol className="grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+            <ol className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
               {rest.map((campaign, index) => (
                 <li key={campaign._id}>
                   <Link
