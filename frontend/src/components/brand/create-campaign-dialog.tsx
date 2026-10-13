@@ -12,6 +12,7 @@ import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/commo
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
 import { CoverImageField } from "@/components/forms/cover-image-field";
+import { TextAreaField } from "@/components/forms/text-area-field";
 import { TextField } from "@/components/forms/text-field";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,7 @@ const PLATFORM_CHOICES: readonly Choice<Platform>[] = platformSchema.options.map
 
 const DEFAULT_VALUES: Partial<CreateCampaignInput> = {
   name: "",
+  description: "",
   platform: "instagram",
   budget: 50_000,
   milestones: [
@@ -79,7 +81,10 @@ export function CreateCampaignDialog() {
     onError: (error) => toast.error(error.message),
   });
 
-  const onSubmit = handleSubmit((input) => create.mutate(input));
+  const onSubmit = handleSubmit(
+    (input) => create.mutate(input),
+    () => toast.error("Fix the highlighted fields to continue"),
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -110,6 +115,14 @@ export function CreateCampaignDialog() {
               autoComplete="off"
               error={errors.name}
               {...register("name")}
+            />
+            <TextAreaField
+              label="Brief"
+              description="Creators read this before posting."
+              placeholder="What should creators make? Tone, must-haves and any links to include."
+              rows={4}
+              error={errors.description}
+              {...register("description")}
             />
             <Controller
               control={control}
