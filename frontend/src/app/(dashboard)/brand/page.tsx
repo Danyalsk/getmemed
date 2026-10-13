@@ -1,12 +1,12 @@
-import { BrandDashboard } from "@/components/brand/brand-dashboard";
+import { BrandHome } from "@/components/brand/brand-home";
 import { PageTransition } from "@/components/page-transition";
 
 export const instant = false;
 
-export default function BrandPage() {
+export default function BrandHomePage() {
   return (
     <PageTransition>
-      <BrandDashboard />
+      <BrandHome />
     </PageTransition>
   );
 }

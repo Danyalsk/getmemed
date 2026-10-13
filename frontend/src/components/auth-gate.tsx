@@ -24,10 +24,10 @@ function useRedirectTo(target: string | null): void {
   }, [target, router]);
 }
 
-export function RequireRole({ role, children }: { role: Role; children: ReactNode }) {
+export function RequireSession({ role, children }: { role?: Role; children: ReactNode }) {
   const session = useSession();
-  const target =
-    session === null ? "/login" : session && session.user.role !== role ? HOME_BY_ROLE[session.user.role] : null;
+  const wrongRole = session && role && session.user.role !== role;
+  const target = session === null ? "/login" : wrongRole ? HOME_BY_ROLE[session.user.role] : null;
   useRedirectTo(target);
 
   if (session === undefined || target) return <PageLoader />;

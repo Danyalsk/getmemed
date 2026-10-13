@@ -73,7 +73,7 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
   return (
     <>
       <Link
-        href="/brand"
+        href="/brand/campaigns"
         transitionTypes={TRANSITION_TYPES.back}
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >

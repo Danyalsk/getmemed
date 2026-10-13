@@ -23,7 +23,7 @@ import { CreateCampaignDialog } from "./create-campaign-dialog";
 
 const ALL_STATUSES = "all";
 
-export function BrandDashboard() {
+export function BrandCampaigns() {
   const list = useListState();
   const [status, setStatus] = useState<CampaignStatus>();
   const { data, error, refetch, isPlaceholderData } = useQuery(queries.myCampaigns({ ...list.query, status }));
@@ -88,7 +88,7 @@ export function BrandDashboard() {
             className={`grid gap-5 md:grid-cols-2 lg:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
           >
             {data
-              ? data.items.map((campaign) => <BrandCampaignCard key={campaign._id} campaign={campaign} />)
+              ? data.items.map((campaign) => <BrandCampaignCard key={campaign._id} campaign={campaign} morphCover />)
               : Array.from({ length: 6 }, (_, index) => <CampaignCardSkeleton key={index} />)}
           </div>
         )}

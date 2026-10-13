@@ -7,7 +7,7 @@ import type { Campaign } from "@contracts/campaign";
 import type { CampaignStatus } from "@contracts/common";
 
 import { api } from "@/lib/api";
-import { queryKeys } from "@/lib/queries";
+import { invalidateQueryRoots } from "@/lib/queries";
 
 const SUCCESS_MESSAGES: Record<CampaignStatus, (name: string) => string> = {
   active: (name) => `${name} resumed`,
@@ -21,7 +21,7 @@ export function useUpdateCampaignStatus(campaign: Pick<Campaign, "_id" | "name">
     mutationFn: (status: CampaignStatus) => api.setCampaignStatus(campaign._id, status),
     onSuccess: (updated) => {
       toast.success(SUCCESS_MESSAGES[updated.status](campaign.name));
-      return queryClient.invalidateQueries({ queryKey: queryKeys.campaigns });
+      return invalidateQueryRoots(queryClient, "campaigns", "analytics");
     },
     onError: (error) => toast.error(error.message),
   });

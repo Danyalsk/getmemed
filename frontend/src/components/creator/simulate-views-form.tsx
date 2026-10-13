@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { formatRupees } from "@/lib/format";
-import { queryKeys } from "@/lib/queries";
+import { invalidateQueryRoots } from "@/lib/queries";
 
 export function SimulateViewsForm({ submission }: { submission: Submission }) {
   const queryClient = useQueryClient();
@@ -33,10 +33,7 @@ export function SimulateViewsForm({ submission }: { submission: Submission }) {
       } else {
         toast.info("Views updated, no new payout");
       }
-      return Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.submissions }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.campaigns }),
-      ]);
+      return invalidateQueryRoots(queryClient, "submissions", "campaigns", "analytics");
     },
     onError: (error) => toast.error(error.message),
   });

@@ -1,12 +1,12 @@
-import { CreatorDiscover } from "@/components/creator/creator-discover";
+import { CreatorHome } from "@/components/creator/creator-home";
 import { PageTransition } from "@/components/page-transition";
 
 export const instant = false;
 
-export default function CreatorPage() {
+export default function CreatorHomePage() {
   return (
     <PageTransition>
-      <CreatorDiscover />
+      <CreatorHome />
     </PageTransition>
   );
 }

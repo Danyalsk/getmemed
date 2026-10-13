@@ -12,13 +12,14 @@ import { queries } from "@/lib/queries";
 
 import { CampaignActions } from "./campaign-actions";
 
-export function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
+export function BrandCampaignCard({ campaign, morphCover }: { campaign: Campaign; morphCover?: boolean }) {
   const queryClient = useQueryClient();
   const primeCampaignPage = () => queryClient.setQueryData(queries.campaign(campaign._id).queryKey, campaign);
 
   return (
     <CampaignCard
       campaign={campaign}
+      morphCover={morphCover}
       title={
         <Link
           href={`/brand/campaigns/${campaign._id}`}

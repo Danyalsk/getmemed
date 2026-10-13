@@ -1,10 +1,20 @@
-import type { z } from "zod";
+import { z } from "zod";
 
-import { authResponseSchema, type LoginInput, type SignupInput } from "@contracts/auth";
+import { brandAnalyticsSchema, creatorAnalyticsSchema } from "@contracts/analytics";
+import {
+  authResponseSchema,
+  publicUserSchema,
+  type ChangePasswordInput,
+  type LoginInput,
+  type SignupInput,
+  type UpdateProfileInput,
+} from "@contracts/auth";
 import {
   brandCampaignsSchema,
   campaignPageSchema,
   campaignSchema,
+  joinedCampaignPageSchema,
+  leaderboardSchema,
   type BrandCampaignsQuery,
   type CreateCampaignInput,
   type LiveCampaignsQuery,
@@ -21,6 +31,7 @@ import {
   submissionPageSchema,
   submissionSchema,
   updateViewsResponseSchema,
+  type BrandSubmissionsQuery,
   type PostSubmissionInput,
   type UpdateViewsInput,
 } from "@contracts/submission";
@@ -96,12 +107,17 @@ export const api = {
   uploadImage: (file: Blob) => apiRequest("/api/images", uploadedImageSchema, "POST", file),
   signup: (input: SignupInput) => apiRequest("/api/auth/signup", authResponseSchema, "POST", input),
   login: (input: LoginInput) => apiRequest("/api/auth/login", authResponseSchema, "POST", input),
+  updateProfile: (input: UpdateProfileInput) => apiRequest("/api/auth/me", publicUserSchema, "PATCH", input),
+  changePassword: (input: ChangePasswordInput) => apiRequest("/api/auth/password", z.null(), "PATCH", input),
 
   createCampaign: (input: CreateCampaignInput) =>
     apiRequest("/api/campaigns", campaignSchema, "POST", input),
   myCampaigns: (query: BrandCampaignsQuery) =>
     apiRequest(withQueryString("/api/campaigns/mine", query), brandCampaignsSchema),
   campaign: (id: string) => apiRequest(`/api/campaigns/${id}`, campaignSchema),
+  campaignLeaderboard: (id: string) => apiRequest(`/api/campaigns/${id}/leaderboard`, leaderboardSchema),
+  joinedCampaigns: (query: ListQuery) =>
+    apiRequest(withQueryString("/api/campaigns/joined", query), joinedCampaignPageSchema),
   liveCampaigns: (query: LiveCampaignsQuery) =>
     apiRequest(withQueryString("/api/campaigns/live", query), campaignPageSchema),
   setCampaignStatus: (id: string, status: CampaignStatus) =>
@@ -113,6 +129,11 @@ export const api = {
     apiRequest(`/api/campaigns/${campaignId}/submissions`, submissionSchema, "POST", input),
   mySubmissions: (query: ListQuery) =>
     apiRequest(withQueryString("/api/submissions/mine", query), creatorSubmissionsSchema),
+  brandSubmissions: (query: BrandSubmissionsQuery) =>
+    apiRequest(withQueryString("/api/submissions/brand", query), submissionPageSchema),
   updateViews: (submissionId: string, input: UpdateViewsInput) =>
     apiRequest(`/api/submissions/${submissionId}/views`, updateViewsResponseSchema, "PATCH", input),
+
+  creatorAnalytics: () => apiRequest("/api/analytics/creator", creatorAnalyticsSchema),
+  brandAnalytics: () => apiRequest("/api/analytics/brand", brandAnalyticsSchema),
 };

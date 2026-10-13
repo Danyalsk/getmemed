@@ -1,5 +1,5 @@
-import { RequireRole } from "@/components/auth-gate";
+import { RequireSession } from "@/components/auth-gate";
 
 export default function CreatorLayout({ children }: LayoutProps<"/creator">) {
-  return <RequireRole role="creator">{children}</RequireRole>;
+  return <RequireSession role="creator">{children}</RequireSession>;
 }

@@ -20,7 +20,7 @@ backend/
   src/models/      Mongoose models
   tests/           Unit tests (payout, spike) and integration tests (concurrency)
 frontend/
-  src/app/         Routes: landing, login, signup, /brand, /creator
+  src/app/         Routes: landing, auth, /brand/* and /creator/* workspaces, /settings
   src/components/  UI, grouped by brand / creator / shared
   src/lib/         Typed API client, session store, formatting
 ```
@@ -110,14 +110,21 @@ All responses are JSON. Errors always look like `{ "error": { "code", "message",
 | POST | `/api/auth/signup` | — | `{ name, email, password, role }` → `{ token, user }` |
 | POST | `/api/auth/login` | — | `{ email, password }` → `{ token, user }` |
 | GET | `/api/auth/me` | any | Current user |
+| PATCH | `/api/auth/me` | any | `{ name }` |
+| PATCH | `/api/auth/password` | any | `{ currentPassword, newPassword }` |
 | POST | `/api/campaigns` | brand | Create campaign |
 | GET | `/api/campaigns/mine` | brand | Own campaigns (`spent` / `remaining` each) plus a budget `summary`. Filters: `status` |
-| GET | `/api/campaigns/:id` | brand (owner) | One campaign |
+| GET | `/api/campaigns/:id` | brand (owner) or any creator | One campaign |
+| GET | `/api/campaigns/:id/leaderboard` | brand (owner) or any creator | Top 5 creators by earnings |
+| GET | `/api/campaigns/joined` | creator | Campaigns the creator has posted to, with their posts, views and earnings |
 | PATCH | `/api/campaigns/:id/status` | brand (owner) | `{ status: "active" \| "paused" \| "closed" }` |
 | GET | `/api/campaigns/:id/submissions` | brand (owner) | Posts submitted to a campaign |
-| GET | `/api/campaigns/live` | creator | Live campaigns (Redis-cached). Filters: `platform` |
+| GET | `/api/campaigns/live` | creator | Live campaigns (Redis-cached). Filters: `platform`, `sort=newest\|trending\|budget` |
 | POST | `/api/campaigns/:id/submissions` | creator | `{ postUrl }` |
 | GET | `/api/submissions/mine` | creator | Own posts plus `totalEarnings` |
+| GET | `/api/submissions/brand` | brand | Posts across all the brand's campaigns. Filters: `campaign` |
+| GET | `/api/analytics/creator` | creator | Totals, per-campaign and per-platform breakdowns, top posts |
+| GET | `/api/analytics/brand` | brand | Totals, spend per campaign, platform split, top creators |
 | PATCH | `/api/submissions/:id/views` | **none** | `{ views }` → `{ submission, paidNow }` |
 
 Every list endpoint is paginated and searchable: `?page=1&pageSize=10&search=…` (page size up to 50). Responses look like `{ items, total, page, pageSize, totalPages }`. Campaign lists search by name; submission lists search by post link, creator name or campaign name.

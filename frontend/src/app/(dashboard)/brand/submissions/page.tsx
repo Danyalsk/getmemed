@@ -1,12 +1,12 @@
-import { CreatorPosts } from "@/components/creator/creator-posts";
+import { BrandSubmissions } from "@/components/brand/brand-submissions";
 import { PageTransition } from "@/components/page-transition";
 
 export const instant = false;
 
-export default function CreatorPostsPage() {
+export default function BrandSubmissionsPage() {
   return (
     <PageTransition>
-      <CreatorPosts />
+      <BrandSubmissions />
     </PageTransition>
   );
 }

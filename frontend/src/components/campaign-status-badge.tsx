@@ -1,12 +1,16 @@
 import type { Campaign } from "@contracts/campaign";
-import { CAMPAIGN_STATUS_LABELS } from "@contracts/common";
 
+import { getCampaignAvailability, type CampaignAvailability } from "@/components/campaign-availability";
 import { Badge } from "@/components/ui/badge";
 
+const BADGES: Record<CampaignAvailability, { label: string; variant: "success" | "warning" | "secondary" | "destructive" }> = {
+  open: { label: "Active", variant: "success" },
+  paused: { label: "Paused", variant: "warning" },
+  closed: { label: "Closed", variant: "secondary" },
+  spent: { label: "Budget spent", variant: "destructive" },
+};
+
 export function CampaignStatusBadge({ campaign }: { campaign: Pick<Campaign, "status" | "remaining"> }) {
-  if (campaign.status === "active" && campaign.remaining === 0) {
-    return <Badge variant="destructive">Budget spent</Badge>;
-  }
-  const variant = { active: "success", paused: "warning", closed: "secondary" } as const;
-  return <Badge variant={variant[campaign.status]}>{CAMPAIGN_STATUS_LABELS[campaign.status]}</Badge>;
+  const { label, variant } = BADGES[getCampaignAvailability(campaign)];
+  return <Badge variant={variant}>{label}</Badge>;
 }

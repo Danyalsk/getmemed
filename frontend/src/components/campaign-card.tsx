@@ -25,21 +25,24 @@ interface CampaignCardProps {
   title: ReactNode;
   topLeft?: ReactNode;
   topRight?: ReactNode;
+  footer?: ReactNode;
+  morphCover?: boolean;
 }
 
-export function CampaignCard({ campaign, title, topLeft, topRight }: CampaignCardProps) {
+export function CampaignCard({ campaign, title, topLeft, topRight, footer, morphCover = false }: CampaignCardProps) {
   const PlatformIcon = PLATFORM_ICONS[campaign.platform];
   const firstRung = campaign.milestones[0];
+  const cover = (
+    <div className="absolute inset-0">
+      <CampaignCover campaign={campaign} sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw" />
+    </div>
+  );
   const spentPercent = Math.min(100, (campaign.spent / campaign.budget) * 100);
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-colors hover:border-white/20">
       <div className="relative aspect-video overflow-hidden bg-muted">
-        <SharedCampaignCover id={campaign._id}>
-          <div className="absolute inset-0">
-            <CampaignCover campaign={campaign} sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw" />
-          </div>
-        </SharedCampaignCover>
+        {morphCover ? <SharedCampaignCover id={campaign._id}>{cover}</SharedCampaignCover> : cover}
         {topLeft && <div className="absolute top-3 left-3">{topLeft}</div>}
         {topRight && <div className="absolute top-2 right-2 z-10">{topRight}</div>}
       </div>
@@ -92,6 +95,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight }: CampaignCar
         >
           <div className="h-full rounded-full bg-wl-red transition-[width]" style={{ width: `${spentPercent}%` }} />
         </div>
+        {footer}
       </div>
     </article>
   );

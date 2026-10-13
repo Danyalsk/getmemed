@@ -16,7 +16,7 @@ import { useListState } from "@/hooks/use-list-state";
 import { formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
-export function CreatorPosts() {
+export function CreatorSubmissions() {
   const list = useListState();
   const { data, error, refetch, isPlaceholderData } = useQuery(queries.mySubmissions(list.query));
 

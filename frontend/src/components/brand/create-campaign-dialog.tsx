@@ -26,7 +26,7 @@ import {
 import { FieldDescription, FieldError, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { api } from "@/lib/api";
 import { PLATFORM_ICONS } from "@/lib/platforms";
-import { queryKeys } from "@/lib/queries";
+import { invalidateQueryRoots } from "@/lib/queries";
 
 const PLATFORM_HINTS: Record<Platform, string> = {
   instagram: "Reels and feed posts",
@@ -74,7 +74,7 @@ export function CreateCampaignDialog() {
       toast.success(`${campaign.name} is live`);
       reset(DEFAULT_VALUES);
       setOpen(false);
-      return queryClient.invalidateQueries({ queryKey: queryKeys.campaigns });
+      return invalidateQueryRoots(queryClient, "campaigns", "analytics");
     },
     onError: (error) => toast.error(error.message),
   });

@@ -17,11 +17,15 @@ type Viewer = "brand" | "creator";
 interface SubmissionsTableProps {
   submissions: Submission[] | undefined;
   viewer: Viewer;
+  readOnly?: boolean;
 }
 
 function SubmissionSubject({ submission, viewer }: { submission: Submission; viewer: Viewer }) {
   return viewer === "brand" ? (
-    <span className="font-medium">{submission.creator.name}</span>
+    <div className="flex flex-col gap-0.5">
+      <span className="font-medium">{submission.creator.name}</span>
+      <span className="text-xs text-muted-foreground">{submission.campaign.name}</span>
+    </div>
   ) : (
     <div className="flex flex-col gap-0.5">
       <span className="font-medium">{submission.campaign.name}</span>
@@ -43,7 +47,7 @@ function SubmissionPostLink({ submission }: { submission: Submission }) {
   );
 }
 
-function SubmissionCardList({ submissions, viewer }: SubmissionsTableProps) {
+function SubmissionCardList({ submissions, viewer, readOnly }: SubmissionsTableProps) {
   if (submissions === undefined) {
     return Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-36 rounded-xl" />);
   }
@@ -68,18 +72,19 @@ function SubmissionCardList({ submissions, viewer }: SubmissionsTableProps) {
       {submission.flagged && <ViewSpikeFlag submission={submission} />}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
         <SubmissionPostLink submission={submission} />
-        {viewer === "creator" && <SimulateViewsForm key={submission.views} submission={submission} />}
+        {viewer === "creator" && !readOnly && <SimulateViewsForm key={submission.views} submission={submission} />}
       </div>
     </article>
   ));
 }
 
-export function SubmissionsTable({ submissions, viewer }: SubmissionsTableProps) {
-  const columns = viewer === "creator" ? 7 : 6;
+export function SubmissionsTable({ submissions, viewer, readOnly = false }: SubmissionsTableProps) {
+  const canSimulate = viewer === "creator" && !readOnly;
+  const columns = canSimulate ? 7 : 6;
   return (
     <>
       <div className="flex flex-col gap-3 md:hidden">
-        <SubmissionCardList submissions={submissions} viewer={viewer} />
+        <SubmissionCardList submissions={submissions} viewer={viewer} readOnly={readOnly} />
       </div>
       <div className="hidden rounded-xl border bg-card md:block">
         <Table>
@@ -91,7 +96,7 @@ export function SubmissionsTable({ submissions, viewer }: SubmissionsTableProps)
               <TableHead>Earned</TableHead>
               <TableHead>Flags</TableHead>
               <TableHead>Submitted</TableHead>
-              {viewer === "creator" && <TableHead className="pr-4">Simulate views</TableHead>}
+              {canSimulate && <TableHead className="pr-4">Simulate views</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -114,7 +119,7 @@ export function SubmissionsTable({ submissions, viewer }: SubmissionsTableProps)
                     <ViewSpikeFlag submission={submission} />
                   </TableCell>
                   <TableCell className="text-muted-foreground">{formatDate(submission.createdAt)}</TableCell>
-                  {viewer === "creator" && (
+                  {canSimulate && (
                     <TableCell className="pr-4">
                       <SimulateViewsForm key={submission.views} submission={submission} />
                     </TableCell>
