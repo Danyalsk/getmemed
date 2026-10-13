@@ -32,7 +32,7 @@ export function CreatorAnalytics() {
         />
         <StatCard accent="text-pop-cyan" label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
         <StatCard
-          accent="text-pop-pink"
+          accent="text-pop-violet"
           label="Avg. views per post"
           value={totals && formatViews(totals.posts ? Math.round(totals.views / totals.posts) : 0)}
           icon={TrendingUpIcon}

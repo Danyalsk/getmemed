@@ -38,7 +38,7 @@ export function BrandAnalytics() {
           icon={ChartPieIcon}
         />
         <StatCard
-          accent="text-pop-pink"
+          accent="text-pop-violet"
           label="Cost per 1K views"
           value={totals && formatRupees(costPerThousand)}
           icon={ChartPieIcon}

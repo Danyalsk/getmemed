@@ -1,5 +1,5 @@
-export const ACCENT_BACKGROUNDS = ["bg-brand", "bg-pop-cyan", "bg-pop-pink", "bg-pop-orange"] as const;
-export const ACCENT_TEXTS = ["text-brand", "text-pop-cyan", "text-pop-pink", "text-pop-orange"] as const;
+export const ACCENT_BACKGROUNDS = ["bg-brand", "bg-pop-cyan", "bg-pop-violet", "bg-pop-orange"] as const;
+export const ACCENT_TEXTS = ["text-brand", "text-pop-cyan", "text-pop-violet", "text-pop-orange"] as const;
 
 export function accentIndex(seed: string): number {
   const hash = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0);

@@ -43,7 +43,7 @@ export function BrandHome() {
           icon={MegaphoneIcon}
         />
         <StatCard accent="text-pop-cyan" label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
-        <StatCard accent="text-pop-pink" label="Paid out" value={totals && formatRupees(totals.earned)} icon={ChartPieIcon} />
+        <StatCard accent="text-pop-violet" label="Paid out" value={totals && formatRupees(totals.earned)} icon={ChartPieIcon} />
         <StatCard
           accent="text-pop-orange"
           label="Budget remaining"

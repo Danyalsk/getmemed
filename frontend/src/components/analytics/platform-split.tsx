@@ -11,7 +11,7 @@ interface PlatformRow {
 }
 
 const PLATFORM_COLORS: Record<Platform, string> = {
-  instagram: "bg-pop-pink",
+  instagram: "bg-brand",
   youtube: "bg-pop-orange",
 };
 

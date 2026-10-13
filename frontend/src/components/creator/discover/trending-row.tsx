@@ -29,7 +29,7 @@ export function TrendingRow() {
             >
               <span
                 aria-hidden
-                className="-mr-5 text-[150px] leading-[0.8] font-black text-transparent [-webkit-text-stroke:3px_var(--color-pop-pink)] select-none sm:text-[190px]"
+                className="-mr-5 text-[150px] leading-[0.8] font-black text-transparent [-webkit-text-stroke:3px_var(--color-pop-violet)] select-none sm:text-[190px]"
               >
                 {index + 1}
               </span>

@@ -11,7 +11,7 @@ const READY_VISIBLE_MS = 2500;
 
 type WakeState = "checking" | "waking" | "ready" | "hidden";
 
-const PIXEL_COLORS = ["bg-brand", "bg-pop-cyan", "bg-pop-pink"];
+const PIXEL_COLORS = ["bg-brand", "bg-pop-cyan", "bg-pop-violet"];
 
 function formatElapsed(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;

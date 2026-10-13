@@ -33,7 +33,7 @@ export function CreatorEarnings() {
           value={totals && formatRupees(totals.posts ? Math.round(totals.earned / totals.posts) : 0)}
           icon={ReceiptIndianRupeeIcon}
         />
-        <StatCard accent="text-pop-pink" label="Paying campaigns" value={data && String(data.byCampaign.filter((row) => row.earned > 0).length)} icon={MegaphoneIcon} />
+        <StatCard accent="text-pop-violet" label="Paying campaigns" value={data && String(data.byCampaign.filter((row) => row.earned > 0).length)} icon={MegaphoneIcon} />
         <StatCard accent="text-pop-orange" label="Lost to budget caps" value={uncapped === undefined ? undefined : formatRupees(uncapped)} icon={HourglassIcon} />
       </section>
 

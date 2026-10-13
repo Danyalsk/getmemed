@@ -52,7 +52,7 @@ export function BrandCampaigns() {
           icon={WalletIcon}
         />
         <StatCard
-          accent="text-pop-pink"
+          accent="text-pop-violet"
           label="Paid out"
           value={summary && formatRupees(summary.spent)}
           icon={ChartPieIcon}

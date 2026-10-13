@@ -51,7 +51,7 @@ export function CreatorHome() {
           value={totals && formatViews(totals.views)}
           icon={TrendingUpIcon}
         />
-        <StatCard accent="text-pop-pink" label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
+        <StatCard accent="text-pop-violet" label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
         <StatCard
           accent="text-pop-orange"
           label="Campaigns joined"
