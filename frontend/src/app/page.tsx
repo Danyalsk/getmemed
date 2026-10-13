@@ -1,4 +1,4 @@
-import { ArrowRightIcon, Building2Icon, EyeIcon, ShieldCheckIcon, TrendingUpIcon, UserRoundIcon } from "lucide-react";
+import { ArrowRightIcon, Building2Icon, FlameIcon, ShieldCheckIcon, TrendingUpIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 
 import { SignedInRedirect } from "@/components/auth-gate";
@@ -10,33 +10,29 @@ import { Wordmark } from "@/components/wordmark";
 import { ACCENT_BACKGROUNDS, ACCENT_TEXTS } from "@/lib/accents";
 import { formatRupees, formatViews } from "@/lib/format";
 
-const MILESTONE_STEPS = [
+const LADDER_RUNGS = [
   {
-    views: 10_000,
-    payout: 500,
-    height: "sm:min-h-44",
-    accent: "text-brand",
-    bar: "bg-brand",
-    glow: "border-t-brand from-brand/15",
+    views: 100_000,
+    payout: 5_000,
+    flame: "size-6 text-brand",
+    node: "border-brand shadow-[0_0_28px_-2px_var(--color-brand)]",
+    amount: "text-brand",
   },
   {
     views: 50_000,
     payout: 2_000,
-    height: "sm:min-h-56",
-    accent: "text-pop-cyan",
-    bar: "bg-pop-cyan",
-    glow: "border-t-pop-cyan from-pop-cyan/15",
+    flame: "size-5 text-pop-orange",
+    node: "border-pop-orange shadow-[0_0_20px_-4px_var(--color-pop-orange)]",
+    amount: "text-pop-orange",
   },
   {
-    views: 100_000,
-    payout: 5_000,
-    height: "sm:min-h-68",
-    accent: "text-pop-violet",
-    bar: "bg-pop-violet",
-    glow: "border-t-pop-violet from-pop-violet/15",
+    views: 10_000,
+    payout: 500,
+    flame: "size-4 text-pop-orange/70",
+    node: "border-pop-orange/50 shadow-[0_0_12px_-6px_var(--color-pop-orange)]",
+    amount: "text-foreground",
   },
 ];
-const TOP_STEP_VIEWS = 100_000;
 
 const AUDIENCES = [
   {
@@ -113,42 +109,47 @@ export default function LandingPage() {
                   budget.
                 </p>
               </div>
-              <ol className="grid gap-3 sm:grid-cols-3 sm:items-end">
-                {MILESTONE_STEPS.map((step, index) => {
-                  const previous = MILESTONE_STEPS[index - 1];
-                  return (
-                    <li
-                      key={step.views}
-                      className={`flex flex-col justify-between gap-6 rounded-2xl border border-t-2 bg-linear-to-b to-card to-60% p-5 ${step.glow} ${step.height}`}
-                    >
-                      <div className="flex flex-col gap-3">
-                        <span className="flex items-center justify-between text-xs text-muted-foreground">
-                          Step {index + 1}
-                          <EyeIcon className="size-3.5" />
+              <div className="relative">
+                <span
+                  aria-hidden
+                  className="absolute top-6 bottom-6 left-6 w-1 -translate-x-1/2 overflow-hidden rounded-full bg-linear-to-t from-muted via-pop-orange to-brand"
+                >
+                  <span className="absolute inset-x-0 h-16 animate-[heat-climb_2.6s_ease-in_infinite] rounded-full bg-linear-to-t from-transparent via-white/80 to-transparent motion-reduce:hidden" />
+                </span>
+                <ol aria-label="Example payout ladder" className="relative flex flex-col gap-4">
+                  {LADDER_RUNGS.map((rung, index) => {
+                    const below = LADDER_RUNGS[index + 1];
+                    return (
+                      <li key={rung.views} className="flex items-center gap-4">
+                        <span
+                          className={`flex size-12 shrink-0 items-center justify-center rounded-full border-2 bg-card ${rung.node}`}
+                        >
+                          <FlameIcon className={rung.flame} />
                         </span>
-                        <span className="text-lg font-semibold tabular-nums">{formatViews(step.views)} views</span>
-                        <span className="h-1.5 overflow-hidden rounded-full bg-muted">
-                          <span
-                            className={`block h-full rounded-full ${step.bar}`}
-                            style={{ width: `${(step.views / TOP_STEP_VIEWS) * 100}%` }}
-                          />
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        {previous && (
-                          <span className="w-fit rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
-                            +{formatRupees(step.payout - previous.payout)} top-up
+                        <div className="flex flex-1 items-center justify-between gap-3 rounded-2xl border bg-card/70 px-4 py-3 backdrop-blur">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-xs text-muted-foreground tabular-nums">
+                              {formatViews(rung.views)} views{index === 0 && " · max payout"}
+                            </span>
+                            <span className={`text-2xl font-semibold tracking-tight tabular-nums ${rung.amount}`}>
+                              {formatRupees(rung.payout)}
+                            </span>
+                          </div>
+                          <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-muted-foreground tabular-nums">
+                            +{formatRupees(rung.payout - (below?.payout ?? 0))}
                           </span>
-                        )}
-                        <span className={`text-3xl font-semibold tracking-tight tabular-nums ${step.accent}`}>
-                          {formatRupees(step.payout)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">paid in total</span>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
+                        </div>
+                      </li>
+                    );
+                  })}
+                  <li className="flex items-center gap-4">
+                    <span className="flex size-12 shrink-0 items-center justify-center">
+                      <span className="size-3 rounded-full bg-muted-foreground/60 ring-4 ring-background" />
+                    </span>
+                    <span className="text-sm text-muted-foreground">Post goes live · ₹0</span>
+                  </li>
+                </ol>
+              </div>
             </div>
           </section>
 

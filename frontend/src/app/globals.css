@@ -230,3 +230,17 @@
     translate: 10px -18px;
   }
 }
+
+@keyframes heat-climb {
+  from {
+    top: 100%;
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  to {
+    top: -4rem;
+    opacity: 0;
+  }
+}
