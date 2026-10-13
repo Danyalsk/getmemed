@@ -48,6 +48,8 @@ export function DateField({ label, description, value, onChange, min, max, error
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
+            fixedWeeks
+            showOutsideDays
             selected={selected}
             defaultMonth={selected}
             startMonth={toDate(min)}
