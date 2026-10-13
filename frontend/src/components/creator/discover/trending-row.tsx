@@ -17,9 +17,13 @@ import { campaignHref } from "../creator-campaign-card";
 const TOP_COUNT = 10;
 
 const PODIUM_STEPS = [
-  { rank: 2, base: "h-20 bg-pop-cyan", order: "order-2 md:order-1" },
-  { rank: 1, base: "h-28 bg-brand", order: "order-1 md:order-2" },
-  { rank: 3, base: "h-14 bg-pop-violet", order: "order-3" },
+  {
+    rank: 2,
+    base: "h-20 border-pop-cyan/60 from-pop-cyan/25 text-pop-cyan",
+    order: "order-2 md:order-1",
+  },
+  { rank: 1, base: "h-28 border-brand/60 from-brand/25 text-brand", order: "order-1 md:order-2" },
+  { rank: 3, base: "h-14 border-pop-violet/60 from-pop-violet/25 text-pop-violet", order: "order-3" },
 ] as const;
 
 function HeatMeter({ posts, hottest }: { posts: number; hottest: number }) {
@@ -47,9 +51,9 @@ function PodiumStep({ campaign, rank, base, hottest }: { campaign: Campaign; ran
       href={campaignHref(campaign._id)}
       transitionTypes={TRANSITION_TYPES.forward}
       aria-label={`Number ${rank}: ${campaign.name}`}
-      className="group flex flex-col transition-transform duration-300 ease-out hover:-translate-y-1 motion-reduce:transition-none"
+      className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-transform duration-300 ease-out hover:-translate-y-1 motion-reduce:transition-none"
     >
-      <span className="flex flex-col gap-3 rounded-t-2xl border border-b-0 bg-card p-3">
+      <span className="flex flex-col gap-3 p-3">
         <span className="relative aspect-video overflow-hidden rounded-xl bg-muted">
           <CampaignCover campaign={campaign} sizes="(min-width: 768px) 420px, 100vw" />
         </span>
@@ -61,8 +65,11 @@ function PodiumStep({ campaign, rank, base, hottest }: { campaign: Campaign; ran
           <HeatMeter posts={campaign.submissionCount} hottest={hottest} />
         </span>
       </span>
-      <span aria-hidden className={`flex items-center justify-center rounded-b-2xl ${base}`}>
-        <span className="text-5xl font-extrabold tracking-tight text-ink">{rank}</span>
+      <span
+        aria-hidden
+        className={`flex items-center justify-center border-t-2 bg-linear-to-b to-transparent ${base}`}
+      >
+        <span className="text-5xl font-extrabold tracking-tight">{rank}</span>
       </span>
     </Link>
   );
