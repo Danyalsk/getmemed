@@ -138,6 +138,7 @@ This starts a single-node Mongo replica set, Redis, the API on port 4000 and the
 | Variable | Required | Notes |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | yes | Base URL of the API, for example `http://localhost:4000` |
+| `NEXT_PUBLIC_SITE_URL` | no | Public URL of the web app, used for link previews. Defaults to `http://localhost:3000` |
 
 The backend validates its environment with Zod on startup and exits with a clear message if something is missing or malformed.
 

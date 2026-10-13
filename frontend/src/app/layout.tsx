@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Silkscreen } from "next/font/google";
 
 import { Providers } from "@/components/providers";
@@ -10,9 +10,32 @@ import "./globals.css";
 const body = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
 const pixel = Silkscreen({ variable: "--font-silkscreen", weight: ["400", "700"], subsets: ["latin"] });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const DESCRIPTION = "Run creator campaigns with milestone payouts that track real views and never exceed your budget.";
+
 export const metadata: Metadata = {
-  title: { default: "Meme'd", template: "%s · Meme'd" },
-  description: "Run creator campaigns with milestone payouts that never exceed your budget.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Meme'd · Creator campaigns, paid on performance", template: "%s · Meme'd" },
+  description: DESCRIPTION,
+  applicationName: "Meme'd",
+  openGraph: {
+    type: "website",
+    siteName: "Meme'd",
+    title: "Meme'd · Creator campaigns, paid on performance",
+    description: DESCRIPTION,
+    url: "/",
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Meme'd · Creator campaigns, paid on performance",
+    description: DESCRIPTION,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#131313",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
