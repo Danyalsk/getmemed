@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { SignedInRedirect } from "@/components/auth-gate";
 import { FeaturedBrands } from "@/components/featured-brands";
-import { CampaignWall } from "@/components/campaign-wall";
+import { CampaignFeed } from "@/components/campaign-feed";
 import { Wordmark } from "@/components/wordmark";
 
 const PROMISES = [
@@ -49,7 +49,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
             </p>
           </div>
 
-          <CampaignWall />
+          <CampaignFeed />
 
           <ul className="relative grid shrink-0 grid-cols-3 gap-6 border-t pt-6">
             {PROMISES.map((promise) => (
