@@ -1,4 +1,4 @@
-import { ArrowRightIcon, Building2Icon, ShieldCheckIcon, TrendingUpIcon, UserRoundIcon } from "lucide-react";
+import { ArrowRightIcon, Building2Icon, EyeIcon, ShieldCheckIcon, TrendingUpIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 
 import { SignedInRedirect } from "@/components/auth-gate";
@@ -6,14 +6,37 @@ import { CampaignTicker } from "@/components/campaign-ticker";
 import { FloatingBrands } from "@/components/floating-brands";
 import { PageTransition } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
-import { ACCENT_BACKGROUNDS, ACCENT_TEXTS } from "@/lib/accents";
 import { Wordmark } from "@/components/wordmark";
+import { ACCENT_BACKGROUNDS, ACCENT_TEXTS } from "@/lib/accents";
+import { formatRupees, formatViews } from "@/lib/format";
 
-const SAMPLE_MILESTONES = [
-  { views: "10K views", payout: "₹500" },
-  { views: "50K views", payout: "₹2,000" },
-  { views: "100K views", payout: "₹5,000" },
+const MILESTONE_STEPS = [
+  {
+    views: 10_000,
+    payout: 500,
+    height: "sm:min-h-44",
+    accent: "text-brand",
+    bar: "bg-brand",
+    glow: "border-t-brand from-brand/15",
+  },
+  {
+    views: 50_000,
+    payout: 2_000,
+    height: "sm:min-h-56",
+    accent: "text-pop-cyan",
+    bar: "bg-pop-cyan",
+    glow: "border-t-pop-cyan from-pop-cyan/15",
+  },
+  {
+    views: 100_000,
+    payout: 5_000,
+    height: "sm:min-h-68",
+    accent: "text-pop-violet",
+    bar: "bg-pop-violet",
+    glow: "border-t-pop-violet from-pop-violet/15",
+  },
 ];
+const TOP_STEP_VIEWS = 100_000;
 
 const AUDIENCES = [
   {
@@ -90,14 +113,41 @@ export default function LandingPage() {
                   budget.
                 </p>
               </div>
-              <ol className="grid gap-3 sm:grid-cols-3">
-                {SAMPLE_MILESTONES.map(({ views, payout }, index) => (
-                  <li key={views} className="flex flex-col gap-2 rounded-xl border bg-card p-5">
-                    <span className="text-xs text-muted-foreground">Milestone {index + 1}</span>
-                    <span className="text-sm">{views}</span>
-                    <span className={`text-2xl font-semibold ${ACCENT_TEXTS[index % ACCENT_TEXTS.length]}`}>{payout}</span>
-                  </li>
-                ))}
+              <ol className="grid gap-3 sm:grid-cols-3 sm:items-end">
+                {MILESTONE_STEPS.map((step, index) => {
+                  const previous = MILESTONE_STEPS[index - 1];
+                  return (
+                    <li
+                      key={step.views}
+                      className={`flex flex-col justify-between gap-6 rounded-2xl border border-t-2 bg-linear-to-b to-card to-60% p-5 ${step.glow} ${step.height}`}
+                    >
+                      <div className="flex flex-col gap-3">
+                        <span className="flex items-center justify-between text-xs text-muted-foreground">
+                          Step {index + 1}
+                          <EyeIcon className="size-3.5" />
+                        </span>
+                        <span className="text-lg font-semibold tabular-nums">{formatViews(step.views)} views</span>
+                        <span className="h-1.5 overflow-hidden rounded-full bg-muted">
+                          <span
+                            className={`block h-full rounded-full ${step.bar}`}
+                            style={{ width: `${(step.views / TOP_STEP_VIEWS) * 100}%` }}
+                          />
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        {previous && (
+                          <span className="w-fit rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
+                            +{formatRupees(step.payout - previous.payout)} top-up
+                          </span>
+                        )}
+                        <span className={`text-3xl font-semibold tracking-tight tabular-nums ${step.accent}`}>
+                          {formatRupees(step.payout)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">paid in total</span>
+                      </div>
+                    </li>
+                  );
+                })}
               </ol>
             </div>
           </section>
