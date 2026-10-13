@@ -54,7 +54,7 @@ export default function LandingPage() {
               <div className="absolute top-30 right-0 h-14 w-12 bg-wl-lavender lg:top-58 lg:h-32 lg:w-20" />
             </div>
             <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 pt-48 pb-20 lg:py-24">
-              <p className="text-sm font-medium text-wl-lime">Creator campaigns by WLDD</p>
+              <p className="text-sm font-medium text-wl-lime">Creator campaigns, paid on performance</p>
               <h1 className="max-w-2xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
                 Pay for reach, not for promises.
               </h1>
@@ -123,7 +123,7 @@ export default function LandingPage() {
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-sm text-muted-foreground">
           <Wordmark className="text-base" />
-          <span>A WLDD company</span>
+          <span>Pay for reach, not for promises.</span>
         </div>
       </footer>
     </div>
