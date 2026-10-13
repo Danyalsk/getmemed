@@ -20,6 +20,8 @@ import { FieldGroup } from "@/components/ui/field";
 import { api } from "@/lib/api";
 import { saveSession } from "@/lib/session";
 
+import { AUTH_INPUT_CLASS, AUTH_SUBMIT_CLASS } from "../auth-styles";
+
 const ROLE_CHOICES: readonly Choice<Role>[] = [
   { value: "creator", label: "Creator", hint: "Post content and earn", icon: UserRoundIcon },
   { value: "brand", label: "Brand", hint: "Run paid campaigns", icon: Building2Icon },
@@ -57,8 +59,8 @@ export default function SignupPage() {
     <PageTransition>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
-          <p className="text-sm text-muted-foreground">Get set up in under a minute.</p>
+          <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">Create your account</h1>
+          <p className="text-sm text-muted-foreground lg:text-base">Get set up in under a minute.</p>
         </div>
         <form onSubmit={onSubmit} noValidate>
           <FieldGroup>
@@ -76,6 +78,7 @@ export default function SignupPage() {
               )}
             />
             <TextField
+              className={AUTH_INPUT_CLASS}
               label={role === "brand" ? "Brand name" : "Full name"}
               autoComplete={role === "brand" ? "organization" : "name"}
               placeholder={role === "brand" ? "Company or brand name" : "Your name"}
@@ -83,6 +86,7 @@ export default function SignupPage() {
               {...register("name")}
             />
             <TextField
+              className={AUTH_INPUT_CLASS}
               label="Email"
               type="email"
               autoComplete="email"
@@ -91,6 +95,7 @@ export default function SignupPage() {
               {...register("email")}
             />
             <PasswordField
+              className={AUTH_INPUT_CLASS}
               label="Password"
               autoComplete="new-password"
               description="At least 8 characters."
@@ -98,12 +103,13 @@ export default function SignupPage() {
               {...register("password")}
             />
             <PasswordField
+              className={AUTH_INPUT_CLASS}
               label="Confirm password"
               autoComplete="new-password"
               error={errors.confirmPassword}
               {...register("confirmPassword")}
             />
-            <Button type="submit" disabled={signup.isPending}>
+            <Button type="submit" className={AUTH_SUBMIT_CLASS} disabled={signup.isPending}>
               {signup.isPending && <LoaderCircleIcon className="animate-spin" />}
               Create account
             </Button>

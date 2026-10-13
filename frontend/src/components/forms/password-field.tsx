@@ -1,6 +1,7 @@
 "use client";
 
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { cn } from "cn";
 import { useId, useState, type ComponentProps } from "react";
 import type { FieldError as FormFieldError } from "react-hook-form";
 
@@ -13,7 +14,7 @@ type PasswordFieldProps = Omit<ComponentProps<"input">, "type"> & {
   error?: FormFieldError | undefined;
 };
 
-export function PasswordField({ label, description, error, ...props }: PasswordFieldProps) {
+export function PasswordField({ label, description, error, className, ...props }: PasswordFieldProps) {
   const inputId = useId();
   const [visible, setVisible] = useState(false);
 
@@ -21,13 +22,19 @@ export function PasswordField({ label, description, error, ...props }: PasswordF
     <Field data-invalid={error !== undefined}>
       <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
       <div className="relative">
-        <Input id={inputId} type={visible ? "text" : "password"} aria-invalid={error !== undefined} className="pr-10" {...props} />
+        <Input
+          id={inputId}
+          type={visible ? "text" : "password"}
+          aria-invalid={error !== undefined}
+          className={cn("pr-10", className)}
+          {...props}
+        />
         <button
           type="button"
           onClick={() => setVisible((shown) => !shown)}
           aria-label={visible ? "Hide password" : "Show password"}
           aria-pressed={visible}
-          className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+          className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
         >
           {visible ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
         </button>

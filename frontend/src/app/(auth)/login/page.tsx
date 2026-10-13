@@ -17,6 +17,8 @@ import { FieldGroup } from "@/components/ui/field";
 import { api } from "@/lib/api";
 import { saveSession } from "@/lib/session";
 
+import { AUTH_INPUT_CLASS, AUTH_SUBMIT_CLASS } from "../auth-styles";
+
 export default function LoginPage() {
   const {
     register,
@@ -36,12 +38,13 @@ export default function LoginPage() {
     <PageTransition>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Log in</h1>
-          <p className="text-sm text-muted-foreground">Welcome back. Enter your details to continue.</p>
+          <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">Log in</h1>
+          <p className="text-sm text-muted-foreground lg:text-base">Welcome back. Enter your details to continue.</p>
         </div>
         <form onSubmit={onSubmit} noValidate>
           <FieldGroup>
             <TextField
+              className={AUTH_INPUT_CLASS}
               label="Email"
               type="email"
               autoComplete="email"
@@ -50,12 +53,13 @@ export default function LoginPage() {
               {...register("email")}
             />
             <PasswordField
+              className={AUTH_INPUT_CLASS}
               label="Password"
               autoComplete="current-password"
               error={errors.password}
               {...register("password")}
             />
-            <Button type="submit" disabled={login.isPending}>
+            <Button type="submit" className={AUTH_SUBMIT_CLASS} disabled={login.isPending}>
               {login.isPending && <LoaderCircleIcon className="animate-spin" />}
               Log in
             </Button>
