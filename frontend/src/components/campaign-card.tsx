@@ -8,7 +8,7 @@ import { CampaignCover } from "@/components/campaign-cover";
 import { SharedCampaignCover } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
 import { accentBackground } from "@/lib/accents";
-import { formatRelativeTime, formatRupees, formatRupeesCompact, formatViews, getInitials } from "@/lib/format";
+import { formatRupees, formatRupeesCompact, formatTimeLeft, formatViews, getDeadline, getInitials } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 
 export const CARD_LINK_CLASS =
@@ -49,7 +49,11 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
               {getInitials(campaign.brand.name)}
             </span>
             <span className="truncate font-medium">{campaign.brand.name}</span>
-            <span className="shrink-0 text-muted-foreground">· {formatRelativeTime(campaign.createdAt)}</span>
+            <span
+              className={`shrink-0 ${getDeadline(campaign.endsAt).urgent ? "text-pop-orange" : "text-muted-foreground"}`}
+            >
+              · {formatTimeLeft(campaign.endsAt)}
+            </span>
           </div>
           <span
             className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted"

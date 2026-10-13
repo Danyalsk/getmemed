@@ -13,7 +13,7 @@ import { PaginationBar } from "@/components/list/pagination-bar";
 import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SharedCampaignCover, TRANSITION_TYPES } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatRelativeTime, formatRupees, formatRupeesCompact } from "@/lib/format";
+import { formatRupees, formatRupeesCompact, formatTimeLeft } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 import { queries } from "@/lib/queries";
 
@@ -45,7 +45,7 @@ function CampaignListRow({ campaign }: { campaign: Campaign }) {
         <span className="truncate font-semibold group-hover:underline">{campaign.name}</span>
         <span className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
           <PlatformIcon aria-label={PLATFORM_LABELS[campaign.platform]} className="size-3.5 shrink-0" />
-          {campaign.brand.name} · {formatRelativeTime(campaign.createdAt)}
+          {campaign.brand.name} · {formatTimeLeft(campaign.endsAt)}
         </span>
         <span className="text-xs text-muted-foreground sm:hidden">
           <span className="text-brand">{formatRupees(topPayout)}</span> max · {formatRupeesCompact(campaign.remaining)}{" "}

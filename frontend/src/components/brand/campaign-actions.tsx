@@ -1,6 +1,6 @@
 "use client";
 
-import { CirclePauseIcon, CirclePlayIcon, CircleXIcon, EllipsisIcon, EyeIcon } from "lucide-react";
+import { CirclePauseIcon, CirclePlayIcon, CircleXIcon, EllipsisIcon, EyeIcon, Trash2Icon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -18,6 +18,7 @@ import {
 import { TRANSITION_TYPES } from "@/components/page-transition";
 
 import { CloseCampaignDialog } from "./close-campaign-dialog";
+import { DeleteCampaignDialog } from "./delete-campaign-dialog";
 import { useUpdateCampaignStatus } from "./use-update-campaign-status";
 
 interface CampaignActionsProps {
@@ -27,8 +28,10 @@ interface CampaignActionsProps {
 
 export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
   const [confirmClose, setConfirmClose] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const status = useUpdateCampaignStatus(campaign);
-  const canClose = campaign.status !== "closed";
+  const canDelete = campaign.submissionCount === 0;
+  const canClose = campaign.status !== "closed" && !canDelete;
   const toggle =
     campaign.status === "active"
       ? { next: "paused" as const, label: "Pause", icon: CirclePauseIcon }
@@ -37,12 +40,20 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
         : null;
 
   const dialog = (
-    <CloseCampaignDialog
-      campaign={campaign}
-      open={confirmClose}
-      onOpenChange={setConfirmClose}
-      onConfirm={() => status.mutate("closed")}
-    />
+    <>
+      <CloseCampaignDialog
+        campaign={campaign}
+        open={confirmClose}
+        onOpenChange={setConfirmClose}
+        onConfirm={() => status.mutate("closed")}
+      />
+      <DeleteCampaignDialog
+        campaign={campaign}
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        redirectTo={layout === "buttons" ? "/brand/campaigns" : undefined}
+      />
+    </>
   );
 
   if (layout === "buttons") {
@@ -56,6 +67,11 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
         {canClose && (
           <Button variant="destructive" disabled={status.isPending} onClick={() => setConfirmClose(true)}>
             <CircleXIcon /> Close
+          </Button>
+        )}
+        {canDelete && (
+          <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+            <Trash2Icon /> Delete
           </Button>
         )}
         {dialog}
@@ -90,6 +106,11 @@ export function CampaignActions({ campaign, layout }: CampaignActionsProps) {
               </DropdownMenuItem>
             </>
           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" disabled={!canDelete} onSelect={() => setConfirmDelete(true)}>
+            <Trash2Icon />
+            {canDelete ? "Delete campaign" : "Delete (has posts, close instead)"}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       {dialog}

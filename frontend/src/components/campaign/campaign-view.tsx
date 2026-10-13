@@ -14,12 +14,14 @@ import { PayoutTrack } from "./payout-track";
 interface CampaignViewProps {
   campaign: Campaign;
   actions: ReactNode;
+  insights?: ReactNode;
 }
 
-export function CampaignView({ campaign, actions }: CampaignViewProps) {
+export function CampaignView({ campaign, actions, insights }: CampaignViewProps) {
   return (
     <>
       <CampaignHero campaign={campaign} actions={actions} />
+      {insights}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col gap-5">
           <Panel title="Payout track" description="Each post earns the highest milestone it reaches. Milestones don't stack.">

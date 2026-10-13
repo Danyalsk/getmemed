@@ -15,6 +15,10 @@ const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFracti
 
 const date = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
+const shortDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
+
+const indiaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" });
+
 const relative = new Intl.RelativeTimeFormat("en", { numeric: "auto", style: "narrow" });
 
 const UNITS: readonly [Intl.RelativeTimeFormatUnit, number][] = [
@@ -47,3 +51,31 @@ export function getInitials(name: string): string {
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
 }
+
+const HOUR_MS = 3_600_000;
+const URGENT_HOURS = 48;
+
+export interface Deadline {
+  ended: boolean;
+  urgent: boolean;
+  countdown: string;
+  date: string;
+}
+
+export function getDeadline(endsAt: string): Deadline {
+  const hoursLeft = (new Date(endsAt).getTime() - Date.now()) / HOUR_MS;
+  const days = Math.ceil(hoursLeft / 24);
+  return {
+    ended: hoursLeft <= 0,
+    urgent: hoursLeft > 0 && hoursLeft < URGENT_HOURS,
+    countdown: hoursLeft < URGENT_HOURS ? `${Math.max(1, Math.ceil(hoursLeft))}h` : `${days} days`,
+    date: shortDate.format(new Date(endsAt)),
+  };
+}
+
+export function formatTimeLeft(endsAt: string): string {
+  const deadline = getDeadline(endsAt);
+  return deadline.ended ? "ended" : `${deadline.countdown} left`;
+}
+
+export const indiaDateFromNow = (days: number): string => indiaDay.format(Date.now() + days * 24 * HOUR_MS);

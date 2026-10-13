@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { brandAnalyticsSchema, creatorAnalyticsSchema } from "@contracts/analytics";
+import { brandAnalyticsSchema, campaignPerformanceSchema, creatorAnalyticsSchema } from "@contracts/analytics";
 import {
   authResponseSchema,
   publicUserSchema,
@@ -52,7 +52,7 @@ export class ApiRequestError extends Error {
   }
 }
 
-type Method = "GET" | "POST" | "PATCH";
+type Method = "GET" | "POST" | "PATCH" | "DELETE";
 
 function withQueryString(path: string, params: Record<string, string | number | undefined>): string {
   const query = new URLSearchParams();
@@ -125,6 +125,8 @@ export const api = {
     apiRequest(withQueryString("/api/campaigns/live", query), campaignPageSchema),
   setCampaignStatus: (id: string, status: CampaignStatus) =>
     apiRequest(`/api/campaigns/${id}/status`, campaignSchema, "PATCH", { status }),
+  deleteCampaign: (id: string) => apiRequest(`/api/campaigns/${id}`, z.null(), "DELETE"),
+  campaignPerformance: (id: string) => apiRequest(`/api/campaigns/${id}/performance`, campaignPerformanceSchema),
   campaignSubmissions: (id: string, query: ListQuery) =>
     apiRequest(withQueryString(`/api/campaigns/${id}/submissions`, query), submissionPageSchema),
 

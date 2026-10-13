@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { createCampaignSchema, MAX_MILESTONES, type CreateCampaignInput } from "@contracts/campaign";
+import { createCampaignSchema, MAX_CAMPAIGN_DAYS, MAX_MILESTONES, type CreateCampaignInput } from "@contracts/campaign";
 import { PLATFORM_LABELS, platformSchema, type Platform } from "@contracts/common";
 
 import { ChoiceTiles, type Choice } from "@/components/forms/choice-tiles";
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { FieldDescription, FieldError, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { api } from "@/lib/api";
+import { indiaDateFromNow } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 import { invalidateQueryRoots } from "@/lib/queries";
 
@@ -41,7 +42,9 @@ const PLATFORM_CHOICES: readonly Choice<Platform>[] = platformSchema.options.map
   icon: PLATFORM_ICONS[platform],
 }));
 
-const DEFAULT_VALUES: Partial<CreateCampaignInput> = {
+const DEFAULT_RUN_DAYS = 30;
+
+const defaultValues = (): Partial<CreateCampaignInput> => ({
   name: "",
   description: "",
   platform: "instagram",
@@ -51,7 +54,8 @@ const DEFAULT_VALUES: Partial<CreateCampaignInput> = {
     { views: 50_000, payout: 2_000 },
     { views: 100_000, payout: 5_000 },
   ],
-};
+  endsAt: indiaDateFromNow(DEFAULT_RUN_DAYS),
+});
 
 export function CreateCampaignDialog() {
   const [open, setOpen] = useState(false);
@@ -65,7 +69,7 @@ export function CreateCampaignDialog() {
     formState: { errors },
   } = useForm<CreateCampaignInput>({
     resolver: zodResolver(createCampaignSchema),
-    defaultValues: DEFAULT_VALUES,
+    defaultValues: defaultValues(),
   });
   const milestones = useFieldArray({ control, name: "milestones" });
   const ladderError = errors.milestones?.root ?? errors.milestones;
@@ -74,7 +78,7 @@ export function CreateCampaignDialog() {
     mutationFn: api.createCampaign,
     onSuccess: (campaign) => {
       toast.success(`${campaign.name} is live`);
-      reset(DEFAULT_VALUES);
+      reset(defaultValues());
       setOpen(false);
       return invalidateQueryRoots(queryClient, "campaigns", "analytics");
     },
@@ -145,6 +149,15 @@ export function CreateCampaignDialog() {
               min={1}
               error={errors.budget}
               {...register("budget", { valueAsNumber: true })}
+            />
+            <TextField
+              label="End date"
+              description="Creators can submit posts until the end of this day (IST)."
+              type="date"
+              min={indiaDateFromNow(0)}
+              max={indiaDateFromNow(MAX_CAMPAIGN_DAYS)}
+              error={errors.endsAt}
+              {...register("endsAt")}
             />
             <FieldSet>
               <FieldLegend variant="label">Payout milestones</FieldLegend>

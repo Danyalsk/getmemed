@@ -16,6 +16,7 @@ import { useListState } from "@/hooks/use-list-state";
 import { queries } from "@/lib/queries";
 
 import { CampaignActions } from "./campaign-actions";
+import { CampaignPerformance } from "./campaign-performance";
 
 function CampaignSubmissionsSection({ campaignId }: { campaignId: string }) {
   const list = useListState();
@@ -78,7 +79,11 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       {campaign ? (
-        <CampaignView campaign={campaign} actions={<CampaignActions campaign={campaign} layout="buttons" />} />
+        <CampaignView
+          campaign={campaign}
+          actions={<CampaignActions campaign={campaign} layout="buttons" />}
+          insights={<CampaignPerformance campaign={campaign} />}
+        />
       ) : (
         !error && <Skeleton className="h-96 w-full rounded-3xl" />
       )}
