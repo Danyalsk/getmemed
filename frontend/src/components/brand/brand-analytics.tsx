@@ -9,6 +9,7 @@ import { PlatformSplit } from "@/components/analytics/platform-split";
 import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
+import { accentBackground } from "@/lib/accents";
 import { formatRupees, formatViews, getInitials } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
@@ -24,14 +25,26 @@ export function BrandAnalytics() {
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
         <StatCard
+          accent="text-brand"
+          label="Total views"
+          value={totals && formatViews(totals.views)}
+          icon={TrendingUpIcon}
+        />
+        <StatCard
+          accent="text-pop-cyan"
           label="Paid out"
           value={totals && `${formatRupees(totals.earned)} of ${formatRupees(totals.budget)}`}
           icon={ChartPieIcon}
         />
-        <StatCard label="Cost per 1K views" value={totals && formatRupees(costPerThousand)} icon={ChartPieIcon} />
         <StatCard
+          accent="text-pop-pink"
+          label="Cost per 1K views"
+          value={totals && formatRupees(costPerThousand)}
+          icon={ChartPieIcon}
+        />
+        <StatCard
+          accent="text-pop-orange"
           label="Creators · flagged posts"
           value={totals && `${totals.creators} · ${totals.flagged}`}
           icon={totals?.flagged ? FlagIcon : UsersRoundIcon}
@@ -60,12 +73,14 @@ export function BrandAnalytics() {
       <Panel title="Top creators" description="Creators who have earned the most from your campaigns.">
         <BarList
           emptyMessage="No creator has earned from your campaigns yet."
-          barClassName="bg-foreground/60"
+          barClassName="bg-pop-cyan"
           items={(data?.topCreators ?? []).map((row) => ({
             key: row.creator._id,
             label: (
               <span className="flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-foreground">
+                <span
+                  className={`flex size-6 items-center justify-center rounded-full text-[10px] font-semibold text-ink ${accentBackground(row.creator.name)}`}
+                >
                   {getInitials(row.creator.name)}
                 </span>
                 {row.creator.name}

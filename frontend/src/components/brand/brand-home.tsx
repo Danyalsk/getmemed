@@ -37,13 +37,15 @@ export function BrandHome() {
 
       <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
+          accent="text-brand"
           label="Active campaigns"
           value={totals && `${totals.activeCampaigns} of ${totals.campaigns}`}
           icon={MegaphoneIcon}
         />
-        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
-        <StatCard label="Paid out" value={totals && formatRupees(totals.earned)} icon={ChartPieIcon} />
+        <StatCard accent="text-pop-cyan" label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
+        <StatCard accent="text-pop-pink" label="Paid out" value={totals && formatRupees(totals.earned)} icon={ChartPieIcon} />
         <StatCard
+          accent="text-pop-orange"
           label="Budget remaining"
           value={totals && formatRupees(totals.budget - totals.earned)}
           icon={PiggyBankIcon}

@@ -7,6 +7,7 @@ import { PLATFORM_LABELS } from "@contracts/common";
 import { CampaignCover } from "@/components/campaign-cover";
 import { SharedCampaignCover } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
+import { accentBackground } from "@/lib/accents";
 import { formatRelativeTime, formatRupees, formatRupeesCompact, formatViews, getInitials } from "@/lib/format";
 import { PLATFORM_ICONS } from "@/lib/platforms";
 
@@ -43,7 +44,7 @@ export function CampaignCard({ campaign, title, topLeft, topRight, footer, morph
         <div className="flex items-center justify-between gap-3 text-sm">
           <div className="flex min-w-0 items-center gap-2">
             <span
-              className="flex size-6 shrink-0 items-center justify-center rounded-md bg-brand text-[10px] font-bold text-ink"
+              className={`flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold text-ink ${accentBackground(campaign.brand.name)}`}
             >
               {getInitials(campaign.brand.name)}
             </span>

@@ -5,6 +5,7 @@ import { SignedInRedirect } from "@/components/auth-gate";
 import { CampaignTicker } from "@/components/campaign-ticker";
 import { PageTransition } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
+import { ACCENT_BACKGROUNDS, ACCENT_TEXTS } from "@/lib/accents";
 import { Wordmark } from "@/components/wordmark";
 
 const SAMPLE_MILESTONES = [
@@ -76,7 +77,7 @@ export default function LandingPage() {
           <section className="border-y bg-[#0e0e0e]">
             <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-[1fr_1.2fr]">
               <div className="flex flex-col gap-3">
-                <TrendingUpIcon className="size-6 text-brand" />
+                <TrendingUpIcon className="size-6 text-pop-cyan" />
                 <h2 className="text-2xl font-semibold tracking-tight">How payouts work</h2>
                 <p className="text-muted-foreground">
                   A post earns the highest milestone it has crossed. Moving from 10K to 100K views tops the creator up
@@ -92,7 +93,7 @@ export default function LandingPage() {
                   <li key={views} className="flex flex-col gap-2 rounded-xl border bg-card p-5">
                     <span className="text-xs text-muted-foreground">Milestone {index + 1}</span>
                     <span className="text-sm">{views}</span>
-                    <span className="text-2xl font-semibold text-brand">{payout}</span>
+                    <span className={`text-2xl font-semibold ${ACCENT_TEXTS[index % ACCENT_TEXTS.length]}`}>{payout}</span>
                   </li>
                 ))}
               </ol>
@@ -100,14 +101,14 @@ export default function LandingPage() {
           </section>
 
           <section className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-16 md:grid-cols-2">
-            {AUDIENCES.map(({ icon: Icon, title, points }) => (
+            {AUDIENCES.map(({ icon: Icon, title, points }, index) => (
               <div key={title} className="flex flex-col gap-4 rounded-xl border bg-card p-6">
-                <Icon className="size-6 text-brand" />
+                <Icon className={`size-6 ${ACCENT_TEXTS[index + 2]}`} />
                 <h3 className="text-xl font-semibold">{title}</h3>
                 <ul className="flex flex-col gap-2 text-muted-foreground">
                   {points.map((point) => (
                     <li key={point} className="flex items-center gap-2">
-                      <span aria-hidden className="size-1.5 rounded-full bg-brand" />
+                      <span aria-hidden className={`size-1.5 rounded-full ${ACCENT_BACKGROUNDS[index + 2]}`} />
                       {point}
                     </li>
                   ))}

@@ -26,11 +26,13 @@ export function CreatorSubmissions() {
 
       <section aria-label="Earnings overview" className="grid gap-4 sm:grid-cols-2">
         <StatCard
+          accent="text-brand"
           label="Total earned"
           value={data && formatRupees(data.totalEarnings)}
           icon={IndianRupeeIcon}
         />
         <StatCard
+          accent="text-pop-cyan"
           label={list.query.search ? "Matching posts" : "Posts submitted"}
           value={data && String(data.total)}
           icon={FileVideoIcon}

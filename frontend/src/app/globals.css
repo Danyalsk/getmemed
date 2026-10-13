@@ -8,6 +8,9 @@
   --brand: #96ff43;
   --ink: #131313;
   --warning: #f5b544;
+  --pop-cyan: #38e1ff;
+  --pop-pink: #ff5ccf;
+  --pop-orange: #ff8a3d;
 
   --background: var(--ink);
   --foreground: #f4f4f2;
@@ -53,6 +56,9 @@
   --color-brand: var(--brand);
   --color-ink: var(--ink);
   --color-warning: var(--warning);
+  --color-pop-cyan: var(--pop-cyan);
+  --color-pop-pink: var(--pop-pink);
+  --color-pop-orange: var(--pop-orange);
 
   --font-sans: var(--font-bricolage);
   --font-heading: var(--font-bricolage);

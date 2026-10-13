@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Panel } from "@/components/analytics/panel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { accentBackground } from "@/lib/accents";
 import { formatRupees, formatViews, getInitials } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
@@ -21,7 +22,9 @@ export function CampaignLeaderboard({ campaignId }: { campaignId: string }) {
           {data.map((entry, index) => (
             <li key={entry.creator._id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
               <span className="w-6 font-pixel text-sm text-muted-foreground">{index + 1}</span>
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-semibold text-foreground">
+              <span
+                className={`flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-ink ${accentBackground(entry.creator.name)}`}
+              >
                 {getInitials(entry.creator.name)}
               </span>
               <div className="flex min-w-0 flex-1 flex-col">

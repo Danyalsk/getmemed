@@ -39,10 +39,25 @@ export function CreatorHome() {
       />
 
       <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard label="Total earned" value={totals && formatRupees(totals.earned)} icon={IndianRupeeIcon} />
-        <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} />
-        <StatCard label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
-        <StatCard label="Campaigns joined" value={totals && String(totals.campaigns)} icon={MegaphoneIcon} />
+        <StatCard
+          accent="text-brand"
+          label="Total earned"
+          value={totals && formatRupees(totals.earned)}
+          icon={IndianRupeeIcon}
+        />
+        <StatCard
+          accent="text-pop-cyan"
+          label="Total views"
+          value={totals && formatViews(totals.views)}
+          icon={TrendingUpIcon}
+        />
+        <StatCard accent="text-pop-pink" label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} />
+        <StatCard
+          accent="text-pop-orange"
+          label="Campaigns joined"
+          value={totals && String(totals.campaigns)}
+          icon={MegaphoneIcon}
+        />
       </section>
 
       {joined.data?.total !== 0 && (

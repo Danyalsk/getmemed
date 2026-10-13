@@ -11,6 +11,7 @@ import { PLATFORM_LABELS } from "@contracts/common";
 import { CampaignCover } from "@/components/campaign-cover";
 import { TRANSITION_TYPES } from "@/components/page-transition";
 import { Skeleton } from "@/components/ui/skeleton";
+import { accentBackground } from "@/lib/accents";
 import { formatRupees, formatRupeesCompact, formatViews, getInitials } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
@@ -56,7 +57,9 @@ function Slide({ campaign, visible, priority }: { campaign: Campaign; visible: b
       >
         <div className="flex max-w-xl flex-col gap-3">
           <span className="flex items-center gap-2 text-sm font-medium">
-            <span className="flex size-7 items-center justify-center rounded-md bg-brand text-[10px] font-bold text-ink">
+            <span
+              className={`flex size-7 items-center justify-center rounded-md text-[10px] font-bold text-ink ${accentBackground(campaign.brand.name)}`}
+            >
               {getInitials(campaign.brand.name)}
             </span>
             {campaign.brand.name}
@@ -82,7 +85,13 @@ function Slide({ campaign, visible, priority }: { campaign: Campaign; visible: b
 }
 
 export function FeaturedCarousel() {
-  const { data } = useQuery(queries.liveCampaigns({ page: 1, pageSize: FEATURED_COUNT, sort: "budget" }));
+  const { data } = useQuery(
+    queries.liveCampaigns({
+      page: 1,
+      pageSize: FEATURED_COUNT,
+      sort: "budget",
+    }),
+  );
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const slides = data?.items ?? [];

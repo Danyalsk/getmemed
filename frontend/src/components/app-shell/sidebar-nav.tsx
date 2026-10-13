@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import type { PublicUser } from "@contracts/auth";
 
 import { Wordmark } from "@/components/wordmark";
+import { accentBackground } from "@/lib/accents";
 import { getInitials } from "@/lib/format";
 import { clearSession, HOME_BY_ROLE } from "@/lib/session";
 
@@ -50,7 +51,9 @@ export function SidebarNav({ user, onNavigate }: SidebarNavProps) {
       </nav>
 
       <div className="flex items-center gap-3 rounded-xl border bg-card p-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
+        <span
+          className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-ink ${accentBackground(user.name)}`}
+        >
           {getInitials(user.name)}
         </span>
         <div className="flex min-w-0 flex-1 flex-col">

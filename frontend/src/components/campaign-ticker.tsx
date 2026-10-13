@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { ACCENT_BACKGROUNDS, ACCENT_TEXTS } from "@/lib/accents";
 import { formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
@@ -22,7 +23,9 @@ export function CampaignTicker() {
       <div className="flex min-w-0 flex-1 overflow-hidden mask-x-from-90%">
         <ul
           className="flex shrink-0 animate-[marquee_linear_infinite] items-center hover:[animation-play-state:paused] motion-reduce:animate-none"
-          style={{ animationDuration: `${campaigns.length * SECONDS_PER_ITEM}s` }}
+          style={{
+            animationDuration: `${campaigns.length * SECONDS_PER_ITEM}s`,
+          }}
         >
           {loop.map((campaign, index) => (
             <li
@@ -30,10 +33,10 @@ export function CampaignTicker() {
               aria-hidden={index >= campaigns.length}
               className="flex items-center gap-3 px-6 whitespace-nowrap"
             >
-              <span aria-hidden className="size-1.5 bg-brand" />
+              <span aria-hidden className={`size-1.5 ${ACCENT_BACKGROUNDS[index % ACCENT_BACKGROUNDS.length]}`} />
               <span>{campaign.name}</span>
               <span className="text-muted-foreground">{campaign.brand.name}</span>
-              <span className="font-medium text-brand tabular-nums">
+              <span className={`font-medium tabular-nums ${ACCENT_TEXTS[index % ACCENT_TEXTS.length]}`}>
                 up to {formatRupees(campaign.milestones.at(-1)?.payout ?? 0)}
               </span>
             </li>

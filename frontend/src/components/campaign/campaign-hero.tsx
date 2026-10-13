@@ -6,6 +6,7 @@ import { CampaignCover } from "@/components/campaign-cover";
 import { CampaignStatusBadge } from "@/components/campaign-status-badge";
 import { SharedCampaignCover } from "@/components/page-transition";
 import { PlatformLabel } from "@/components/platform-label";
+import { accentBackground } from "@/lib/accents";
 import { formatRelativeTime, formatRupees, getInitials } from "@/lib/format";
 
 interface CampaignHeroProps {
@@ -26,7 +27,9 @@ export function CampaignHero({ campaign, actions }: CampaignHeroProps) {
       <div className="flex min-w-0 flex-col gap-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
           <span className="flex items-center gap-2 text-foreground">
-            <span className="flex size-7 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-ink">
+            <span
+              className={`flex size-7 items-center justify-center rounded-full text-[10px] font-bold text-ink ${accentBackground(campaign.brand.name)}`}
+            >
               {getInitials(campaign.brand.name)}
             </span>
             {campaign.brand.name}

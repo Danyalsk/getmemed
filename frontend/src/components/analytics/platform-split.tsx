@@ -11,8 +11,8 @@ interface PlatformRow {
 }
 
 const PLATFORM_COLORS: Record<Platform, string> = {
-  instagram: "bg-brand",
-  youtube: "bg-foreground/60",
+  instagram: "bg-pop-pink",
+  youtube: "bg-pop-orange",
 };
 
 export function PlatformSplit({ rows, earnedLabel }: { rows: PlatformRow[]; earnedLabel: string }) {
