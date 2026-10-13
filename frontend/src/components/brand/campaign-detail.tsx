@@ -4,22 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon, InboxIcon } from "lucide-react";
 import Link from "next/link";
 
-import { CampaignCover } from "@/components/campaign-cover";
-import { SharedCampaignCover, TRANSITION_TYPES } from "@/components/page-transition";
-import { CampaignStatusBadge } from "@/components/campaign-status-badge";
+import { CampaignView } from "@/components/campaign/campaign-view";
 import { EmptyState } from "@/components/list/empty-state";
 import { PaginationBar } from "@/components/list/pagination-bar";
 import { QueryErrorAlert } from "@/components/list/query-error-alert";
 import { SearchInput } from "@/components/list/search-input";
-import { MilestoneLadder } from "@/components/milestone-ladder";
-import { PlatformLabel } from "@/components/platform-label";
+import { TRANSITION_TYPES } from "@/components/page-transition";
 import { SubmissionsTable } from "@/components/submissions-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListState } from "@/hooks/use-list-state";
-import { formatDate, formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
-import { BudgetUsage } from "./budget-usage";
 import { CampaignActions } from "./campaign-actions";
 
 function CampaignSubmissionsSection({ campaignId }: { campaignId: string }) {
@@ -83,47 +78,9 @@ export function CampaignDetail({ campaignId }: { campaignId: string }) {
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
       {campaign ? (
-        <section className="group flex flex-col overflow-hidden rounded-2xl border bg-card">
-          <div className="relative aspect-video md:aspect-[3/1]">
-            <SharedCampaignCover id={campaign._id}>
-              <div className="absolute inset-0">
-                <CampaignCover campaign={campaign} sizes="(min-width: 1152px) 1152px, 100vw" priority />
-              </div>
-            </SharedCampaignCover>
-            <div aria-hidden className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
-          </div>
-          <div className="-mt-12 flex flex-col gap-6 p-6 pt-0">
-            <div className="relative flex flex-wrap items-start justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-2xl font-semibold tracking-tight">{campaign.name}</h1>
-                  <CampaignStatusBadge campaign={campaign} />
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  <PlatformLabel platform={campaign.platform} />
-                  <span>Created {formatDate(campaign.createdAt)}</span>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <CampaignActions campaign={campaign} layout="buttons" />
-              </div>
-            </div>
-            <div className="grid gap-6 md:grid-cols-[2fr_3fr]">
-              <div className="flex flex-col gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Budget · <span className="text-foreground tabular-nums">{formatRupees(campaign.budget)}</span>
-                </span>
-                <BudgetUsage campaign={campaign} />
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="text-sm text-muted-foreground">Payout milestones</span>
-                <MilestoneLadder milestones={campaign.milestones} />
-              </div>
-            </div>
-          </div>
-        </section>
+        <CampaignView campaign={campaign} actions={<CampaignActions campaign={campaign} layout="buttons" />} />
       ) : (
-        !error && <Skeleton className="h-96 w-full rounded-2xl" />
+        !error && <Skeleton className="h-96 w-full rounded-3xl" />
       )}
 
       <CampaignSubmissionsSection campaignId={campaignId} />
