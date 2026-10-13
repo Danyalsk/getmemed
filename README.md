@@ -4,7 +4,7 @@ A creator marketplace where brands run campaigns with a milestone payout ladder 
 
 | | |
 |---|---|
-| Live app | https://memed-campaign-payout-tracker.vercel.app |
+| Live app | https://memed-payouts.vercel.app |
 | API | https://memed-api.onrender.com/api/health |
 | Repository | https://github.com/Danyalsk/memed-campaign-payout-tracker |
 
