@@ -120,6 +120,7 @@ export const api = {
   campaignLeaderboard: (id: string) => apiRequest(`/api/campaigns/${id}/leaderboard`, leaderboardSchema),
   joinedCampaigns: (query: ListQuery) =>
     apiRequest(withQueryString("/api/campaigns/joined", query), joinedCampaignPageSchema),
+  featuredCampaigns: () => apiRequest("/api/campaigns/featured", campaignPageSchema),
   liveCampaigns: (query: LiveCampaignsQuery) =>
     apiRequest(withQueryString("/api/campaigns/live", query), campaignPageSchema),
   setCampaignStatus: (id: string, status: CampaignStatus) =>

@@ -56,6 +56,21 @@ describe("campaign pages", () => {
 
     expect(order.indexOf(busy.campaignId)).toBeLessThan(order.indexOf(quiet.campaignId));
   });
+
+  it("shows live campaigns publicly on the featured list, without paused ones", async () => {
+    const live = await createCampaign(10_000, { name: "Featured live" });
+    const paused = await createCampaign(10_000, { name: "Featured paused" });
+    await request(app)
+      .patch(`/api/campaigns/${paused.campaignId}/status`)
+      .auth(paused.brandToken, { type: "bearer" })
+      .send({ status: "paused" });
+
+    const page = campaignPageSchema.parse((await request(app).get("/api/campaigns/featured")).body);
+    const ids = page.items.map((campaign) => campaign._id);
+
+    expect(ids).toContain(live.campaignId);
+    expect(ids).not.toContain(paused.campaignId);
+  });
 });
 
 describe("creator workspace", () => {

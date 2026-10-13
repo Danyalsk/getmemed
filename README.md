@@ -159,6 +159,7 @@ Responses are JSON. Errors always have the shape `{ "error": { "code", "message"
 | GET | `/api/campaigns/:id/leaderboard` | owner brand or any creator | Top 5 creators by earnings |
 | PATCH | `/api/campaigns/:id/status` | owner brand | `{ status: "active" \| "paused" \| "closed" }` |
 | GET | `/api/campaigns/:id/submissions` | owner brand | Posts submitted to the campaign |
+| GET | `/api/campaigns/featured` | none | Up to 12 trending live campaigns for the login and signup pages (Redis-cached) |
 | GET | `/api/campaigns/live` | creator | Live campaigns, cached in Redis. Filters: `platform`, `sort=newest\|trending\|budget` |
 | GET | `/api/campaigns/joined` | creator | Campaigns the creator has posted to, with their own posts, views and earnings |
 | POST | `/api/campaigns/:id/submissions` | creator | `{ postUrl }` |
@@ -215,12 +216,12 @@ When two updates touch the same campaign or submission at once, MongoDB raises a
 cd backend && npm test
 ```
 
-41 tests across five suites:
+42 tests across five suites:
 
 - `payout.test.ts`: milestone lookup, multi-milestone jumps, paying the difference, and the budget cap when it's full, partial or exhausted
 - `spike.test.ts`: spike thresholds and time windows
 - `views.integration.test.ts`: concurrency, idempotency, partial payouts, pause/resume/close, pagination, search and input validation
-- `marketplace.integration.test.ts`: campaign access rules, leaderboards, trending sort, creator and brand workspaces, account settings
+- `marketplace.integration.test.ts`: campaign access rules, leaderboards, trending sort, the public featured list, creator and brand workspaces, account settings
 - `auth.integration.test.ts`: the password hash never appears in a response
 
 ## Deployment

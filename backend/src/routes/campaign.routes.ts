@@ -25,6 +25,17 @@ import {
 
 export const campaignRouter = Router();
 
+const FEATURED_CAMPAIGNS_QUERY = liveCampaignsQuerySchema.parse({ pageSize: 12, sort: "trending" });
+
+campaignRouter.get("/featured", async (_req, res, next) => {
+  try {
+    const body = await listLiveCampaignsJson(FEATURED_CAMPAIGNS_QUERY);
+    res.type("json").send(body);
+  } catch (error) {
+    next(error);
+  }
+});
+
 campaignRouter.use(authenticate);
 
 campaignRouter.post("/", requireRole("brand"), async (req, res, next) => {

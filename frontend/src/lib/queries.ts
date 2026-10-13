@@ -35,6 +35,10 @@ export const queries = {
       queryKey: [...queryKeys.campaigns, id, "leaderboard"],
       queryFn: () => api.campaignLeaderboard(id),
     }),
+  featuredCampaigns: queryOptions({
+    queryKey: [...queryKeys.campaigns, "featured"],
+    queryFn: api.featuredCampaigns,
+  }),
   liveCampaigns: (query: LiveCampaignsQuery) =>
     queryOptions({
       queryKey: [...queryKeys.campaigns, "live", query],
