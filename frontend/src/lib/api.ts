@@ -21,6 +21,7 @@ import {
 } from "@contracts/campaign";
 import {
   apiErrorSchema,
+  healthSchema,
   type CampaignStatus,
   type ErrorCode,
   type ListQuery,
@@ -104,6 +105,7 @@ async function apiRequest<T>(
 export const getImageUrl = (imageId: string): string => `${API_URL}/api/images/${imageId}`;
 
 export const api = {
+  health: () => apiRequest("/api/health", healthSchema),
   uploadImage: (file: Blob) => apiRequest("/api/images", uploadedImageSchema, "POST", file),
   signup: (input: SignupInput) => apiRequest("/api/auth/signup", authResponseSchema, "POST", input),
   login: (input: LoginInput) => apiRequest("/api/auth/login", authResponseSchema, "POST", input),

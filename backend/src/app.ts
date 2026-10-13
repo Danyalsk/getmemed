@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env";
+import type { Health } from "./contracts/common";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler";
 import { analyticsRouter } from "./routes/analytics.routes";
 import { authRouter } from "./routes/auth.routes";
@@ -19,7 +20,8 @@ export function createApp() {
   app.use(express.json({ limit: "100kb" }));
 
   app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok" });
+    const health: Health = { status: "ok" };
+    res.json(health);
   });
   app.use("/api/auth", authRouter);
   app.use("/api/campaigns", campaignRouter);

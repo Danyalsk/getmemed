@@ -66,3 +66,6 @@ export const apiErrorSchema = z.object({
   }),
 });
 export type ApiError = z.infer<typeof apiErrorSchema>;
+
+export const healthSchema = z.object({ status: z.literal("ok") });
+export type Health = z.infer<typeof healthSchema>;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { SignedInRedirect } from "@/components/auth-gate";
+import { ClientMarquee } from "@/components/client-marquee";
 import { Wordmark } from "@/components/wordmark";
 
 export default function AuthLayout({ children }: LayoutProps<"/">) {
@@ -16,13 +17,16 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           <div className="absolute top-20 right-40 h-24 w-24 bg-wl-yellow" />
           <div className="absolute top-52 right-0 h-56 w-24 bg-wl-lavender" />
         </div>
-        <div className="relative flex flex-col gap-4">
-          <p className="max-w-md text-3xl leading-tight font-semibold tracking-tight">
-            Pay creators for the reach they actually deliver.
-          </p>
-          <p className="max-w-md text-muted-foreground">
-            Milestone payouts that track views in real time and never exceed your campaign budget.
-          </p>
+        <div className="relative flex flex-col gap-12">
+          <div className="flex flex-col gap-4">
+            <p className="max-w-md text-3xl leading-tight font-semibold tracking-tight">
+              Pay creators for the reach they actually deliver.
+            </p>
+            <p className="max-w-md text-muted-foreground">
+              Milestone payouts that track views in real time and never exceed your campaign budget.
+            </p>
+          </div>
+          <ClientMarquee />
         </div>
         <p className="relative text-xs text-muted-foreground">A WLDD company</p>
       </aside>

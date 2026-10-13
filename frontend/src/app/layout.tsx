@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Silkscreen } from "next/font/google";
 
 import { Providers } from "@/components/providers";
+import { ServerWakeNotice } from "@/components/server-wake-notice";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`dark ${body.variable} ${pixel.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
+        <ServerWakeNotice />
         <Toaster position="bottom-right" richColors />
       </body>
     </html>
