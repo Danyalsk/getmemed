@@ -232,11 +232,11 @@ cd backend && npm test
 
 ## Scaling to 10,000 creators
 
-The current design is correct, but every payout for a campaign goes through one document, which becomes the bottleneck at scale.
+Today every view update runs a payout transaction, and every payout for a campaign updates one `spent` counter. Both become bottlenecks at this scale.
 
-- **Take view updates off the request path.** Platform pollers push view counts into a queue (SQS or BullMQ). Workers batch updates per post and only run the payout transaction when a count crosses a new milestone, so most updates become a cheap `$max` on `views`.
-- **Avoid contention on popular campaigns.** A viral campaign with thousands of posts serialises on its `spent` counter. Partitioning the queue by campaign lets one worker own each campaign's payouts with no conflicts or retries. Splitting the budget into reserved chunks is another option.
-- **Use a ledger, not just counters.** Writing each payout as an immutable entry keyed by `(submissionId, milestone)` gives an audit trail, makes retries naturally idempotent, and lets `spent` and earnings be rebuilt or reconciled.
-- **Reads.** Lists are already paginated and indexed on `{ brand, createdAt }`, `{ creator, createdAt }` and `{ campaign, createdAt }`. Next would be keeping creator earnings as a running total, moving search to Atlas Search, and caching per-campaign summaries.
-- **Platform rate limits.** Poll on a schedule weighted by post age (new posts every few minutes, older ones hourly) and back off on errors.
-- **Fraud.** Run spike detection in the worker against per-creator baselines and hold flagged payouts for review.
+- **Queue view updates.** Platform pollers push counts into a queue (BullMQ or SQS). Workers save every count right away with a cheap `$max`, so brands always see live views, and only open a payout transaction when a post crosses a new milestone.
+- **Partition by campaign.** Routing a campaign's updates to a single worker removes write conflicts on `spent`, so a viral campaign with thousands of posts doesn't slow everything else down.
+- **Payout ledger.** Each payout becomes an immutable entry keyed by `(submissionId, milestone)`. That gives an audit trail, makes retries idempotent by design, and lets totals be rebuilt or reconciled.
+- **Fast reads.** Keep creator earnings and campaign view totals as stored running totals instead of aggregating per request, move search to Atlas Search, and cache campaign summaries in Redis.
+- **Platform rate limits.** Poll new posts every few minutes and older ones hourly, and back off when a platform rate-limits us.
+- **Fraud.** Score engagement quality (likes and comments relative to views, against the creator's usual numbers) alongside view spikes. Payouts for flagged posts are held until a brand reviews them.
