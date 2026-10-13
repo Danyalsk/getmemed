@@ -1,69 +1,111 @@
-# Meme'd — Campaign Payout Tracker
+# Meme'd Campaign Payout Tracker
 
-Brands run campaigns with a milestone payout ladder. Creators submit Instagram / YouTube posts, and as views come in they are paid the highest milestone their post has crossed — never more than the campaign's budget.
+A creator marketplace where brands run campaigns with a milestone payout ladder and creators get paid as their Instagram and YouTube posts gain views. A post earns the highest milestone it has crossed, and a campaign can never pay out more than its budget, even when view updates arrive at the same time.
 
-**Live demo:** _frontend link_ · _API link_
-
-| | Stack |
+| | |
 |---|---|
-| Backend | Node.js, Express 5, TypeScript, MongoDB + Mongoose, Zod, JWT, Redis (optional) |
+| Live app | https://memed-campaign-payout-tracker.vercel.app |
+| API | https://memed-api.onrender.com/api/health |
+| Repository | https://github.com/Danyalsk/memed-campaign-payout-tracker |
+
+The API runs on Render's free tier, so the first request after a quiet period can take up to a minute while the instance wakes up.
+
+### Demo accounts
+
+All demo accounts use the password `password123`.
+
+| Role | Email |
+|---|---|
+| Creator | `daily.meme.dose@seed.memed.app` |
+| Brand | `zing.beverages@seed.memed.app` |
+
+You can also sign up with any email as a brand or a creator.
+
+## What's covered
+
+| Assignment item | Where it lives |
+|---|---|
+| JWT signup and login, brand and creator roles | `backend/src/routes/auth.routes.ts`, `middleware/auth.ts` |
+| Brand creates a campaign (name, platform, budget, milestone ladder) | `POST /api/campaigns`, "New campaign" on `/brand/campaigns` |
+| Budget spent vs. remaining per campaign | `GET /api/campaigns/mine`, brand campaign cards and campaign page |
+| Creator lists live campaigns | `GET /api/campaigns/live`, `/creator/discover` |
+| Creator submits a post link | `POST /api/campaigns/:id/submissions`, "Submit a post" on a campaign page |
+| Creator sees total earnings | `GET /api/submissions/mine`, `/creator/earnings` |
+| `PATCH /api/submissions/:id/views` with no role check | `backend/src/routes/submission.routes.ts`, "Update" on `/creator/submissions` |
+| Payout = highest milestone crossed, capped by remaining budget | `backend/src/services/payout.ts`, `submission.service.ts` |
+| Jest unit tests for payout and budget cap | `backend/tests/payout.test.ts` |
+| Bonus: Redis cache for the campaign list | `backend/src/lib/cache.ts` |
+| Bonus: flag unusual view spikes | `backend/src/services/spike.ts` |
+| Stretch: concurrent updates never overspend or double pay | Mongo transactions, `tests/views.integration.test.ts` |
+| Stretch: Docker | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile` |
+| Stretch: scaling to 10,000 creators | [Scaling](#scaling-to-10000-creators) below |
+
+Beyond the brief, I added pause/resume/close for campaigns, a brief on each campaign, search and pagination on every list, a discovery page for creators, per-campaign leaderboards, analytics for both roles, and account settings.
+
+## Stack
+
+| | |
+|---|---|
+| Backend | Node.js, Express 5, TypeScript, MongoDB with Mongoose, Zod, JWT, Redis |
 | Frontend | Next.js 16 (App Router), TypeScript, TanStack Query, Tailwind CSS v4, shadcn/ui, react-hook-form |
 | Tests | Jest, Supertest, mongodb-memory-server |
+| Hosting | Vercel (web), Render (API and Redis), MongoDB Atlas |
 
-## Repository layout
+## Project structure
 
 ```
 backend/
-  src/contracts/   Zod schemas + inferred types for every request/response (shared with the frontend)
-  src/services/    Business logic — payout.ts and spike.ts are pure functions
+  src/contracts/   Zod schemas and inferred types for every request and response
+  src/services/    Business logic; payout.ts and spike.ts are pure functions
   src/routes/      Express routers
   src/models/      Mongoose models
-  tests/           Unit tests (payout, spike) and integration tests (concurrency)
+  scripts/         Demo data seed
+  tests/           Unit and integration tests
 frontend/
-  src/app/         Routes: landing, auth, /brand/* and /creator/* workspaces, /settings
-  src/components/  UI, grouped by brand / creator / shared
-  src/lib/         Typed API client, session store, formatting
+  src/app/         Routes: landing, auth, /brand/*, /creator/*, /settings
+  src/components/  UI grouped into brand, creator, campaign and shared pieces
+  src/lib/         Typed API client, query definitions, session store, formatting
 ```
 
-**Single source of truth for types.** Every API shape is defined once as a Zod schema in `backend/src/contracts`. The backend validates requests with it; the frontend imports the same files through the `@contracts/*` path alias, uses them for form validation, and parses every API response with them. Nothing is redeclared on either side.
+Every API shape is defined once, as a Zod schema in `backend/src/contracts`. The backend validates requests with it, and the frontend imports the same files through the `@contracts/*` path alias for form validation and to parse every response. No type is declared twice.
 
-The API returns Mongoose documents as-is — the response shape is owned by the schemas (`remaining` is a virtual, `passwordHash` is stripped in `toJSON`), so there are no hand-written DTO mappers. The integration tests parse every response with the contract schemas, which keeps the two in sync.
+The API returns Mongoose documents directly. The schema owns the response shape (`remaining` is a virtual and `passwordHash` is removed in `toJSON`), so there are no mapping layers to keep in sync. The integration tests parse every response with the contract schemas, which catches any drift.
 
-Every route handler wraps its work in `try/catch` and passes failures to `next(error)`. The central error handler (`middleware/error-handler.ts`) maps Zod, domain, duplicate-key and body-parser errors to the shared error shape, and anything unexpected to a 500 without leaking internals.
+Each route handler catches its errors and passes them to `next(error)`. One error handler (`middleware/error-handler.ts`) turns validation, domain, duplicate-key and malformed-body errors into the shared error format, and returns a plain 500 for anything unexpected without leaking internals.
 
 ## Running locally
 
-Requirements: Node 20+, a MongoDB **replica set** (MongoDB Atlas works out of the box; transactions need a replica set), and optionally Redis.
+You need Node 22+, a MongoDB replica set (any Atlas cluster works; payouts use transactions, which need a replica set) and, optionally, Redis.
 
 ```bash
-# API → http://localhost:4000
+# API on http://localhost:4000
 cd backend
-cp .env.example .env        # fill in MONGODB_URI and JWT_SECRET
+cp .env.example .env        # set MONGODB_URI and JWT_SECRET
 npm install
 npm run dev
 
-# Web app → http://localhost:3000
+# Web app on http://localhost:3000
 cd frontend
 cp .env.example .env.local
 npm install
 npm run dev
 ```
 
-### Demo data
+To load demo data:
 
 ```bash
 cd backend && npm run seed
 ```
 
-Creates 12 campaigns from fictional brands (with cover art from `backend/scripts/seed/covers`), 8 creators and posts whose payouts are calculated by the real payout service. Every seeded account uses the `@seed.memed.app` domain and the password `password123`, for example `daily.meme.dose@seed.memed.app` (creator) or `zing.beverages@seed.memed.app` (brand). Re-running the seed replaces only that data.
+This creates 12 campaigns from fictional brands, 8 creators and their posts. The payouts on those posts go through the real payout service. Seeded accounts use the `@seed.memed.app` domain, and running the seed again replaces only that data.
 
-Or run everything (Mongo replica set, Redis, API, web) with Docker:
+### Docker
 
 ```bash
 JWT_SECRET=$(openssl rand -hex 32) docker compose up --build
 ```
 
-> The Docker setup was written but not run on my machine (Docker isn't installed there), so treat it as untested.
+This starts a single-node Mongo replica set, Redis, the API on port 4000 and the web app on port 3000. I tested it end to end: health check, signup, cover upload, campaign creation, submissions, and parallel view updates that stopped exactly at the budget, plus the Redis cache being filled.
 
 ### Scripts
 
@@ -72,11 +114,11 @@ JWT_SECRET=$(openssl rand -hex 32) docker compose up --build
 | Dev server | `npm run dev` | `npm run dev` |
 | Type check | `npm run typecheck` | `npm run typecheck` |
 | Lint | `npm run lint` | `npm run lint` |
-| Tests | `npm test` | — |
-| Demo data | `npm run seed` | — |
+| Tests | `npm test` | |
+| Demo data | `npm run seed` | |
 | Production | `npm run build && npm start` | `npm run build && npm start` |
 
-`npm test` runs Jest with `--experimental-vm-modules`: the MongoDB driver loads runtime adapters with a dynamic `import()`, which Jest's VM rejects without that flag.
+`npm test` runs Jest with `--experimental-vm-modules`, because the MongoDB driver loads some modules with a dynamic `import()` that Jest's VM rejects without the flag.
 
 ## Environment variables
 
@@ -84,90 +126,91 @@ JWT_SECRET=$(openssl rand -hex 32) docker compose up --build
 
 | Variable | Required | Default | Notes |
 |---|---|---|---|
-| `MONGODB_URI` | yes | — | Must point to a replica set (Atlas clusters are) |
-| `JWT_SECRET` | yes | — | At least 32 characters |
+| `MONGODB_URI` | yes | | Must point to a replica set |
+| `JWT_SECRET` | yes | | At least 32 characters |
 | `JWT_TTL_SECONDS` | no | `604800` | Token lifetime (7 days) |
 | `PORT` | no | `4000` | |
-| `CORS_ORIGINS` | no | `http://localhost:3000` | Comma-separated allowed origins |
-| `REDIS_URL` | no | — | Enables the live-campaign cache. Without it, or if Redis is down, reads go to Mongo |
-| `SPIKE_MIN_DELTA` | no | `5000` | Minimum view gain to consider a spike |
-| `SPIKE_VIEWS_PER_HOUR` | no | `20000` | Growth rate that triggers a spike flag |
+| `CORS_ORIGINS` | no | `http://localhost:3000` | Comma-separated list of allowed origins |
+| `REDIS_URL` | no | | Turns on the live campaign cache. Without it, or if Redis is down, reads go straight to Mongo |
+| `SPIKE_MIN_DELTA` | no | `5000` | Smallest view gain that can count as a spike |
+| `SPIKE_VIEWS_PER_HOUR` | no | `20000` | Growth rate that flags a spike |
 
 **frontend/.env.local**
 
 | Variable | Required | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | yes | Base URL of the API, e.g. `http://localhost:4000` |
+| `NEXT_PUBLIC_API_URL` | yes | Base URL of the API, for example `http://localhost:4000` |
 
-All backend env vars are validated with Zod at startup; the process exits with a clear message if anything is missing or malformed.
+The backend validates its environment with Zod on startup and exits with a clear message if something is missing or malformed.
 
 ## API
 
-All responses are JSON. Errors always look like `{ "error": { "code", "message", "fields"? } }`.
+Responses are JSON. Errors always have the shape `{ "error": { "code", "message", "fields"? } }`.
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| POST | `/api/auth/signup` | — | `{ name, email, password, role }` → `{ token, user }` |
-| POST | `/api/auth/login` | — | `{ email, password }` → `{ token, user }` |
+| POST | `/api/auth/signup` | | `{ name, email, password, role }` returns `{ token, user }` |
+| POST | `/api/auth/login` | | `{ email, password }` returns `{ token, user }` |
 | GET | `/api/auth/me` | any | Current user |
 | PATCH | `/api/auth/me` | any | `{ name }` |
 | PATCH | `/api/auth/password` | any | `{ currentPassword, newPassword }` |
-| POST | `/api/campaigns` | brand | Create campaign |
-| GET | `/api/campaigns/mine` | brand | Own campaigns (`spent` / `remaining` each) plus a budget `summary`. Filters: `status` |
-| GET | `/api/campaigns/:id` | brand (owner) or any creator | One campaign |
-| GET | `/api/campaigns/:id/leaderboard` | brand (owner) or any creator | Top 5 creators by earnings |
-| GET | `/api/campaigns/joined` | creator | Campaigns the creator has posted to, with their posts, views and earnings |
-| PATCH | `/api/campaigns/:id/status` | brand (owner) | `{ status: "active" \| "paused" \| "closed" }` |
-| GET | `/api/campaigns/:id/submissions` | brand (owner) | Posts submitted to a campaign |
-| GET | `/api/campaigns/live` | creator | Live campaigns (Redis-cached). Filters: `platform`, `sort=newest\|trending\|budget` |
+| POST | `/api/images` | brand | Upload a campaign cover (JPEG, PNG or WebP, up to 2 MB) |
+| POST | `/api/campaigns` | brand | Create a campaign |
+| GET | `/api/campaigns/mine` | brand | Own campaigns with `spent` and `remaining`, plus a budget `summary`. Filter: `status` |
+| GET | `/api/campaigns/:id` | owner brand or any creator | One campaign |
+| GET | `/api/campaigns/:id/leaderboard` | owner brand or any creator | Top 5 creators by earnings |
+| PATCH | `/api/campaigns/:id/status` | owner brand | `{ status: "active" \| "paused" \| "closed" }` |
+| GET | `/api/campaigns/:id/submissions` | owner brand | Posts submitted to the campaign |
+| GET | `/api/campaigns/live` | creator | Live campaigns, cached in Redis. Filters: `platform`, `sort=newest\|trending\|budget` |
+| GET | `/api/campaigns/joined` | creator | Campaigns the creator has posted to, with their own posts, views and earnings |
 | POST | `/api/campaigns/:id/submissions` | creator | `{ postUrl }` |
 | GET | `/api/submissions/mine` | creator | Own posts plus `totalEarnings` |
-| GET | `/api/submissions/brand` | brand | Posts across all the brand's campaigns. Filters: `campaign` |
-| GET | `/api/analytics/creator` | creator | Totals, per-campaign and per-platform breakdowns, top posts |
-| GET | `/api/analytics/brand` | brand | Totals, spend per campaign, platform split, top creators |
-| PATCH | `/api/submissions/:id/views` | **none** | `{ views }` → `{ submission, paidNow }` |
+| GET | `/api/submissions/brand` | brand | Posts across all of the brand's campaigns. Filter: `campaign` |
+| PATCH | `/api/submissions/:id/views` | none | `{ views }` returns `{ submission, paidNow }` |
+| GET | `/api/analytics/creator` | creator | Totals plus per-campaign and per-platform breakdowns |
+| GET | `/api/analytics/brand` | brand | Totals, spend per campaign, platform split and top creators |
 
-Every list endpoint is paginated and searchable: `?page=1&pageSize=10&search=…` (page size up to 50). Responses look like `{ items, total, page, pageSize, totalPages }`. Campaign lists search by name; submission lists search by post link, creator name or campaign name.
+Every list endpoint takes `?page=1&pageSize=12&search=…` (page size up to 50) and returns `{ items, total, page, pageSize, totalPages }`. Campaign lists search by name; submission lists search by post link, creator name or campaign name.
 
-Auth is a JWT sent as `Authorization: Bearer <token>`. Signup and login are rate limited (20 requests / 15 min per IP).
+Requests are authenticated with `Authorization: Bearer <token>`. Signup and login are rate limited to 20 requests per 15 minutes per IP.
 
-The views endpoint is intentionally unauthenticated as the brief says it simulates platform data. The creator dashboard has a "Simulate views" control that calls it, so the payout flow can be tried from the UI.
+The views endpoint has no auth because the brief describes it as a stand-in for platform data. To try payouts from the UI, open My posts as a creator and use the "Update" field on any post.
 
 ## Payout rules and assumptions
 
-Where the brief was open, these are the calls I made:
+Where the brief left room, these are the calls I made:
 
-1. **Highest milestone only.** A post's entitlement is the payout of the highest milestone its views have reached. Crossing several milestones in one update (e.g. 0 → 120K) pays the top one, not the sum.
-2. **Pay the difference.** Each update pays `entitled − alreadyPaid`. Going from 10K (₹500) to 50K (₹2,000) pays ₹1,500 more, for ₹2,000 total.
-3. **Budget runs out mid-payout → partial payout.** If ₹3,000 is owed but ₹1,200 is left, ₹1,200 is paid and the campaign is exhausted. The submission records both `entitledAmount` and `paidAmount`, and the UI shows "capped by budget".
-4. **Views never go down.** A lower count than the stored one is treated as stale/out-of-order and ignored. Payouts are never clawed back.
-5. **Live campaign** = status `active` and `spent < budget`. Exhausted, paused or closed campaigns disappear from the creator list and reject new submissions.
-6. **Pause, resume, close.** Brands can pause an active campaign and resume it later, or close it for good. A paused campaign is hidden from creators, takes no new submissions and pays nothing, but views are still recorded. Because each update pays `entitled − alreadyPaid`, the first update after resuming pays whatever was earned while paused. Closing is final: no submissions or payouts, and the remaining budget stays unspent.
-7. **Money is whole rupees** (integers).
-8. **Milestone ladder:** 1–10 rungs, views and payouts strictly increasing, and the top payout must fit inside the budget.
-9. **One post, one submission.** Links are normalised before the uniqueness check — `?igsh=`, `/reel/` vs `/p/`, `youtu.be`, `/shorts/` all collapse to one canonical URL — so the same post can't be submitted twice. The link's host must match the campaign platform.
-10. **Spike flag** (bonus): an update is flagged when the post gained at least `SPIKE_MIN_DELTA` views at a rate of at least `SPIKE_VIEWS_PER_HOUR` since the previous update. The flag is informational and sticky — it's shown to the brand, but the payout still goes through. In production I'd hold flagged payouts for review.
-11. **Session storage:** the JWT is kept in `localStorage`. It's simple and works across the Vercel/Render domains, at the cost of being readable by injected scripts; an httpOnly cookie behind a same-origin proxy would be the hardening step.
-12. **Post ownership isn't verified.** The brief asks creators to submit a link and simulates views through `PATCH /views`, so any well-formed link for the right platform is accepted. Instagram's oEmbed stopped returning the post author in 2025, so a link alone can't be tied to an account. In production I'd verify without codes in bios or captions: YouTube through Google sign-in (read-only), checking each video's channel; Instagram by having the creator add the brand as a **Collaborator** on the reel (only the owner can do that, and the brand gets the reach), or a one-time Story mention of the Meme'd account picked up by a webhook. Payouts would be held until a post is verified.
+1. **Highest milestone only.** A post is entitled to the payout of the highest milestone its views have reached. If one update jumps past several milestones (0 to 120K), it pays the top one, not the sum.
+2. **Pay the difference.** Each update pays `entitled − alreadyPaid`. Moving from 10K (₹500) to 50K (₹2,000) pays ₹1,500 more, so the post has ₹2,000 in total.
+3. **Budget runs out mid-payout: pay what's left.** If ₹3,000 is owed and ₹1,200 remains, the creator gets ₹1,200 and the campaign is exhausted. The submission keeps both `entitledAmount` and `paidAmount`, and the UI marks it as capped by budget.
+4. **Views never go down.** A lower count than the stored one is treated as stale or out of order and ignored. Nothing is ever clawed back.
+5. **A live campaign** is `active` with budget left. Exhausted, paused and closed campaigns drop out of the creator list and reject new posts.
+6. **Pause, resume, close.** A paused campaign is hidden from creators, takes no new posts and pays nothing, but still records views. Because payouts are `entitled − alreadyPaid`, the first update after resuming pays whatever was earned during the pause. Closing is permanent and leaves the remaining budget unspent.
+7. **Money is in whole rupees.**
+8. **Milestone ladder:** 1 to 10 rungs, with views and payouts strictly increasing, and the top payout must fit in the budget.
+9. **A post can be submitted once.** Links are normalised before the uniqueness check (`?igsh=`, `/reel/` vs `/p/`, `youtu.be` and `/shorts/` all map to one canonical URL), and the link's host must match the campaign's platform.
+10. **Spike flag:** an update is flagged when a post gains at least `SPIKE_MIN_DELTA` views at `SPIKE_VIEWS_PER_HOUR` or faster since its last update. The flag is shown to the brand and stays on the post, but the payout still goes through. In production I'd hold flagged payouts for review.
+11. **Session storage:** the JWT lives in `localStorage`. It's simple and works across the Vercel and Render domains. The trade-off is that injected scripts could read it; an httpOnly cookie behind a same-origin proxy would be the next step.
+12. **Post ownership isn't verified.** The brief asks for a link and simulates views, so any valid link for the right platform is accepted. Instagram's oEmbed stopped returning the post author in 2025, so a link alone can't be tied to an account. In production I'd verify YouTube through Google sign-in (read-only) by matching each video's channel. For Instagram, I'd have the creator add the brand as a Collaborator on the reel; only the owner can do that, and the brand gets the reach too. Payouts would wait until a post is verified.
 
 ## Concurrency and idempotency
 
-`PATCH /api/submissions/:id/views` runs inside a MongoDB transaction with snapshot read concern:
+`PATCH /api/submissions/:id/views` runs in a MongoDB transaction with snapshot reads:
 
 1. Read the submission and its campaign.
-2. Compute `views = max(stored, incoming)`, the entitlement, and `pay = min(entitled − paid, budget − spent)`.
-3. `$inc` the campaign's `spent` (with an `$expr` guard that `spent + pay ≤ budget`) and update the submission.
+2. Work out `views = max(stored, incoming)`, the entitlement, and `pay = min(entitled − paid, budget − spent)`.
+3. `$inc` the campaign's `spent`, guarded by `spent + pay ≤ budget`, and update the submission.
 
-If two updates touch the same campaign or submission at once, MongoDB raises a write conflict for one of them and Mongoose retries it from a fresh read, so the second update sees the first one's payout. Together with paying only the difference, this means:
+When two updates touch the same campaign or submission at once, MongoDB raises a write conflict on one of them and Mongoose retries it from a fresh read, so the second update sees the first one's payout. Combined with paying only the difference:
 
-- parallel updates for different posts can't overspend the budget, and
-- repeating or racing the same update can't pay a milestone twice.
+- parallel updates on different posts can't overspend the budget
+- repeated or racing updates on the same post can't pay a milestone twice
 
-`tests/views.integration.test.ts` proves this against a real (in-memory) replica set: 20 posts each owed ₹2,000 are updated in parallel against a ₹5,000 budget and exactly ₹5,000 is paid; 10 concurrent duplicate updates pay ₹500 once. Removing the transaction makes both tests fail (₹21,000 paid out of a ₹5,000 budget).
+`tests/views.integration.test.ts` checks this against a real in-memory replica set. In one test, 20 posts each owed ₹2,000 are updated in parallel against a ₹5,000 budget and exactly ₹5,000 is paid. In another, 10 concurrent duplicate updates pay ₹500 once. Without the transaction, both tests fail (₹21,000 paid from a ₹5,000 budget).
 
 ## Caching
 
-`GET /api/campaigns/live` is a read-through Redis cache (`campaigns:live`, 30s TTL). It stores the serialised response body, so a hit skips MongoDB and serialisation entirely. Each page/search/filter combination is cached under a versioned key; invalidation bumps the version, dropping every variant at once. That happens whenever a campaign is created, changes status, or any payout changes its spend, so remaining budgets shown to creators stay current. Any Redis error falls back to MongoDB.
+`GET /api/campaigns/live` is a read-through Redis cache with a 30 second TTL. It stores the serialised response, so a hit skips both Mongo and serialisation. Each page, search and filter combination gets its own key under a version number. Creating a campaign, changing its status or paying out from it bumps the version, which drops every cached variant at once, so the remaining budgets creators see stay current. If Redis errors, the request falls back to Mongo.
 
 ## Tests
 
@@ -175,24 +218,27 @@ If two updates touch the same campaign or submission at once, MongoDB raises a w
 cd backend && npm test
 ```
 
-- `payout.test.ts` — milestone lookup, multi-milestone jumps, paying the difference, budget cap (full, partial, exhausted).
-- `spike.test.ts` — spike thresholds and time windows.
-- `views.integration.test.ts` — concurrency, idempotency, partial payout, pause/resume/close, pagination and search, input validation.
-- `auth.integration.test.ts` — password hash never appears in responses.
+41 tests across five suites:
+
+- `payout.test.ts`: milestone lookup, multi-milestone jumps, paying the difference, and the budget cap when it's full, partial or exhausted
+- `spike.test.ts`: spike thresholds and time windows
+- `views.integration.test.ts`: concurrency, idempotency, partial payouts, pause/resume/close, pagination, search and input validation
+- `marketplace.integration.test.ts`: campaign access rules, leaderboards, trending sort, creator and brand workspaces, account settings
+- `auth.integration.test.ts`: the password hash never appears in a response
 
 ## Deployment
 
-- **API (Render):** root directory `backend`, build `npm ci && npm run build`, start `npm start`. Set the env vars above plus `MONGOMS_DISABLE_POSTINSTALL=1` (skips the test-only MongoDB binary download). Set `CORS_ORIGINS` to the frontend URL.
-- **Web (Vercel):** root directory `frontend`, keep "Include files outside the root directory" enabled (the app imports `backend/src/contracts`), set `NEXT_PUBLIC_API_URL`.
-- **Database:** MongoDB Atlas (any tier — it's a replica set).
+- **Web on Vercel:** root directory `frontend`, with "Include files outside the root directory" turned on because the app imports `backend/src/contracts`. Set `NEXT_PUBLIC_API_URL`.
+- **API on Render:** defined in `render.yaml` (web service plus a Redis-compatible Key Value instance). Set `MONGODB_URI` and `CORS_ORIGINS`; `JWT_SECRET` is generated by Render.
+- **Database:** MongoDB Atlas.
 
 ## Scaling to 10,000 creators
 
-The current design is correct but funnels every payout for a campaign through one document, which becomes the bottleneck as volume grows.
+The current design is correct, but every payout for a campaign goes through one document, which becomes the bottleneck at scale.
 
-- **Ingest views asynchronously.** Platforms (or our pollers) push view counts into a queue (SQS / BullMQ). Workers batch updates per submission and only run the payout transaction when a count crosses a new milestone — most updates then become a cheap `$max` on `views` with no transaction at all.
-- **Reduce contention on hot campaigns.** A viral campaign with thousands of posts serialises on its `spent` counter. Partition the queue by campaign so one worker owns a campaign's payouts (no conflicts, no retries), or pre-split the budget into reservation chunks.
-- **Ledger instead of counters.** Write each payout as an immutable ledger entry with a unique `(submissionId, milestone)` key. That gives an audit trail, makes retries naturally idempotent, and lets `spent` / earnings be recomputed or reconciled.
-- **Reads.** Lists are already paginated and indexed (`{ brand, createdAt }`, `{ creator, createdAt }`, `{ campaign, createdAt }`). Next steps: keep creator earnings as a maintained total instead of aggregating per request, replace regex search with an Atlas Search index, and cache per-campaign summaries in Redis.
-- **Platform limits.** Instagram/YouTube APIs are rate limited, so poll on a schedule weighted by post age (fresh posts every few minutes, older ones hourly) and back off on errors.
-- **Fraud.** Move spike detection to the worker with per-creator baselines, and hold flagged payouts for review.
+- **Take view updates off the request path.** Platform pollers push view counts into a queue (SQS or BullMQ). Workers batch updates per post and only run the payout transaction when a count crosses a new milestone, so most updates become a cheap `$max` on `views`.
+- **Avoid contention on popular campaigns.** A viral campaign with thousands of posts serialises on its `spent` counter. Partitioning the queue by campaign lets one worker own each campaign's payouts with no conflicts or retries. Splitting the budget into reserved chunks is another option.
+- **Use a ledger, not just counters.** Writing each payout as an immutable entry keyed by `(submissionId, milestone)` gives an audit trail, makes retries naturally idempotent, and lets `spent` and earnings be rebuilt or reconciled.
+- **Reads.** Lists are already paginated and indexed on `{ brand, createdAt }`, `{ creator, createdAt }` and `{ campaign, createdAt }`. Next would be keeping creator earnings as a running total, moving search to Atlas Search, and caching per-campaign summaries.
+- **Platform rate limits.** Poll on a schedule weighted by post age (new posts every few minutes, older ones hourly) and back off on errors.
+- **Fraud.** Run spike detection in the worker against per-creator baselines and hold flagged payouts for review.
