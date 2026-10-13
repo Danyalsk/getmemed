@@ -36,7 +36,7 @@ export function ScrollRow({ title, description, children }: ScrollRowProps) {
       </div>
       <div
         ref={trackRef}
-        className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:-mx-10 lg:scroll-px-10 lg:px-10 [&::-webkit-scrollbar]:hidden"
+        className="-mx-4 flex snap-x snap-mandatory scroll-px-4 -mt-2 -mb-6 gap-4 overflow-x-auto px-4 pt-2 pb-8 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:-mx-10 lg:scroll-px-10 lg:px-10 [&::-webkit-scrollbar]:hidden"
       >
         {children}
       </div>

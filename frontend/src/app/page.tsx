@@ -49,11 +49,11 @@ export default function LandingPage() {
         <main className="flex flex-1 flex-col">
           <section className="relative overflow-hidden">
             <div aria-hidden className="pointer-events-none absolute inset-0">
-              <div className="absolute top-10 right-0 h-48 w-1/3 bg-wl-red" />
-              <div className="absolute top-10 right-1/3 h-20 w-28 bg-wl-yellow" />
-              <div className="absolute top-58 right-0 h-32 w-20 bg-wl-lavender" />
+              <div className="absolute top-6 right-0 h-24 w-1/3 bg-wl-red lg:top-10 lg:h-48" />
+              <div className="absolute top-6 right-1/3 h-12 w-16 bg-wl-yellow lg:top-10 lg:h-20 lg:w-28" />
+              <div className="absolute top-30 right-0 h-14 w-12 bg-wl-lavender lg:top-58 lg:h-32 lg:w-20" />
             </div>
-            <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-24">
+            <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 pt-48 pb-20 lg:py-24">
               <p className="text-sm font-medium text-wl-lime">Creator campaigns by WLDD</p>
               <h1 className="max-w-2xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
                 Pay for reach, not for promises.

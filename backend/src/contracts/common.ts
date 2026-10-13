@@ -28,11 +28,11 @@ export const rupeesSchema = z.number().int().nonnegative();
 
 export const isoDateSchema = z.iso.datetime();
 
-export const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
+export const PAGE_SIZE_OPTIONS = [12, 24, 48] as const;
 
 export const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).default(10),
+  pageSize: z.coerce.number().int().min(1).max(50).default(12),
   search: z.string().trim().max(100).optional(),
 });
 export type ListQuery = z.output<typeof listQuerySchema>;

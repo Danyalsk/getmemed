@@ -38,7 +38,7 @@ export function BrandCampaigns() {
         actions={<CreateCampaignDialog />}
       />
 
-      <section aria-label="Budget overview" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Budget overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Campaigns" value={summary && String(summary.campaigns)} icon={MegaphoneIcon} accent="text-wl-lavender" />
         <StatCard label="Total budget" value={summary && formatRupees(summary.budget)} icon={WalletIcon} accent="text-wl-yellow" />
         <StatCard label="Paid out" value={summary && formatRupees(summary.spent)} icon={ChartPieIcon} accent="text-wl-red" />
@@ -85,7 +85,7 @@ export function BrandCampaigns() {
           />
         ) : (
           <div
-            className={`grid gap-5 md:grid-cols-2 lg:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
+            className={`grid gap-5 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}
           >
             {data
               ? data.items.map((campaign) => <BrandCampaignCard key={campaign._id} campaign={campaign} morphCover />)

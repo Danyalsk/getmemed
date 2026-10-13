@@ -37,11 +37,11 @@ export function AllCampaignsSection() {
 
   return (
     <section aria-labelledby="all-campaigns-heading" className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <h2 id="all-campaigns-heading" className="text-xl font-semibold tracking-tight sm:text-2xl">
           All campaigns {data && <span className="text-muted-foreground tabular-nums">({data.total})</span>}
         </h2>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 lg:flex-nowrap">
           <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search campaigns" />
           <Select
             value={platform ?? ALL_PLATFORMS}
@@ -51,7 +51,7 @@ export function AllCampaignsSection() {
               list.resetPage();
             }}
           >
-            <SelectTrigger aria-label="Filter by platform" className="w-36">
+            <SelectTrigger aria-label="Filter by platform" className="flex-1 sm:w-36 sm:flex-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -70,7 +70,7 @@ export function AllCampaignsSection() {
               list.resetPage();
             }}
           >
-            <SelectTrigger aria-label="Sort campaigns" className="w-40">
+            <SelectTrigger aria-label="Sort campaigns" className="flex-1 sm:w-40 sm:flex-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -95,7 +95,7 @@ export function AllCampaignsSection() {
           }
         />
       ) : (
-        <div className={`grid gap-5 md:grid-cols-2 xl:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}>
+        <div className={`grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}>
           {data
             ? data.items.map((campaign) => <CreatorCampaignCard key={campaign._id} campaign={campaign} morphCover />)
             : Array.from({ length: 6 }, (_, index) => <CampaignCardSkeleton key={index} />)}

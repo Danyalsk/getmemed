@@ -25,7 +25,7 @@ export function CreatorEarnings() {
 
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
-      <section aria-label="Earnings overview" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Earnings overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Total earned" value={totals && formatRupees(totals.earned)} icon={IndianRupeeIcon} accent="text-wl-lime" />
         <StatCard
           label="Avg. per post"

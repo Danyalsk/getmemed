@@ -23,7 +23,7 @@ export function BrandAnalytics() {
 
       {error && <QueryErrorAlert error={error} onRetry={() => void refetch()} />}
 
-      <section aria-label="Totals" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Totals" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} accent="text-wl-yellow" />
         <StatCard
           label="Paid out"

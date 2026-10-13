@@ -20,7 +20,7 @@ export function CampaignCover({ campaign, sizes, priority }: CampaignCoverProps)
         sizes={sizes}
         priority={priority}
         unoptimized
-        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:group-hover:scale-100"
       />
     );
   }

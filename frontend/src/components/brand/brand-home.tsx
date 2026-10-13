@@ -35,7 +35,7 @@ export function BrandHome() {
         actions={<CreateCampaignDialog />}
       />
 
-      <section aria-label="Overview" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
           label="Active campaigns"
           value={totals && `${totals.activeCampaigns} of ${totals.campaigns}`}

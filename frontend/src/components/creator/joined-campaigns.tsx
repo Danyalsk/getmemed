@@ -46,7 +46,7 @@ export function JoinedCampaigns() {
           }
         />
       ) : (
-        <div className={`grid gap-5 md:grid-cols-2 xl:grid-cols-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}>
+        <div className={`grid gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}>
           {data
             ? data.items.map((campaign) => (
                 <CreatorCampaignCard

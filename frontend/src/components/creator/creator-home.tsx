@@ -38,7 +38,7 @@ export function CreatorHome() {
         }
       />
 
-      <section aria-label="Overview" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label="Total earned" value={totals && formatRupees(totals.earned)} icon={IndianRupeeIcon} accent="text-wl-lime" />
         <StatCard label="Total views" value={totals && formatViews(totals.views)} icon={TrendingUpIcon} accent="text-wl-yellow" />
         <StatCard label="Posts" value={totals && String(totals.posts)} icon={ClapperboardIcon} accent="text-wl-lavender" />
