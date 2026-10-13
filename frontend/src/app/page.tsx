@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { SignedInRedirect } from "@/components/auth-gate";
 import { CampaignTicker } from "@/components/campaign-ticker";
+import { FloatingBrands } from "@/components/floating-brands";
 import { PageTransition } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
 import { ACCENT_BACKGROUNDS, ACCENT_TEXTS } from "@/lib/accents";
@@ -50,6 +51,7 @@ export default function LandingPage() {
       <PageTransition>
         <main className="flex flex-1 flex-col">
           <section className="relative overflow-hidden">
+            <FloatingBrands />
             <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-6 py-20 lg:py-28">
               <p className="text-sm font-medium text-brand">Creator campaigns, paid on performance</p>
               <h1 className="max-w-2xl text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">

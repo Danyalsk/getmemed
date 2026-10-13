@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const FEATURED_BRANDS = [
+export const FEATURED_BRANDS = [
   { name: "Zing Beverages", logo: "zing" },
   { name: "Kraft Arena Games", logo: "kraft-arena" },
   { name: "Masala Monk Foods", logo: "masala-monk" },

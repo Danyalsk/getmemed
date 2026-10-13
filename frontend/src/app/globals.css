@@ -221,3 +221,12 @@
     transform: translateY(-50%);
   }
 }
+
+@keyframes brand-float {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 10px -18px;
+  }
+}
