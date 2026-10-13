@@ -2,6 +2,7 @@ import { ArrowRightIcon, Building2Icon, ShieldCheckIcon, TrendingUpIcon, UserRou
 import Link from "next/link";
 
 import { SignedInRedirect } from "@/components/auth-gate";
+import { CampaignTicker } from "@/components/campaign-ticker";
 import { PageTransition } from "@/components/page-transition";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
@@ -74,6 +75,8 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+
+          <CampaignTicker />
 
           <section className="border-y bg-[#0e0e0e]">
             <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-[1fr_1.2fr]">
