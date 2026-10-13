@@ -4,7 +4,7 @@ A creator marketplace where brands run campaigns with a milestone payout ladder 
 
 | | |
 |---|---|
-| Live app | https://memed-payouts.vercel.app |
+| Live app | https://getmemed.vercel.app |
 | API | https://memed-api.onrender.com/api/health |
 | Repository | https://github.com/Danyalsk/memed-campaign-payout-tracker |
 
@@ -189,7 +189,6 @@ Where the brief left room, these are the calls I made:
 9. **A post can be submitted once.** Links are normalised before the uniqueness check (`?igsh=`, `/reel/` vs `/p/`, `youtu.be` and `/shorts/` all map to one canonical URL), and the link's host must match the campaign's platform.
 10. **Spike flag:** an update is flagged when a post gains at least `SPIKE_MIN_DELTA` views at `SPIKE_VIEWS_PER_HOUR` or faster since its last update. The flag is shown to the brand and stays on the post, but the payout still goes through. In production I'd hold flagged payouts for review.
 11. **Session storage:** the JWT lives in `localStorage`. It's simple and works across the Vercel and Render domains. The trade-off is that injected scripts could read it; an httpOnly cookie behind a same-origin proxy would be the next step.
-12. **Post ownership isn't verified.** The brief asks for a link and simulates views, so any valid link for the right platform is accepted. Instagram's oEmbed stopped returning the post author in 2025, so a link alone can't be tied to an account. In production I'd verify YouTube through Google sign-in (read-only) by matching each video's channel. For Instagram, I'd have the creator add the brand as a Collaborator on the reel; only the owner can do that, and the brand gets the reach too. Payouts would wait until a post is verified.
 
 ## Concurrency and idempotency
 
