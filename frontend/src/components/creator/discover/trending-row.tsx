@@ -4,16 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 import { FlameIcon } from "lucide-react";
 import Link from "next/link";
 
-import { CampaignCover } from "@/components/campaign-cover";
+import type { Campaign } from "@contracts/campaign";
+
 import { TRANSITION_TYPES } from "@/components/page-transition";
 import { ScrollRow } from "@/components/scroll-row";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ACCENT_BACKGROUNDS } from "@/lib/accents";
+import { getImageUrl } from "@/lib/api";
+import { formatRupees } from "@/lib/format";
 import { queries } from "@/lib/queries";
 
 import { campaignHref } from "../creator-campaign-card";
 
 const TOP_COUNT = 10;
+const FALLBACK_FILL = "linear-gradient(135deg, var(--color-brand), var(--color-pop-orange))";
+
+function rankFill(campaign: Campaign): string {
+  return campaign.coverImage ? `url(${getImageUrl(campaign.coverImage)})` : FALLBACK_FILL;
+}
 
 export function TrendingRow() {
   const { data } = useQuery(queries.liveCampaigns({ page: 1, pageSize: TOP_COUNT, sort: "trending" }));
@@ -28,18 +35,24 @@ export function TrendingRow() {
               key={campaign._id}
               href={campaignHref(campaign._id)}
               transitionTypes={TRANSITION_TYPES.forward}
-              className="group flex w-[280px] shrink-0 snap-start flex-col gap-3 sm:w-[320px]"
+              className="group flex w-[320px] shrink-0 snap-start items-center gap-4 border-l pl-5 first:border-l-0 first:pl-0 sm:w-[370px]"
             >
-              <span className="relative aspect-video overflow-hidden rounded-2xl border bg-muted">
-                <CampaignCover campaign={campaign} sizes="320px" />
-                <span
-                  className={`absolute top-3 left-3 -rotate-6 rounded-lg px-2 py-0.5 text-sm font-extrabold text-ink shadow-[0.1em_0.12em_0_rgb(0_0_0/0.65)] ${ACCENT_BACKGROUNDS[index % ACCENT_BACKGROUNDS.length]}`}
-                >
-                  #{index + 1}
-                </span>
+              <span
+                aria-hidden
+                style={{ backgroundImage: rankFill(campaign) }}
+                className="bg-[length:260%] bg-center bg-clip-text text-[150px] leading-[0.82] font-extrabold tracking-tighter text-transparent transition-transform duration-500 ease-out select-none [-webkit-text-stroke:1.5px_rgb(255_255_255/0.35)] group-hover:scale-105 group-hover:-rotate-3 motion-reduce:transition-none sm:text-[180px]"
+              >
+                {index + 1}
               </span>
-              <span className="flex flex-col gap-1.5">
-                <span className="truncate font-medium group-hover:underline">{campaign.name}</span>
+              <span className="flex min-w-0 flex-1 flex-col gap-2">
+                <span className="text-xs text-muted-foreground">#{index + 1} trending</span>
+                <span className="line-clamp-2 text-base leading-snug font-semibold group-hover:underline">
+                  {campaign.name}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {campaign.brand.name} · up to{" "}
+                  <span className="text-brand">{formatRupees(campaign.milestones.at(-1)?.payout ?? 0)}</span>
+                </span>
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
                   <FlameIcon aria-hidden className="size-3.5 shrink-0 text-pop-orange" />
                   <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
@@ -48,15 +61,13 @@ export function TrendingRow() {
                       style={{ width: `${(campaign.submissionCount / hottest) * 100}%` }}
                     />
                   </span>
-                  <span className="tabular-nums">
-                    {campaign.submissionCount} {campaign.submissionCount === 1 ? "post" : "posts"}
-                  </span>
+                  <span className="tabular-nums">{campaign.submissionCount}</span>
                 </span>
               </span>
             </Link>
           ))
         : Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="aspect-video w-[300px] shrink-0 rounded-2xl" />
+            <Skeleton key={index} className="h-36 w-[300px] shrink-0 rounded-2xl" />
           ))}
     </ScrollRow>
   );
