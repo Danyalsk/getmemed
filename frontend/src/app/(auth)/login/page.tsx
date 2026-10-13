@@ -38,8 +38,8 @@ export default function LoginPage() {
     <PageTransition>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">Log in</h1>
-          <p className="text-sm text-muted-foreground lg:text-base">Welcome back. Enter your details to continue.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Log in</h1>
+          <p className="text-sm text-muted-foreground">Welcome back. Enter your details to continue.</p>
         </div>
         <form onSubmit={onSubmit} noValidate>
           <FieldGroup>

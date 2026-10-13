@@ -59,8 +59,8 @@ export default function SignupPage() {
     <PageTransition>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">Create your account</h1>
-          <p className="text-sm text-muted-foreground lg:text-base">Get set up in under a minute.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
+          <p className="text-sm text-muted-foreground">Get set up in under a minute.</p>
         </div>
         <form onSubmit={onSubmit} noValidate>
           <FieldGroup>

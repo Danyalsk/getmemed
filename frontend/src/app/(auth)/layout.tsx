@@ -26,7 +26,7 @@ const PROMISES = [
 
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
-    <main className="grid flex-1 grid-cols-1 lg:grid-cols-2">
+    <main className="grid flex-1 grid-cols-1 lg:grid-cols-[3fr_2fr]">
       <SignedInRedirect />
       <div className="hidden border-r bg-[#0e0e0e] lg:block">
         <aside className="sticky top-0 flex h-svh flex-col gap-10 overflow-hidden p-12">
@@ -63,7 +63,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         <Link href="/" aria-label="Meme'd home" className="lg:hidden">
           <Wordmark className="text-3xl" />
         </Link>
-        <div className="w-full max-w-sm lg:max-w-md">{children}</div>
+        <div className="w-full max-w-sm">{children}</div>
         <FeaturedBrands />
       </div>
     </main>
