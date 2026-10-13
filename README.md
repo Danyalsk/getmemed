@@ -154,14 +154,16 @@ Responses are JSON. Errors always have the shape `{ "error": { "code", "message"
 | PATCH | `/api/auth/me` | any | `{ name }` |
 | PATCH | `/api/auth/password` | any | `{ currentPassword, newPassword }` |
 | POST | `/api/images` | brand | Upload a campaign cover (JPEG, PNG or WebP, up to 2 MB) |
-| POST | `/api/campaigns` | brand | Create a campaign |
+| POST | `/api/campaigns` | brand | Create a campaign. `endsAt` is a date; the campaign takes posts until the end of that day (IST) |
 | GET | `/api/campaigns/mine` | brand | Own campaigns with `spent` and `remaining`, plus a budget `summary`. Filter: `status` |
 | GET | `/api/campaigns/:id` | owner brand or any creator | One campaign |
 | GET | `/api/campaigns/:id/leaderboard` | owner brand or any creator | Top 5 creators by earnings |
 | PATCH | `/api/campaigns/:id/status` | owner brand | `{ status: "active" \| "paused" \| "closed" }` |
+| DELETE | `/api/campaigns/:id` | owner brand | Only while the campaign has no posts; after that, close it instead |
+| GET | `/api/campaigns/:id/performance` | owner brand | Posts, views, paid out, creators and flagged posts for one campaign |
 | GET | `/api/campaigns/:id/submissions` | owner brand | Posts submitted to the campaign |
 | GET | `/api/campaigns/featured` | none | Up to 12 trending live campaigns for the login and signup pages (Redis-cached) |
-| GET | `/api/campaigns/live` | creator | Live campaigns, cached in Redis. Filters: `platform`, `sort=newest\|trending\|budget` |
+| GET | `/api/campaigns/live` | creator | Active campaigns with budget left and an end date still ahead, cached in Redis. Filters: `platform`, `sort=newest\|trending\|budget` |
 | GET | `/api/campaigns/joined` | creator | Campaigns the creator has posted to, with their own posts, views and earnings |
 | POST | `/api/campaigns/:id/submissions` | creator | `{ postUrl }` |
 | GET | `/api/submissions/mine` | creator | Own posts plus `totalEarnings` |
