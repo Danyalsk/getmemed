@@ -7,9 +7,9 @@ import { submissionSchema } from "./submission";
 const campaignRefSchema = z.object({ _id: objectIdSchema, name: z.string(), platform: platformSchema });
 const creatorRefSchema = z.object({ _id: objectIdSchema, name: z.string() });
 
-export const campaignBreakdownSchema = participationSchema.extend({ campaign: campaignRefSchema });
-export const platformBreakdownSchema = participationSchema.extend({ platform: platformSchema });
-export const creatorBreakdownSchema = participationSchema.extend({ creator: creatorRefSchema });
+const campaignBreakdownSchema = participationSchema.extend({ campaign: campaignRefSchema });
+const platformBreakdownSchema = participationSchema.extend({ platform: platformSchema });
+const creatorBreakdownSchema = participationSchema.extend({ creator: creatorRefSchema });
 
 export const creatorAnalyticsSchema = z.object({
   totals: participationSchema.extend({

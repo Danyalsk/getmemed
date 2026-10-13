@@ -24,7 +24,7 @@ export const milestoneSchema = z.object({
 });
 export type Milestone = z.infer<typeof milestoneSchema>;
 
-export const milestoneLadderSchema = z
+const milestoneLadderSchema = z
   .array(milestoneSchema)
   .min(1, "Add at least one milestone")
   .max(MAX_MILESTONES, `At most ${MAX_MILESTONES} milestones`)
@@ -99,7 +99,7 @@ export type LiveCampaignsQuery = z.output<typeof liveCampaignsQuerySchema>;
 
 export const campaignPageSchema = pageSchema(campaignSchema);
 
-export const budgetSummarySchema = z.object({
+const budgetSummarySchema = z.object({
   campaigns: z.number().int().nonnegative(),
   budget: rupeesSchema,
   spent: rupeesSchema,
@@ -116,15 +116,12 @@ export const participationSchema = z.object({
 });
 export type Participation = z.infer<typeof participationSchema>;
 
-export const joinedCampaignSchema = campaignSchema.extend({ participation: participationSchema });
-export type JoinedCampaign = z.infer<typeof joinedCampaignSchema>;
+const joinedCampaignSchema = campaignSchema.extend({ participation: participationSchema });
 export const joinedCampaignPageSchema = pageSchema(joinedCampaignSchema);
 
-export const leaderboardEntrySchema = participationSchema.extend({
+const leaderboardEntrySchema = participationSchema.extend({
   creator: z.object({ _id: objectIdSchema, name: z.string() }),
 });
-export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;
 export const leaderboardSchema = z.array(leaderboardEntrySchema);
 
 export const updateCampaignStatusSchema = z.object({ status: campaignStatusSchema });
-export type UpdateCampaignStatusInput = z.infer<typeof updateCampaignStatusSchema>;

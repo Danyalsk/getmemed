@@ -36,7 +36,7 @@ function extractYoutubeVideoId(url: URL): string | null {
   return null;
 }
 
-export function normalizePostUrl(raw: string, platform: Platform): string | null {
+function normalizePostUrl(raw: string, platform: Platform): string | null {
   const url = parseHttpUrl(raw.trim());
   if (!url) return null;
 
@@ -121,4 +121,3 @@ export const updateViewsResponseSchema = z.object({
   submission: submissionSchema,
   paidNow: rupeesSchema,
 });
-export type UpdateViewsResponse = z.infer<typeof updateViewsResponseSchema>;

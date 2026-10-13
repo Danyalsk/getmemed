@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export interface BarListItem {
+interface BarListItem {
   key: string;
   label: ReactNode;
   value: number;

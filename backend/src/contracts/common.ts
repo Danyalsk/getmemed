@@ -47,7 +47,7 @@ export function pageSchema<T extends z.ZodType>(item: T) {
   });
 }
 
-export const errorCodeSchema = z.enum([
+const errorCodeSchema = z.enum([
   "VALIDATION_ERROR",
   "UNAUTHORIZED",
   "FORBIDDEN",

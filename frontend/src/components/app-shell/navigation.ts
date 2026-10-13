@@ -11,13 +11,13 @@ import {
 
 import type { Role } from "@contracts/common";
 
-export interface NavItem {
+interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
 }
 
-export interface NavSection {
+interface NavSection {
   title: string;
   items: NavItem[];
 }

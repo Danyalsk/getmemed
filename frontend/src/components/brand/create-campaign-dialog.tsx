@@ -153,7 +153,7 @@ export function CreateCampaignDialog() {
                 {milestones.fields.map((field, index) => (
                   <li key={field.id} className="grid grid-cols-[1fr_1fr_auto] items-start gap-3">
                     <TextField
-                      label={`Views — milestone ${index + 1}`}
+                      label={`Milestone ${index + 1} views`}
                       type="number"
                       inputMode="numeric"
                       min={1}
